@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Search, X, MapPin, Plane, Users, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,8 @@ export function SiteSearch({ onClose, isOpen = false }: SiteSearchProps) {
   const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Comprehensive search data for the site
-  const searchData: SearchResult[] = [
+  // Comprehensive search data for the site - wrapped in useMemo to prevent dependency issues
+  const searchData: SearchResult[] = useMemo(() => [
     // Services
     {
       id: "search-tickets",
@@ -177,10 +177,10 @@ export function SiteSearch({ onClose, isOpen = false }: SiteSearchProps) {
       url: "#accueil",
       icon: <MapPin className="w-4 h-4" />
     }
-  ];
+  ], []); // Empty dependency array since this data is static
 
-  // Search function
-  const performSearch = (searchQuery: string) => {
+  // Search function wrapped in useCallback to prevent useEffect dependency issues
+  const performSearch = useCallback((searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
       return;
@@ -213,11 +213,11 @@ export function SiteSearch({ onClose, isOpen = false }: SiteSearchProps) {
       setResults(filteredResults.slice(0, 8)); // Limit to 8 results
       setIsSearching(false);
     }, 300);
-  };
+  }, [searchData]);
 
   useEffect(() => {
     performSearch(query);
-  }, [query,performSearch]);
+  }, [query, performSearch]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {

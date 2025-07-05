@@ -101,6 +101,94 @@ body {
   .card-hover {
     @apply transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl;
   }
+
+  /* Plane animation */
+  @keyframes plane-fly {
+    0% {
+      transform: translateX(-100%) translateY(-50%) rotate(-10deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateX(50vw) translateY(-50%) rotate(0deg);
+      opacity: 0.2;
+    }
+    90% {
+      opacity: 0.1;
+    }
+    100% {
+      transform: translateX(120vw) translateY(-50%) rotate(10deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    33% {
+      transform: translateY(-10px) rotate(1deg);
+    }
+    66% {
+      transform: translateY(5px) rotate(-1deg);
+    }
+  }
+
+  .animate-plane-fly {
+    animation: plane-fly 15s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Heart beat animation */
+  @keyframes heartbeat {
+    0% {
+      transform: scale(1);
+    }
+    14% {
+      transform: scale(1.2);
+    }
+    28% {
+      transform: scale(1);
+    }
+    42% {
+      transform: scale(1.2);
+    }
+    70% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+}
+
+/* PWA Install Prompt Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* PWA Splash Screen Styling */
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+  }
 }
 
 

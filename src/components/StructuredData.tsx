@@ -6,9 +6,9 @@ export function StructuredData() {
     "@type": ["TravelAgency", "LocalBusiness"],
     "name": "Revolution Travel & Services",
     "alternateName": "Revolution Travel",
-    "url": "https://pouantou-revolution-travel.vercel.app",
-    "logo": "https://pouantou-revolution-travel.vercel.app/logo.png",
-    "image": "https://pouantou-revolution-travel.vercel.app/og-image.jpg",
+    "url": "https://puantou-revolution-travel.vercel.app",
+    "logo": "https://puantou-revolution-travel.vercel.app/logo.png",
+    // "image": "https://puantou-revolution-travel.vercel.app/og-image.jpg",
     "description": "Agence de voyage professionnelle basée au Cameroun, spécialisée dans la réservation de billets d'avion vers toutes les destinations internationales. Votre partenaire de confiance pour tous vos voyages.",
     "address": {
       "@type": "PostalAddress",
@@ -109,7 +109,22 @@ export function StructuredData() {
         "datePublished": "2024-12-01",
         "reviewBody": "Service exceptionnel! L'équipe m'a trouvé un excellent tarif pour mon voyage d'affaires à Paris. Processus très professionnel."
       }
-    ]
+    ],
+    "developer": {
+      "@type": "Person",
+      "name": "TOMDIEU TCHADIEUKO IVAN GOTTFRIED",
+      "alternateName": ["Tomdieu Ivan", "Ivan Tomdieu", "Tchadieuko Ivan", "Ivan Gottfried"],
+      "url": "https://github.com/Tomdieu",
+      "jobTitle": "Développeur Web Full Stack",
+      "knowsAbout": [
+        "Next.js",
+        "React",
+        "TypeScript", 
+        "Web Development",
+        "Progressive Web Apps"
+      ],
+      "sameAs": "https://github.com/Tomdieu"
+    }
   };
 
   const servicesData = {
@@ -259,7 +274,7 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Revolution Travel & Services",
-    "url": "https://pouantou-revolution-travel.vercel.app",
+    "url": "https://puantou-revolution-travel.vercel.app",
     "description": "Agence de voyage professionnelle au Cameroun pour la réservation de billets d'avion",
     "publisher": {
       "@type": "Organization",
@@ -269,7 +284,7 @@ export function StructuredData() {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://pouantou-revolution-travel.vercel.app?search={search_term_string}"
+        "urlTemplate": "https://puantou-revolution-travel.vercel.app?search={search_term_string}"
       },
       "query-input": "required name=search_term_string"
     },
@@ -284,25 +299,25 @@ export function StructuredData() {
         "@type": "ListItem",
         "position": 1,
         "name": "Accueil",
-        "item": "https://pouantou-revolution-travel.vercel.app"
+        "item": "https://puantou-revolution-travel.vercel.app"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Services",
-        "item": "https://pouantou-revolution-travel.vercel.app#services"
+        "item": "https://puantou-revolution-travel.vercel.app#services"
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": "Destinations",
-        "item": "https://pouantou-revolution-travel.vercel.app#destinations"
+        "item": "https://puantou-revolution-travel.vercel.app#destinations"
       },
       {
         "@type": "ListItem",
         "position": 4,
         "name": "Contact",
-        "item": "https://pouantou-revolution-travel.vercel.app#contact"
+        "item": "https://puantou-revolution-travel.vercel.app#contact"
       }
     ]
   };

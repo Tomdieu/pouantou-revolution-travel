@@ -57,6 +57,8 @@ export async function POST(request: NextRequest) {
         max: 5 // Limit to top 5 results for email
       };
 
+      console.log('Sending Amadeus search request with params:', amadeusSearchParams);
+
       const amadeusResponse = await fetch(`${process.env.NODE_ENV === 'production' ? 'https://' + request.headers.get('host') : 'http://localhost:3000'}/api/amadeus/flight-search`, {
         method: 'POST',
         headers: {
@@ -65,11 +67,29 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(amadeusSearchParams),
       });
 
+      console.log('Amadeus response status:', amadeusResponse.status);
+
       if (amadeusResponse.ok) {
         const amadeusData = await amadeusResponse.json();
+        console.log('Amadeus response data:', JSON.stringify(amadeusData, null, 2));
+        
         if (amadeusData.success) {
           flightPrices = amadeusData.data;
+          // Check if we got actual flight offers
+          if (!flightPrices?.offers || flightPrices.offers.length === 0) {
+            console.log('Amadeus API returned no flight offers for this route/date combination');
+            priceSearchError = `Aucun vol trouvé pour la route ${departureCity} → ${destination} à la date demandée. Vérifier les codes d'aéroport ou la disponibilité de la route.`;
+            flightPrices = null;
+          } else {
+            console.log(`Amadeus API returned ${flightPrices.offers.length} flight offers`);
+          }
+        } else {
+          console.log('Amadeus API returned success=false:', amadeusData);
+          priceSearchError = 'Amadeus API returned an error response';
         }
+      } else {
+        console.log('Amadeus API returned non-OK status:', amadeusResponse.status);
+        priceSearchError = `Amadeus API error: ${amadeusResponse.status}`;
       }
     } catch (error) {
       console.log('Amadeus price search failed, continuing with email without prices:', error);
@@ -127,6 +147,20 @@ ${budget ? `Budget: ${budget}` : ''}
 ${currencyCode ? `Devise: ${currencyCode}` : ''}
 ${maxPrice ? `Prix maximum: ${maxPrice}` : ''}
 ${additionalInfo ? `Informations supplémentaires: ${additionalInfo}` : ''}
+
+${flightPrices && flightPrices.offers && flightPrices.offers.length > 0 
+  ? `=== PRIX EN TEMPS RÉEL AMADEUS ===
+${flightPrices.offers.slice(0, 3).map((offer: any, index: number) => 
+`${index + 1}. ${offer.price.formattedTotal} - ${offer.isNonStop ? 'Direct' : `${offer.stops} escale(s)`} - Durée: ${offer.duration || 'N/A'}`
+).join('\n')}
+
+⚠️ Ces prix sont indicatifs et peuvent changer. Contactez rapidement le client pour finaliser la réservation.
+==========================================` 
+  : priceSearchError 
+    ? `⚠️ RECHERCHE AMADEUS ÉCHOUÉE: ${priceSearchError}
+Veuillez effectuer une recherche manuelle pour ce client.` 
+    : '⚠️ Aucune donnée de prix automatique disponible. Recherche manuelle requise.'
+}
 
 Revolution Travel Services - Cameroun
 Merci de contacter le client sous 24h.`,

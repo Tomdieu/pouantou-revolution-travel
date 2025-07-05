@@ -3,9 +3,61 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CityCombobox } from "@/components/ui/city-combobox";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { ChevronDownIcon, Search } from "lucide-react";
+import { SiteSearch } from "@/components/ui/site-search";
+import { StructuredData } from "@/components/StructuredData";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
+
+// Zod schema for form validation
+const formSchema = z.object({
+  fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  phone: z.string().min(8, "Numéro de téléphone invalide"),
+  email: z.string().email("Adresse email invalide"),
+  departureCity: z.string().min(2, "Ville de départ requise"),
+  destination: z.string().min(2, "Destination requise"),
+  departureDate: z.date({ required_error: "Date de départ requise" }),
+  returnDate: z.date().optional(),
+  passengers: z.string().min(1, "Nombre de passagers requis"),
+  travelClass: z.string().default("economy"),
+  preferredAirline: z.string().default("none"),
+  budget: z.string().default("select-budget"),
+  additionalInfo: z.string().optional()
+}).refine((data) => {
+  // Validate that departure date is not more than 9 months ahead
+  const today_date = new Date();
+  const maxDate = new Date();
+  maxDate.setMonth(today_date.getMonth() + 9);
+  
+  if (data.departureDate > maxDate) {
+    return false;
+  }
+  
+  // Validate that departure date is not after return date
+  if (data.returnDate && data.departureDate > data.returnDate) {
+    return false;
+  }
+  
+  return true;
+}, {
+  message: "Les dates sélectionnées ne sont pas valides",
+  path: ["departureDate"]
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -15,47 +67,78 @@ export default function Home() {
   const testimonialsRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    departureCity: '',
-    destination: '',
-    departureDate: '',
-    returnDate: '',
-    passengers: '',
-    travelClass: 'economy',
-    preferredAirline: '',
-    budget: '',
-    additionalInfo: ''
+  // Add hydration state to prevent SSR/client mismatch
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+    
+    // Keyboard shortcuts
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + K to open search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+      // Escape to close search
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Safe scroll function that only works after hydration
+  const scrollToSection = (sectionId: string) => {
+    if (!isHydrated) return;
+    const element = document.getElementById(sectionId);
+    element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Form setup with react-hook-form and zod
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      fullName: '',
+      phone: '',
+      email: '',
+      departureCity: '',
+      destination: '',
+      departureDate: new Date(),
+      returnDate: undefined,
+      passengers: '',
+      travelClass: 'economy',
+      preferredAirline: 'none',
+      budget: 'select-budget',
+      additionalInfo: ''
+    }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     setSubmitStatus({ type: '', message: '' });
 
     try {
+      // Convert dates to strings for API
+      const formDataForAPI = {
+        ...data,
+        departureDate: data.departureDate.toISOString().split('T')[0],
+        returnDate: data.returnDate?.toISOString().split('T')[0] || ''
+      };
+
       const response = await fetch('/api/send-quote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formDataForAPI),
       });
 
       const result = await response.json();
@@ -66,27 +149,14 @@ export default function Home() {
           message: 'Demande envoyée avec succès! Vous recevrez votre devis sous 24h.'
         });
         // Reset form
-        setFormData({
-          fullName: '',
-          phone: '',
-          email: '',
-          departureCity: '',
-          destination: '',
-          departureDate: '',
-          returnDate: '',
-          passengers: '',
-          travelClass: 'economy',
-          preferredAirline: '',
-          budget: '',
-          additionalInfo: ''
-        });
+        form.reset();
       } else {
         setSubmitStatus({
           type: 'error',
           message: result.error || 'Erreur lors de l\'envoi. Veuillez réessayer.'
         });
       }
-    } catch (error) {
+    } catch (_error) {
       setSubmitStatus({
         type: 'error',
         message: 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
@@ -97,126 +167,180 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Only run animations after hydration to prevent SSR/client mismatch
+    if (!isHydrated) return;
+
     // Hero section animations
     const tl = gsap.timeline();
-    tl.fromTo(navRef.current, 
-      { y: -100, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
-    )
-    .fromTo(heroRef.current?.querySelector('h1'), 
-      { y: 50, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, 
-      "-=0.5"
-    )
-    .fromTo(heroRef.current?.querySelector('p'), 
-      { y: 30, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 
-      "-=0.3"
-    )
-    .fromTo(heroRef.current?.querySelectorAll('button'), 
-      { y: 20, opacity: 0 }, 
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.2, ease: "power3.out" }, 
-      "-=0.2"
-    );
+    
+    if (navRef.current) {
+      tl.fromTo(navRef.current, 
+        { y: -100, opacity: 0 }, 
+        { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
+      );
+    }
+    
+    if (heroRef.current) {
+      const heroTitle = heroRef.current.querySelector('h1');
+      const heroText = heroRef.current.querySelector('p');
+      const heroButtons = heroRef.current.querySelectorAll('button');
+      
+      if (heroTitle) {
+        tl.fromTo(heroTitle, 
+          { y: 50, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 1, ease: "power3.out" }, 
+          "-=0.5"
+        );
+      }
+      
+      if (heroText) {
+        tl.fromTo(heroText, 
+          { y: 30, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 
+          "-=0.3"
+        );
+      }
+      
+      if (heroButtons.length > 0) {
+        tl.fromTo(heroButtons, 
+          { y: 20, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.6, stagger: 0.2, ease: "power3.out" }, 
+          "-=0.2"
+        );
+      }
+    }
 
     // Services animation on scroll
-    gsap.fromTo(servicesRef.current?.querySelectorAll('.service-card'), 
-      { y: 80, opacity: 0, scale: 0.8 }, 
-      { 
-        y: 0, 
-        opacity: 1, 
-        scale: 1, 
-        duration: 0.8, 
-        stagger: 0.2, 
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: servicesRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse"
-        }
+    if (servicesRef.current) {
+      const serviceCards = servicesRef.current.querySelectorAll('.service-card');
+      if (serviceCards.length > 0) {
+        gsap.fromTo(serviceCards, 
+          { y: 80, opacity: 0, scale: 0.8 }, 
+          { 
+            y: 0, 
+            opacity: 1, 
+            scale: 1, 
+            duration: 0.8, 
+            stagger: 0.2, 
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: servicesRef.current,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
       }
-    );
+    }
 
     // Destinations cards animation
-    gsap.fromTo(destinationsRef.current?.querySelectorAll('.destination-card'), 
-      { y: 100, opacity: 0, rotationY: -15 }, 
-      { 
-        y: 0, 
-        opacity: 1, 
-        rotationY: 0, 
-        duration: 1, 
-        stagger: 0.15, 
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: destinationsRef.current,
-          start: "top 75%",
-          end: "bottom 25%",
-          toggleActions: "play none none reverse"
-        }
+    if (destinationsRef.current) {
+      const destinationCards = destinationsRef.current.querySelectorAll('.destination-card');
+      if (destinationCards.length > 0) {
+        gsap.fromTo(destinationCards, 
+          { y: 100, opacity: 0, rotationY: -15 }, 
+          { 
+            y: 0, 
+            opacity: 1, 
+            rotationY: 0, 
+            duration: 1, 
+            stagger: 0.15, 
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: destinationsRef.current,
+              start: "top 75%",
+              end: "bottom 25%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
       }
-    );
+    }
 
     // Stats counter animation
-    gsap.fromTo(statsRef.current?.querySelectorAll('.stat-number'), 
-      { innerText: 0, opacity: 0 }, 
-      { 
-        innerText: (i, el) => el.getAttribute('data-count'),
-        opacity: 1,
-        duration: 2, 
-        ease: "power2.out",
-        snap: { innerText: 1 },
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: statsRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse"
-        }
+    if (statsRef.current) {
+      const statNumbers = statsRef.current.querySelectorAll('.stat-number');
+      if (statNumbers.length > 0) {
+        gsap.fromTo(statNumbers, 
+          { innerText: 0, opacity: 0 }, 
+          { 
+            innerText: (_i: number, el: any) => el.getAttribute('data-count'),
+            opacity: 1,
+            duration: 2, 
+            ease: "power2.out",
+            snap: { innerText: 1 },
+            stagger: 0.2,
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: "top 80%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
       }
-    );
+    }
 
     // Testimonials animation
-    gsap.fromTo(testimonialsRef.current?.querySelectorAll('.testimonial-card'), 
-      { x: -50, opacity: 0, rotation: -5 }, 
-      { 
-        x: 0, 
-        opacity: 1, 
-        rotation: 0, 
-        duration: 0.8, 
-        stagger: 0.3, 
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: testimonialsRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse"
-        }
+    if (testimonialsRef.current) {
+      const testimonialCards = testimonialsRef.current.querySelectorAll('.testimonial-card');
+      if (testimonialCards.length > 0) {
+        gsap.fromTo(testimonialCards, 
+          { x: -50, opacity: 0, rotation: -5 }, 
+          { 
+            x: 0, 
+            opacity: 1, 
+            rotation: 0, 
+            duration: 0.8, 
+            stagger: 0.3, 
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: testimonialsRef.current,
+              start: "top 80%",
+              end: "bottom 20%",
+              toggleActions: "play none none reverse"
+            }
+          }
+        );
       }
-    );
+    }
 
     // Floating animation for background elements
-    gsap.to(".floating-element", {
-      y: -20,
-      duration: 2,
-      ease: "power1.inOut",
-      yoyo: true,
-      repeat: -1,
-      stagger: 0.5
-    });
+    const floatingElements = document.querySelectorAll(".floating-element");
+    if (floatingElements.length > 0) {
+      gsap.to(floatingElements, {
+        y: -20,
+        duration: 2,
+        ease: "power1.inOut",
+        yoyo: true,
+        repeat: -1,
+        stagger: 0.5
+      });
+    }
 
     // Parallax effect for destination section background
-    gsap.to(destinationsRef.current?.querySelector('.bg-decoration'), {
-      yPercent: -50,
-      ease: "none",
-      scrollTrigger: {
-        trigger: destinationsRef.current,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: true
+    if (destinationsRef.current) {
+      const bgDecoration = destinationsRef.current.querySelector('.bg-decoration');
+      if (bgDecoration) {
+        gsap.to(bgDecoration, {
+          yPercent: -50,
+          ease: "none",
+          scrollTrigger: {
+            trigger: destinationsRef.current,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+          }
+        });
       }
-    });
+    }
 
-  }, []);
+    // Cleanup ScrollTrigger on unmount
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+
+  }, [isHydrated]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-primary-50">
@@ -226,7 +350,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-primary-700">Revolution Travel Services</h1>
+                <h1 className="text-2xl font-bold text-primary-700">Revolution Travel & Services</h1>
               </div>
             </div>
             <div className="hidden md:block">
@@ -235,6 +359,14 @@ export default function Home() {
                 <a href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Services</a>
                 <a href="#destinations" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Destinations</a>
                 <a href="#contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="inline-flex items-center gap-2 text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                  title="Rechercher (Ctrl+K)"
+                >
+                  <Search className="w-4 h-4" />
+                  <span className="hidden lg:inline">Rechercher</span>
+                </button>
               </div>
             </div>
           </div>
@@ -242,267 +374,488 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section id="accueil" className="section-padding">
-        <div className="max-w-7xl mx-auto">
+      <section id="accueil" className="min-h-screen h-screen flex items-center justify-center relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+        {/* Enhanced background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-primary-200/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-48 h-48 bg-sky-200/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-indigo-200/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-10 right-10 w-28 h-28 bg-purple-200/25 rounded-full blur-2xl animate-pulse" style={{animationDelay: '3s'}}></div>
+          
+          {/* Floating icons */}
+          <div className="absolute top-32 left-1/4 text-4xl opacity-20 animate-bounce">✈️</div>
+          <div className="absolute top-40 right-1/3 text-3xl opacity-15 animate-bounce" style={{animationDelay: '0.5s'}}>🌍</div>
+          <div className="absolute bottom-40 left-1/3 text-5xl opacity-10 animate-bounce" style={{animationDelay: '1s'}}>🏖️</div>
+          <div className="absolute bottom-32 right-1/4 text-3xl opacity-20 animate-bounce" style={{animationDelay: '1.5s'}}>🎯</div>
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent" 
+               style={{backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0)', backgroundSize: '40px 40px'}}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div ref={heroRef} className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Votre Rêve de Voyage
-              <span className="text-primary-600 block">Commence Ici</span>
+            {/* <div className="mb-8">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-primary-500 to-sky-500 rounded-3xl mb-8 shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+              </div>
+            </div> */}
+            
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+              <span className="bg-gradient-to-r from-gray-900 via-primary-700 to-sky-600 bg-clip-text text-transparent">
+                Réservez et Voyagez
+              </span>
+              <span className="block mt-2 bg-gradient-to-r from-primary-600 via-sky-500 to-indigo-600 bg-clip-text text-transparent">
+                Partout dans le Monde
+              </span>
+              <span className="block mt-4 text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600 bg-clip-text text-transparent font-black">
+                7 JOURS/7
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Spécialistes en recherche et réservation de billets d'avion. Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 24h.
+            
+            <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+              Spécialistes en recherche et réservation de billets d'avion. 
+              <span className="block mt-2 text-primary-700 font-semibold">
+                Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 24h.
+              </span>
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary" onClick={() => document.getElementById('quote-form')?.scrollIntoView({behavior: 'smooth'})}>
-                Demander un Devis
-              </button>
-              <button className="btn-secondary" onClick={() => document.getElementById('services')?.scrollIntoView({behavior: 'smooth'})}>
-                Nos Services
-              </button>
+            
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+              <Button 
+                size="lg" 
+                className="h-16 px-12 text-lg font-bold bg-gradient-to-r from-primary-600 to-sky-600 hover:from-primary-700 hover:to-sky-700 text-white shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
+                onClick={() => scrollToSection('quote-form')}
+              >
+                Demander un Devis Gratuit
+              </Button>
+              <Button 
+                variant="outline"
+                size="lg" 
+                className="h-16 px-8 text-lg font-semibold border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white shadow-lg transform hover:-translate-y-1 transition-all duration-300 rounded-2xl flex items-center gap-3" 
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="w-5 h-5" />
+                Rechercher
+              </Button>
+            </div>
+            
+            {/* Simple trust indicators */}
+            <div className="flex flex-wrap justify-center gap-6 mt-8">
+              <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                <span className="text-green-500 mr-2 text-lg">✓</span>
+                <span className="text-gray-700 font-semibold">Service 7 jours/7</span>
+              </div>
+              <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                <span className="text-green-500 mr-2 text-lg">✓</span>
+                <span className="text-gray-700 font-semibold">Réponse sous 24h</span>
+              </div>
+              <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
+                <span className="text-green-500 mr-2 text-lg">✓</span>
+                <span className="text-gray-700 font-semibold">Prix compétitifs</span>
+              </div>
+              {/* Search hint */}
+              <div 
+                className="flex items-center bg-primary-50/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg cursor-pointer hover:bg-primary-100/80 transition-colors"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="text-primary-600 mr-2 w-4 h-4" />
+                <span className="text-primary-700 font-semibold">Rechercher</span>
+                <span className="ml-2 text-xs text-primary-500 bg-white/50 px-2 py-1 rounded">Ctrl+K</span>
+              </div>
             </div>
           </div>
         </div>
+        
+        {/* Enhanced scroll indicator */}
+        {/* <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="flex flex-col items-center">
+            <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center mb-2 bg-white/20 backdrop-blur-sm">
+              <div className="w-1 h-3 bg-gray-500 rounded-full mt-2 animate-pulse"></div>
+            </div>
+            <p className="text-sm text-gray-600 font-medium">Découvrir nos services</p>
+            <svg className="w-4 h-4 text-gray-400 mt-1 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+            </svg>
+          </div>
+        </div> */}
       </section>
 
       {/* Quote Request Form */}
-      <section id="quote-form" className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="quote-form" className="py-16 bg-white">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Section */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Demande de Devis Personnalisé</h2>
-            <p className="text-xl text-gray-600">
-              Remplissez le formulaire ci-dessous et recevez votre devis sous 24h
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Demande de Devis
+            </h2>
+            <p className="text-gray-600">
+              Remplissez le formulaire et recevez votre devis personnalisé sous 24h.
             </p>
           </div>
-          
-          <div className="bg-gradient-to-br from-primary-50 to-sky-50 rounded-2xl p-8 shadow-2xl">
-            {/* Status Messages */}
-            {submitStatus.message && (
-              <div className={`mb-6 p-4 rounded-lg ${
-                submitStatus.type === 'success' 
-                  ? 'bg-green-50 border border-green-200 text-green-800' 
-                  : 'bg-red-50 border border-red-200 text-red-800'
-              }`}>
-                <div className="flex items-center">
-                  <span className="text-lg mr-2">
+
+          {/* Status Message */}
+          {submitStatus.message && (
+            <div className={`mb-6 p-4 rounded-lg ${
+              submitStatus.type === 'success' 
+                ? 'bg-green-50 border border-green-200' 
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <span className="text-xl">
                     {submitStatus.type === 'success' ? '✅' : '❌'}
                   </span>
-                  {submitStatus.message}
+                </div>
+                <div className="ml-3">
+                  <p className={`text-sm font-medium ${
+                    submitStatus.type === 'success' ? 'text-green-800' : 'text-red-800'
+                  }`}>
+                    {submitStatus.message}
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Personal Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">Nom Complet *</label>
-                  <input 
-                    type="text" 
+          {/* Form Container */}
+          <div className="border border-gray-200 rounded-lg p-6 shadow-sm">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Personal Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
                     name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Votre nom complet" 
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Nom Complet *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Votre nom et prénom" 
+                            className="h-10" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Email *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email"
+                            placeholder="votre.email@exemple.com" 
+                            className="h-10" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">Téléphone *</label>
-                  <input 
-                    type="tel" 
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Votre numéro de téléphone" 
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-gray-700 text-sm font-semibold mb-2">Email *</label>
-                <input 
-                  type="email" 
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="votre.email@exemple.com" 
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                />
-              </div>
-
-              {/* Trip Details */}
-              <div className="border-t pt-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Détails du Voyage</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Ville de Départ *</label>
-                    <input 
-                      type="text" 
-                      name="departureCity"
-                      value={formData.departureCity}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Ex: Douala, Yaoundé..." 
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Destination *</label>
-                    <input 
-                      type="text" 
-                      name="destination"
-                      value={formData.destination}
-                      onChange={handleInputChange}
-                      required
-                      placeholder="Ex: Paris, New York..." 
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Date de Départ *</label>
-                    <input 
-                      type="date" 
-                      name="departureDate"
-                      value={formData.departureDate}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Date de Retour</label>
-                    <input 
-                      type="date" 
-                      name="returnDate"
-                      value={formData.returnDate}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                    />
-                    <p className="text-sm text-gray-500 mt-1">Laissez vide pour un aller simple</p>
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Nombre de Passagers *</label>
-                    <select 
-                      name="passengers"
-                      value={formData.passengers}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="">Sélectionner</option>
-                      <option value="1">1 Passager</option>
-                      <option value="2">2 Passagers</option>
-                      <option value="3">3 Passagers</option>
-                      <option value="4">4 Passagers</option>
-                      <option value="5">5 Passagers</option>
-                      <option value="6+">6+ Passagers</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Classe de Voyage</label>
-                    <select 
-                      name="travelClass"
-                      value={formData.travelClass}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="economy">Économique</option>
-                      <option value="premium">Premium Economy</option>
-                      <option value="business">Business</option>
-                      <option value="first">Première Classe</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-semibold mb-2">Compagnie Aérienne Préférée (Optionnel)</label>
-                    <select 
-                      name="preferredAirline"
-                      value={formData.preferredAirline}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    >
-                      <option value="">Aucune préférence</option>
-                      <option value="air-france">Air France</option>
-                      <option value="turkish">Turkish Airlines</option>
-                      <option value="emirates">Emirates</option>
-                      <option value="lufthansa">Lufthansa</option>
-                      <option value="british">British Airways</option>
-                      <option value="ethiopian">Ethiopian Airlines</option>
-                      <option value="qatar">Qatar Airways</option>
-                      <option value="royal-air-maroc">Royal Air Maroc</option>
-                      <option value="camair">Camair-Co</option>
-                      <option value="other">Autre</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">Budget Approximatif (FCFA)</label>
-                  <select 
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  >
-                    <option value="">Sélectionner votre budget</option>
-                    <option value="200000-400000">200,000 - 400,000 FCFA</option>
-                    <option value="400000-600000">400,000 - 600,000 FCFA</option>
-                    <option value="600000-800000">600,000 - 800,000 FCFA</option>
-                    <option value="800000-1000000">800,000 - 1,000,000 FCFA</option>
-                    <option value="1000000+">Plus de 1,000,000 FCFA</option>
-                  </select>
-                </div>
-
-                <div className="mt-6">
-                  <label className="block text-gray-700 text-sm font-semibold mb-2">Informations Supplémentaires</label>
-                  <textarea 
-                    name="additionalInfo"
-                    value={formData.additionalInfo}
-                    onChange={handleInputChange}
-                    rows={4}
-                    placeholder="Mentionnez toute exigence particulière, restrictions alimentaires, assistance spéciale, etc."
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  ></textarea>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="text-center pt-6">
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`px-12 py-4 rounded-lg font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-primary-600 text-white hover:bg-primary-700 transform hover:-translate-y-1'
-                  }`}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Envoi en cours...
-                    </span>
-                  ) : (
-                    'Envoyer la Demande de Devis'
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Téléphone *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="tel"
+                          placeholder="+237 6XX XXX XXX" 
+                          className="h-10" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </button>
-                <p className="text-sm text-gray-600 mt-4">
-                  🕒 Vous recevrez votre devis personnalisé sous 24h par email ou téléphone
-                </p>
-              </div>
-            </form>
+                />
+
+                {/* Trip Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="departureCity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Ville de Départ *</FormLabel>
+                        <FormControl>
+                          <CityCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Ex: Douala, Yaoundé..."
+                            className="h-10"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="destination"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Destination *</FormLabel>
+                        <FormControl>
+                          <CityCombobox
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            placeholder="Ex: Paris, New York..."
+                            className="h-10"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="departureDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Date de Départ *</FormLabel>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full h-10 justify-between font-normal"
+                              >
+                                {field.value ? field.value.toLocaleDateString() : "Sélectionner une date"}
+                                <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                captionLayout="dropdown"
+                                selected={field.value}
+                                onSelect={(date) => {
+                                  if (date) field.onChange(date);
+                                }}
+                                disabled={(date) => {
+                                  const today = new Date();
+                                  const maxDate = new Date();
+                                  maxDate.setMonth(today.getMonth() + 9);
+                                  return date < today || date > maxDate;
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="returnDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Date de Retour</FormLabel>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="w-full h-10 justify-between font-normal"
+                              >
+                                {field.value ? field.value.toLocaleDateString() : "Optionnel pour aller simple"}
+                                <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                captionLayout="dropdown"
+                                onSelect={(date) => field.onChange(date)}
+                                disabled={(date) => {
+                                  const departureDate = form.watch("departureDate");
+                                  const maxDate = new Date();
+                                  maxDate.setMonth(new Date().getMonth() + 9);
+                                  return date < departureDate || date > maxDate;
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Passengers and Class */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="passengers"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Passagers *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Nombre de passagers" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="1">1 Passager</SelectItem>
+                            <SelectItem value="2">2 Passagers</SelectItem>
+                            <SelectItem value="3">3 Passagers</SelectItem>
+                            <SelectItem value="4">4 Passagers</SelectItem>
+                            <SelectItem value="5">5 Passagers</SelectItem>
+                            <SelectItem value="6+">6+ Passagers</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="travelClass"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Classe de Voyage</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Choisir une classe" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="economy">Économique</SelectItem>
+                            <SelectItem value="premium">Premium Economy</SelectItem>
+                            <SelectItem value="business">Business</SelectItem>
+                            <SelectItem value="first">Première Classe</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Budget and Airline */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="budget"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Budget (FCFA)</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Votre budget" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="30000-200000">30,000 - 200,000 FCFA</SelectItem>
+                            <SelectItem value="200000-400000">200,000 - 400,000 FCFA</SelectItem>
+                            <SelectItem value="400000-600000">400,000 - 600,000 FCFA</SelectItem>
+                            <SelectItem value="600000-800000">600,000 - 800,000 FCFA</SelectItem>
+                            <SelectItem value="800000-1000000">800,000 - 1,000,000 FCFA</SelectItem>
+                            <SelectItem value="1000000+">Plus de 1,000,000 FCFA</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="preferredAirline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Compagnie Préférée</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Aucune préférence" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">Aucune préférence</SelectItem>
+                            <SelectItem value="air-france">Air France</SelectItem>
+                            <SelectItem value="turkish">Turkish Airlines</SelectItem>
+                            <SelectItem value="emirates">Emirates</SelectItem>
+                            <SelectItem value="lufthansa">Lufthansa</SelectItem>
+                            <SelectItem value="british">British Airways</SelectItem>
+                            <SelectItem value="ethiopian">Ethiopian Airlines</SelectItem>
+                            <SelectItem value="qatar">Qatar Airways</SelectItem>
+                            <SelectItem value="royal-air-maroc">Royal Air Maroc</SelectItem>
+                            <SelectItem value="camair">Camair-Co</SelectItem>
+                            <SelectItem value="other">Autre</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Additional Information */}
+                <FormField
+                  control={form.control}
+                  name="additionalInfo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Informations Supplémentaires</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Exigences particulières, restrictions alimentaires, assistance spéciale..."
+                          className="resize-none"
+                          rows={3}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <Button 
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-10 bg-primary-600 hover:bg-primary-700 text-white font-medium"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Envoi en cours...
+                      </span>
+                    ) : (
+                      'Envoyer ma Demande de Devis'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </div>
         </div>
       </section>
@@ -777,12 +1130,12 @@ export default function Home() {
                       <span className="text-2xl font-bold text-primary-600">{destination.price}</span>
                       <p className="text-xs text-gray-500">par personne</p>
                     </div>
-                    <button 
+                    <Button 
                       className="bg-gradient-to-r from-primary-600 to-sky-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-700 hover:to-sky-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-                      onClick={() => document.getElementById('quote-form')?.scrollIntoView({behavior: 'smooth'})}
+                      onClick={() => scrollToSection('quote-form')}
                     >
                       Demander Prix
-                    </button>
+                    </Button>
                   </div>
                   
                   {/* Special offer badge */}
@@ -803,12 +1156,12 @@ export default function Home() {
               <p className="text-gray-200 mb-6">
                 Vous ne trouvez pas votre destination? Contactez-nous pour un devis personnalisé.
               </p>
-              <button 
+              <Button 
                 className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
-                onClick={() => document.getElementById('quote-form')?.scrollIntoView({behavior: 'smooth'})}
+                onClick={() => scrollToSection('quote-form')}
               >
                 Voir Toutes les Destinations
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -892,12 +1245,12 @@ export default function Home() {
             Contactez-nous dès aujourd'hui et commencez à planifier votre prochain voyage de rêve
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
+            <Button 
               className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
-              onClick={() => document.getElementById('quote-form')?.scrollIntoView({behavior: 'smooth'})}
+              onClick={() => scrollToSection('quote-form')}
             >
               Demander un Devis
-            </button>
+            </Button>
             <a 
               href="tel:677916832"
               className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-all duration-300 text-center"
@@ -913,7 +1266,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-6">Revolution Travel Services</h3>
+              <h3 className="text-2xl font-bold mb-6">Revolution Travel & Services</h3>
               <p className="text-gray-300 mb-4">
                 Votre partenaire de confiance pour tous vos voyages en avion.
               </p>
@@ -975,10 +1328,16 @@ export default function Home() {
           </div>
           
           <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Revolution Travel Services. Tous droits réservés.</p>
+            <p>&copy; 2025 Revolution Travel & Services. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
+
+      {/* Search Component */}
+      <SiteSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* Structured Data for SEO */}
+      <StructuredData />
     </div>
   );
 }

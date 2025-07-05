@@ -11,23 +11,24 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        primary: {
+        // Simplified color palette: blue-500, orange-500, green-500, black
+        blue: {
           50: '#eff6ff',
+          100: '#dbeafe',
           500: '#3b82f6',
           600: '#2563eb',
-          700: '#1d4ed8',
-        },
-        sky: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          500: '#0ea5e9',
-          600: '#0284c7',
         },
         orange: {
-          400: '#fb923c',
+          100: '#fed7aa',
           500: '#f97316',
           600: '#ea580c',
-        }
+        },
+        green: {
+          100: '#dcfce7',
+          500: '#22c55e',
+          600: '#16a34a',
+        },
+        black: '#000000',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

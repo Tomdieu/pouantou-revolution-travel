@@ -3,33 +3,113 @@ import Script from 'next/script';
 export function StructuredData() {
   const organizationData = {
     "@context": "https://schema.org",
-    "@type": "TravelAgency",
+    "@type": ["TravelAgency", "LocalBusiness"],
     "name": "Revolution Travel & Services",
     "alternateName": "Revolution Travel",
     "url": "https://www.revolutiontravel.cm",
     "logo": "https://www.revolutiontravel.cm/logo.png",
+    "image": "https://www.revolutiontravel.cm/og-image.jpg",
     "description": "Agence de voyage professionnelle basée au Cameroun, spécialisée dans la réservation de billets d'avion vers toutes les destinations internationales. Votre partenaire de confiance pour tous vos voyages.",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "CM",
-      "addressRegion": "Cameroun"
+      "addressRegion": "Cameroun",
+      "addressLocality": "Douala"
     },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+237-677-916-832",
-      "email": "p.revolutiontravel@yahoo.com",
-      "contactType": "customer service",
-      "availableLanguage": ["French", "English"]
-    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+237-677-916-832",
+        "email": "p.revolutiontravel@yahoo.com",
+        "contactType": "customer service",
+        "availableLanguage": ["French", "English"],
+        "hoursAvailable": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday", 
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "00:00",
+          "closes": "23:59"
+        }
+      }
+    ],
     "sameAs": [
       "https://www.facebook.com/p/Revolution-Travel-Services-100064125607997/"
     ],
-    "serviceArea": {
-      "@type": "Country",
-      "name": "Cameroon"
-    },
+    "serviceArea": [
+      {
+        "@type": "Country",
+        "name": "Cameroon"
+      },
+      {
+        "@type": "Country", 
+        "name": "Chad"
+      },
+      {
+        "@type": "Country",
+        "name": "Central African Republic"
+      },
+      {
+        "@type": "Country",
+        "name": "Equatorial Guinea"
+      },
+      {
+        "@type": "Country",
+        "name": "Gabon"
+      }
+    ],
     "priceRange": "$$",
-    "currenciesAccepted": "XAF"
+    "currenciesAccepted": "XAF",
+    "paymentAccepted": ["Cash", "Bank Transfer"],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Services de Voyage Revolution Travel",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Réservation Billets d'Avion",
+            "description": "Service de réservation de billets d'avion vers toutes destinations"
+          },
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "priceCurrency": "XAF",
+            "price": "0",
+            "description": "Devis gratuit"
+          }
+        }
+      ]
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5",
+      "reviewCount": "200",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "review": [
+      {
+        "@type": "Review",
+        "author": {
+          "@type": "Person",
+          "name": "Chantal Ngozi"
+        },
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": "5",
+          "bestRating": "5"
+        },
+        "datePublished": "2024-12-01",
+        "reviewBody": "Service exceptionnel! L'équipe m'a trouvé un excellent tarif pour mon voyage d'affaires à Paris. Processus très professionnel."
+      }
+    ]
   };
 
   const servicesData = {

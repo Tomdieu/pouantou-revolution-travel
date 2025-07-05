@@ -12,16 +12,18 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CityCombobox } from "@/components/ui/city-combobox";
+import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ChevronDownIcon } from "lucide-react";
 import { StructuredData } from "@/components/StructuredData";
+import { toast } from "sonner";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
-// Zod schema for form validation
+// Zod schema for form validation - Updated to match Amadeus API
 const formSchema = z.object({
   fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   phone: z.string().min(8, "Numéro de téléphone invalide"),
@@ -30,30 +32,59 @@ const formSchema = z.object({
   destination: z.string().min(2, "Destination requise"),
   departureDate: z.date({ required_error: "Date de départ requise" }),
   returnDate: z.date().optional(),
-  passengers: z.string().min(1, "Nombre de passagers requis"),
-  travelClass: z.string().min(1, "Classe de voyage requise"),
-  preferredAirline: z.string().min(1, "Compagnie aérienne requise"),
-  budget: z.string().min(1, "Budget requis"),
+  // Updated passenger fields to match Amadeus API
+  adults: z.number().min(1, "Au moins 1 adulte requis").max(9, "Maximum 9 adultes"),
+  children: z.number().min(0, "Nombre d'enfants invalide").max(9, "Maximum 9 enfants"),
+  infants: z.number().min(0, "Nombre de bébés invalide").max(9, "Maximum 9 bébés"),
+  travelClass: z.enum(["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"], {
+    required_error: "Classe de voyage requise"
+  }),
+  preferredAirline: z.string().optional(),
+  nonStop: z.boolean().default(false),
+  budget: z.string().optional(),
+  currencyCode: z.string().length(3, "Code devise invalide").default("XAF"),
+  maxPrice: z.number().optional(),
   additionalInfo: z.string().optional()
 }).refine((data) => {
-  // Validate that departure date is not more than 9 months ahead
-  const today_date = new Date();
-  const maxDate = new Date();
-  maxDate.setMonth(today_date.getMonth() + 9);
-  
-  if (data.departureDate > maxDate) {
+  // Validate that infants don't exceed adults (Amadeus requirement)
+  if (data.infants > data.adults) {
     return false;
   }
-  
-  // Validate that departure date is not after return date
-  if (data.returnDate && data.departureDate > data.returnDate) {
-    return false;
-  }
-  
   return true;
 }, {
-  message: "Les dates sélectionnées ne sont pas valides",
+  message: `Le nombre de bébés ne peut pas dépasser le nombre d'adultes`,
+  path: ["infants"]
+}).refine((data) => {
+  // Validate total seated travelers (adults + children) doesn't exceed 9
+  if (data.adults + data.children > 9) {
+    return false;
+  }
+  return true;
+}, {
+  message: `Le nombre total d'adultes et d'enfants ne peut pas dépasser 9`,
+  path: ["children"]
+}).refine((data) => {
+  // Validate that departure date is not more than 365 days ahead (Amadeus limit)
+  const today_date = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today_date.getDate() + 365);
+  
+  if (data.departureDate && data.departureDate > maxDate) {
+    return false;
+  }
+  return true;
+}, {
+  message: "La date de départ ne peut pas être plus de 365 jours dans le futur",
   path: ["departureDate"]
+}).refine((data) => {
+  // Validate that departure date is not after return date
+  if (data.returnDate && data.departureDate && data.departureDate > data.returnDate) {
+    return false;
+  }
+  return true;
+}, {
+  message: "La date de retour doit être après la date de départ",
+  path: ["returnDate"]
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -80,21 +111,33 @@ export default function Home() {
     element?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Form setup with react-hook-form and zod
+  // Form setup with react-hook-form and zod - Updated for Amadeus API
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    mode: 'onChange',
     defaultValues: {
       fullName: '',
       phone: '',
       email: '',
       departureCity: '',
       destination: '',
-      departureDate: new Date(),
+      departureDate: (() => {
+        // Set default date to tomorrow to avoid timezone issues
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+        return tomorrow;
+      })(),
       returnDate: undefined,
-      passengers: '1',
-      travelClass: 'economy',
-      preferredAirline: 'none',
-      budget: 'select-budget',
+      adults: 1,
+      children: 0,
+      infants: 0,
+      travelClass: 'ECONOMY' as const,
+      preferredAirline: 'none', // Changed to 'none' to match SelectItem value
+      nonStop: false,
+      budget: '',
+      currencyCode: 'XAF',
+      maxPrice: undefined,
       additionalInfo: ''
     }
   });
@@ -104,16 +147,29 @@ export default function Home() {
 
   // Handle form submission
   const onSubmit = async (data: FormData) => {
+    console.log('Form submission started', data);
     setIsSubmitting(true);
     setSubmitStatus({ type: '', message: '' });
 
     try {
-      // Convert dates to strings for API
+      // Validate form data
+      if (!data.departureCity || !data.destination) {
+        toast.error("Veuillez sélectionner une ville de départ et une destination");
+        return;
+      }
+
       const formDataForAPI = {
         ...data,
         departureDate: data.departureDate.toISOString().split('T')[0],
-        returnDate: data.returnDate?.toISOString().split('T')[0] || ''
+        returnDate: data.returnDate?.toISOString().split('T')[0] || '',
+        // Convert numbers to strings for backwards compatibility with email templates
+        passengersTotal: data.adults + data.children + data.infants,
+        adultsCount: data.adults,
+        childrenCount: data.children,
+        infantsCount: data.infants
       };
+
+      console.log('Sending form data to API:', formDataForAPI);
 
       const response = await fetch('/api/send-quote', {
         method: 'POST',
@@ -124,24 +180,54 @@ export default function Home() {
       });
 
       const result = await response.json();
+      console.log('API response:', { status: response.status, result });
 
       if (response.ok && result.success) {
+        toast.success('Demande envoyée avec succès! Vous recevrez votre devis sous 24h.');
         setSubmitStatus({
           type: 'success',
           message: 'Demande envoyée avec succès! Vous recevrez votre devis sous 24h.'
         });
         // Reset form
-        form.reset();
+        form.reset({
+          fullName: '',
+          phone: '',
+          email: '',
+          departureCity: '',
+          destination: '',
+          departureDate: (() => {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(12, 0, 0, 0);
+            return tomorrow;
+          })(),
+          returnDate: undefined,
+          adults: 1,
+          children: 0,
+          infants: 0,
+          travelClass: 'ECONOMY' as const,
+          preferredAirline: 'none',
+          nonStop: false,
+          budget: '',
+          currencyCode: 'XAF',
+          maxPrice: undefined,
+          additionalInfo: ''
+        });
       } else {
+        const errorMessage = result.error || 'Erreur lors de l\'envoi. Veuillez réessayer.';
+        toast.error(errorMessage);
         setSubmitStatus({
           type: 'error',
-          message: result.error || 'Erreur lors de l\'envoi. Veuillez réessayer.'
+          message: errorMessage
         });
       }
-    } catch (_error) {
+    } catch (error) {
+      console.error('Form submission error:', error);
+      const errorMessage = 'Erreur de connexion. Veuillez vérifier votre connexion internet.';
+      toast.error(errorMessage);
       setSubmitStatus({
         type: 'error',
-        message: 'Erreur de connexion. Veuillez vérifier votre connexion internet.'
+        message: errorMessage
       });
     } finally {
       setIsSubmitting(false);
@@ -491,8 +577,22 @@ export default function Home() {
 
           {/* Form Container */}
           <div className="border border-gray-200 rounded-lg p-6 shadow-sm">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {isHydrated && (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                  console.log('Form validation errors:', errors);
+                  toast.error("Veuillez corriger les erreurs dans le formulaire");
+                  
+                  // Focus on first error field
+                  const firstErrorField = Object.keys(errors)[0];
+                  if (firstErrorField) {
+                    const element = document.querySelector(`[name="${firstErrorField}"]`);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      (element as HTMLElement).focus();
+                    }
+                  }
+                })} className="space-y-6">
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
@@ -620,10 +720,13 @@ export default function Home() {
                                 }}
                                 disabled={(date) => {
                                   const today = new Date();
+                                  today.setHours(0, 0, 0, 0); // Reset time to start of day
                                   const maxDate = new Date();
                                   maxDate.setMonth(today.getMonth() + 9);
+                                  maxDate.setHours(23, 59, 59, 999); // Set to end of day
                                   return date < today || date > maxDate;
                                 }}
+                                defaultMonth={field.value || new Date()}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -660,8 +763,17 @@ export default function Home() {
                                   const departureDate = form.watch("departureDate");
                                   const maxDate = new Date();
                                   maxDate.setMonth(new Date().getMonth() + 9);
-                                  return date < departureDate || date > maxDate;
+                                  
+                                  if (!departureDate) {
+                                    return date < new Date() || date > maxDate;
+                                  }
+                                  
+                                  const departureDateStart = new Date(departureDate);
+                                  departureDateStart.setHours(0, 0, 0, 0);
+                                  
+                                  return date < departureDateStart || date > maxDate;
                                 }}
+                                defaultMonth={field.value || form.watch("departureDate") || new Date()}
                                 initialFocus
                               />
                             </PopoverContent>
@@ -673,109 +785,207 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Passengers and Class */}
+                {/* Passengers - Updated for Amadeus API */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Passagers</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Adults */}
+                    <FormField
+                      control={form.control}
+                      name="adults"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Adultes (12+ ans) *</FormLabel>
+                          <Select 
+                            onValueChange={(value) => field.onChange(parseInt(value))} 
+                            value={field.value?.toString()}
+                          >
+                            <FormControl className="w-full">
+                              <SelectTrigger className="h-10">
+                                <SelectValue placeholder="Nombre d'adultes" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-white">
+                              {Array.from({length: 9}, (_, i) => i + 1).map(num => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} Adulte{num > 1 ? 's' : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Children */}
+                    <FormField
+                      control={form.control}
+                      name="children"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Enfants (2-11 ans)</FormLabel>
+                          <Select 
+                            onValueChange={(value) => field.onChange(parseInt(value))} 
+                            value={field.value?.toString()}
+                          >
+                            <FormControl className="w-full">
+                              <SelectTrigger className="h-10">
+                                <SelectValue placeholder="Nombre d'enfants" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-white">
+                              {Array.from({length: 10}, (_, i) => i).map(num => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} Enfant{num > 1 ? 's' : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Infants */}
+                    <FormField
+                      control={form.control}
+                      name="infants"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">Bébés (0-2 ans)</FormLabel>
+                          <Select 
+                            onValueChange={(value) => field.onChange(parseInt(value))} 
+                            value={field.value?.toString()}
+                          >
+                            <FormControl className="w-full">
+                              <SelectTrigger className="h-10">
+                                <SelectValue placeholder="Nombre de bébés" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-white">
+                              {Array.from({length: 10}, (_, i) => i).map(num => (
+                                <SelectItem key={num} value={num.toString()}>
+                                  {num} Bébé{num > 1 ? 's' : ''}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          <p className="text-xs text-gray-500">
+                            Les bébés voyagent sur les genoux d'un adulte
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Travel Class and Flight Preferences */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="passengers"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">Passagers *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className="h-10">
-                              <SelectValue placeholder="Nombre de passagers" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="1">1 Passager</SelectItem>
-                            <SelectItem value="2">2 Passagers</SelectItem>
-                            <SelectItem value="3">3 Passagers</SelectItem>
-                            <SelectItem value="4">4 Passagers</SelectItem>
-                            <SelectItem value="5">5 Passagers</SelectItem>
-                            <SelectItem value="6+">6+ Passagers</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                   <FormField
                     control={form.control}
                     name="travelClass"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Classe de Voyage</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
+                        <FormLabel className="text-sm font-medium">Classe de Voyage *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl className="w-full">
                             <SelectTrigger className="h-10">
                               <SelectValue placeholder="Choisir une classe" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="economy">Économique</SelectItem>
-                            <SelectItem value="premium">Premium Economy</SelectItem>
-                            <SelectItem value="business">Business</SelectItem>
-                            <SelectItem value="first">Première Classe</SelectItem>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="ECONOMY">Économique</SelectItem>
+                            <SelectItem value="PREMIUM_ECONOMY">Premium Economy</SelectItem>
+                            <SelectItem value="BUSINESS">Business</SelectItem>
+                            <SelectItem value="FIRST">Première Classe</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* Non-Stop Preference */}
+                  <FormField
+                    control={form.control}
+                    name="nonStop"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-md border px-4 py-3">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-medium">
+                            Vols directs uniquement
+                          </FormLabel>
+                          <p className="text-xs text-gray-500">
+                            Rechercher seulement les vols sans escale
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
-                {/* Budget and Airline */}
+                {/* Budget and Preferences */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="budget"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Budget (FCFA)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
+                        <FormLabel className="text-sm font-medium">Budget estimé (FCFA)</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl className="w-full">
                             <SelectTrigger className="h-10">
-                              <SelectValue placeholder="Votre budget" />
+                              <SelectValue placeholder="Votre budget approximatif" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="30000-200000">30,000 - 200,000 FCFA</SelectItem>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="50000-200000">50,000 - 200,000 FCFA</SelectItem>
                             <SelectItem value="200000-400000">200,000 - 400,000 FCFA</SelectItem>
                             <SelectItem value="400000-600000">400,000 - 600,000 FCFA</SelectItem>
                             <SelectItem value="600000-800000">600,000 - 800,000 FCFA</SelectItem>
                             <SelectItem value="800000-1000000">800,000 - 1,000,000 FCFA</SelectItem>
                             <SelectItem value="1000000+">Plus de 1,000,000 FCFA</SelectItem>
+                            <SelectItem value="flexible">Budget flexible</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="preferredAirline"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-sm font-medium">Compagnie Préférée</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl className="w-full">
                             <SelectTrigger className="h-10">
                               <SelectValue placeholder="Aucune préférence" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-white">
                             <SelectItem value="none">Aucune préférence</SelectItem>
-                            <SelectItem value="air-france">Air France</SelectItem>
-                            <SelectItem value="turkish">Turkish Airlines</SelectItem>
-                            <SelectItem value="emirates">Emirates</SelectItem>
-                            <SelectItem value="lufthansa">Lufthansa</SelectItem>
-                            <SelectItem value="british">British Airways</SelectItem>
-                            <SelectItem value="ethiopian">Ethiopian Airlines</SelectItem>
-                            <SelectItem value="qatar">Qatar Airways</SelectItem>
-                            <SelectItem value="royal-air-maroc">Royal Air Maroc</SelectItem>
-                            <SelectItem value="camair">Camair-Co</SelectItem>
-                            <SelectItem value="other">Autre</SelectItem>
+                            <SelectItem value="AF">Air France</SelectItem>
+                            <SelectItem value="TK">Turkish Airlines</SelectItem>
+                            <SelectItem value="EK">Emirates</SelectItem>
+                            <SelectItem value="LH">Lufthansa</SelectItem>
+                            <SelectItem value="BA">British Airways</SelectItem>
+                            <SelectItem value="ET">Ethiopian Airlines</SelectItem>
+                            <SelectItem value="QR">Qatar Airways</SelectItem>
+                            <SelectItem value="AT">Royal Air Maroc</SelectItem>
+                            <SelectItem value="QC">Camair-Co</SelectItem>
+                            <SelectItem value="KL">KLM</SelectItem>
+                            <SelectItem value="SN">Brussels Airlines</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -784,14 +994,65 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Additional Information */}
+                {/* Currency and Max Price */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="currencyCode"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 w-ful">
+                        <FormLabel className="text-sm font-medium">Devise Préférée</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl className="w-full">
+                            <SelectTrigger className="h-10">
+                              <SelectValue placeholder="Choisir une devise" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white">
+                            <SelectItem value="XAF">FCFA (XAF)</SelectItem>
+                            <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                            <SelectItem value="USD">Dollar US (USD)</SelectItem>
+                            <SelectItem value="GBP">Livre Sterling (GBP)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="maxPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium">Prix Maximum (par personne)</FormLabel>
+                        <FormControl className="w-full">
+                          <Input 
+                            type="number"
+                            placeholder="Ex: 500000 (optionnel)" 
+                            className="h-10"
+                            value={field.value || ''}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              field.onChange(value ? parseInt(value) : undefined);
+                            }}
+                          />
+                        </FormControl>
+                        <p className="text-xs text-gray-500">
+                          Prix limite par voyageur dans la devise sélectionnée
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
                   name="additionalInfo"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">Informations Supplémentaires</FormLabel>
-                      <FormControl>
+                      <FormControl className="w-full">
                         <Textarea 
                           placeholder="Exigences particulières, restrictions alimentaires, assistance spéciale..."
                           className="resize-none"
@@ -809,6 +1070,11 @@ export default function Home() {
                   <Button 
                     type="submit"
                     disabled={isSubmitting}
+                    onClick={() => {
+                      console.log('Submit button clicked!');
+                      console.log('Current form values:', form.getValues());
+                      console.log('Form errors:', form.formState.errors);
+                    }}
                     className="w-full h-10 bg-blue-500 hover:bg-blue-600 text-white font-medium"
                   >
                     {isSubmitting ? (
@@ -826,6 +1092,7 @@ export default function Home() {
                 </div>
               </form>
             </Form>
+            )}
           </div>
         </div>
       </section>

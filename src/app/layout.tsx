@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Revolution Travel & Services - Agence de Voyage Cameroun | Billets d'Avion",
@@ -33,13 +34,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_CM',
-    url: 'https://www.revolutiontravel.cm',
+    url: 'https://pouantou-revolution-travel.vercel.app',
     title: 'Revolution Travel & Services - Votre Agence de Voyage au Cameroun',
     description: 'Spécialistes en réservation de billets d\'avion depuis le Cameroun. Obtenez votre devis gratuit sous 24h. Service professionnel 7j/7.',
     siteName: 'Revolution Travel & Services',
     images: [
       {
-        url: 'https://www.revolutiontravel.cm/og-image.jpg',
+        url: 'https://pouantou-revolution-travel.vercel.app/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Revolution Travel & Services - Agence de Voyage Cameroun',
@@ -50,13 +51,13 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Revolution Travel & Services - Agence de Voyage Cameroun',
     description: 'Réservation de billets d\'avion depuis le Cameroun. Devis gratuit sous 24h.',
-    images: ['https://www.revolutiontravel.cm/twitter-image.jpg'],
+    images: ['https://pouantou-revolution-travel.vercel.app/twitter-image.jpg'],
   },
   verification: {
     google: 'your-google-verification-code',
   },
   alternates: {
-    canonical: 'https://www.revolutiontravel.cm',
+    canonical: 'https://pouantou-revolution-travel.vercel.app',
   },
   category: 'Travel Agency',
 };
@@ -70,6 +71,7 @@ export default function RootLayout({
     <html lang="fr">
       <body className="antialiased" suppressHydrationWarning={true}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

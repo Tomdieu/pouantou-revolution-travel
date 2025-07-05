@@ -1249,12 +1249,12 @@ export default function Home() {
                 >
                   <span className="text-sm font-bold">f</span>
                 </a>
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                {/* <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-sm">t</span>
                 </div>
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-sm">in</span>
-                </div>
+                </div> */}
               </div>
             </div>
             

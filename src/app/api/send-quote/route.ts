@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Send email to the agency
     try {
       const result = await sendEmail({
-        to: ['ivan.tomdieu@gmail.com'], // Your email
+        to: ['ivan.tomdieu@gmail.com','p.revolutiontravel@yahoo.com'], // Your email
         // to: ['p.revolutiontravel@yahoo.com'], // Your aunt's email
         subject: `Nouvelle demande de devis voyage - ${fullName} vers ${destination}`,
         html: agencyEmailHtml,

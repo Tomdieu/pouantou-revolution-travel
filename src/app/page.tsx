@@ -434,7 +434,7 @@ export default function LandingPage() {
   }, [isHydrated]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 to-primary-50">
+    <div className="min-h-screen scroll-smooth bg-gradient-to-br from-sky-50 to-primary-50">
       {/* Navigation */}
       <nav ref={navRef} className="bg-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -592,8 +592,7 @@ export default function LandingPage() {
                   <Send className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
                   Demander un Devis
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button  
                   size="default" 
                   className="w-full sm:w-auto h-14 sm:h-16 px-8 sm:px-12 text-base sm:text-lg font-bold border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
                   onClick={() => scrollToSection('services')}

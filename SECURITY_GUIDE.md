@@ -31,7 +31,7 @@ Your API keys are **already protected** from being pushed to GitHub. Here's why:
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ❌ INSECURE - Hardcoded API key
-const resend = new Resend('re_47WfgBy1_ALzTKndKRKJGLAqvTdRL3a7Y');
+const resend = new Resend('re_xxxxxxxxxxxxxxxxxxx');
 ```
 
 ## 🔍 How to Verify Your Security
@@ -59,15 +59,15 @@ git add .env
 #### Vercel (Recommended):
 1. Go to your Vercel project dashboard
 2. Settings → Environment Variables
-3. Add: `RESEND_API_KEY` = `re_47WfgBy1_ALzTKndKRKJGLAqvTdRL3a7Y`
+3. Add: `RESEND_API_KEY` = `re_xxxxxxxxxxxxxxxxxxxxxx`
 
 #### Netlify:
 1. Site Settings → Environment Variables
-2. Add: `RESEND_API_KEY` = `re_47WfgBy1_ALzTKndKRKJGLAqvTdRL3a7Y`
+2. Add: `RESEND_API_KEY` = `re_xxxxxxxxxxxxxxxxxxxxxx`
 
 #### Railway/Render:
 1. Environment Variables section
-2. Add: `RESEND_API_KEY` = `re_47WfgBy1_ALzTKndKRKJGLAqvTdRL3a7Y`
+2. Add: `RESEND_API_KEY` = `re_xxxxxxxxxxxxxxxxxxxxxx`
 
 ## 📋 Security Checklist
 

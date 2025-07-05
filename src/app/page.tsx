@@ -332,15 +332,15 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-primary-700">Revolution Travel & Services</h1>
+                <h1 className="text-2xl font-bold text-blue-500">Revolution Travel & Services</h1>
               </div>
             </div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
-                <a href="#accueil" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Accueil</a>
-                <a href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Services</a>
-                <a href="#destinations" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Destinations</a>
-                <a href="#contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
+                <a href="#accueil" className="text-black hover:text-blue-500 font-medium transition-colors">Accueil</a>
+                <a href="#services" className="text-black hover:text-blue-500 font-medium transition-colors">Services</a>
+                <a href="#destinations" className="text-black hover:text-blue-500 font-medium transition-colors">Destinations</a>
+                <a href="#contact" className="text-black hover:text-blue-500 font-medium transition-colors">Contact</a>
               </div>
             </div>
           </div>
@@ -348,13 +348,13 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section id="accueil" className="min-h-screen h-screen flex items-center justify-center relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden">
+      <section id="accueil" className="min-h-screen h-screen flex items-center justify-center relative bg-gradient-to-br from-slate-50 via-blue-50 to-blue-100 overflow-hidden">
         {/* Enhanced background decorative elements */}
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-primary-200/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-20 right-20 w-48 h-48 bg-sky-200/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-indigo-200/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-          <div className="absolute bottom-10 right-10 w-28 h-28 bg-purple-200/25 rounded-full blur-2xl animate-pulse" style={{animationDelay: '3s'}}></div>
+          <div className="absolute top-10 left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-green-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute bottom-10 right-10 w-28 h-28 bg-blue-500/25 rounded-full blur-2xl animate-pulse" style={{animationDelay: '3s'}}></div>
           
           {/* Floating icons */}
           <div className="absolute top-32 left-1/4 text-4xl opacity-20 animate-bounce">✈️</div>
@@ -377,21 +377,21 @@ export default function Home() {
               </div>
             </div> */}
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-gray-900 via-primary-700 to-sky-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-black mb-8 leading-tight">
+              <span className="bg-gradient-to-r from-black via-blue-500 to-blue-500 bg-clip-text text-transparent">
                 Réservez et Voyagez
               </span>
-              <span className="block mt-2 bg-gradient-to-r from-primary-600 via-sky-500 to-indigo-600 bg-clip-text text-transparent">
+              <span className="block mt-2 bg-gradient-to-r from-blue-500 via-blue-500 to-blue-500 bg-clip-text text-transparent">
                 Partout dans le Monde
               </span>
-              <span className="block mt-4 text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600 bg-clip-text text-transparent font-black">
+              <span className="block mt-4 text-3xl sm:text-4xl lg:text-5xl bg-gradient-to-r from-orange-500 via-orange-500 to-orange-500 bg-clip-text text-transparent font-black">
                 7 JOURS/7
               </span>
             </h1>
             
-            <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl sm:text-2xl text-black mb-12 max-w-4xl mx-auto leading-relaxed">
               Spécialistes en recherche et réservation de billets d'avion. 
-              <span className="block mt-2 text-primary-700 font-semibold">
+              <span className="block mt-2 text-blue-500 font-semibold">
                 Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 24h.
               </span>
             </p>
@@ -399,7 +399,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <Button 
                 size="lg" 
-                className="h-16 px-12 text-lg font-bold bg-gradient-to-r from-primary-600 to-sky-600 hover:from-primary-700 hover:to-sky-700 text-white shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
+                className="h-16 px-12 text-lg font-bold bg-gradient-to-r from-blue-500 to-blue-500 hover:from-blue-600 hover:to-blue-600 text-white shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
                 onClick={() => scrollToSection('quote-form')}
               >
                 <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -410,7 +410,7 @@ export default function Home() {
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="h-16 px-12 text-lg font-bold border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
+                className="h-16 px-12 text-lg font-bold border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
                 onClick={() => scrollToSection('services')}
               >
                 <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -424,15 +424,15 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-6 mt-8">
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
                 <span className="text-green-500 mr-2 text-lg">✓</span>
-                <span className="text-gray-700 font-semibold">Service 7 jours/7</span>
+                <span className="text-black font-semibold">Service 7 jours/7</span>
               </div>
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
                 <span className="text-green-500 mr-2 text-lg">✓</span>
-                <span className="text-gray-700 font-semibold">Réponse sous 24h</span>
+                <span className="text-black font-semibold">Réponse sous 24h</span>
               </div>
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
                 <span className="text-green-500 mr-2 text-lg">✓</span>
-                <span className="text-gray-700 font-semibold">Prix compétitifs</span>
+                <span className="text-black font-semibold">Prix compétitifs</span>
               </div>
             </div>
           </div>
@@ -457,10 +457,10 @@ export default function Home() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl font-bold text-black mb-4">
               Demande de Devis
             </h2>
-            <p className="text-gray-600">
+            <p className="text-black">
               Remplissez le formulaire et recevez votre devis personnalisé sous 24h.
             </p>
           </div>
@@ -809,7 +809,7 @@ export default function Home() {
                   <Button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full h-10 bg-primary-600 hover:bg-primary-700 text-white font-medium"
+                    className="w-full h-10 bg-blue-500 hover:bg-blue-600 text-white font-medium"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">
@@ -831,11 +831,11 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="section-padding bg-gradient-to-br from-primary-50 to-sky-50">
+      <section className="section-padding bg-gradient-to-br from-blue-50 to-blue-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Comment Ça Marche ?</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-black mb-4">Comment Ça Marche ?</h2>
+            <p className="text-xl text-black max-w-2xl mx-auto">
               Un processus simple et transparent pour obtenir les meilleurs tarifs aériens
             </p>
           </div>
@@ -843,44 +843,44 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Step 1 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 1
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Soumettez Votre Demande</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-black mb-4">Soumettez Votre Demande</h3>
+              <p className="text-black">
                 Remplissez notre formulaire avec vos détails de voyage et préférences
               </p>
             </div>
 
             {/* Step 2 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-sky-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 2
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Nous Recherchons</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-black mb-4">Nous Recherchons</h3>
+              <p className="text-black">
                 Notre équipe compare les tarifs de toutes les compagnies aériennes
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 3
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Vous Recevez le Devis</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-black mb-4">Vous Recevez le Devis</h3>
+              <p className="text-black">
                 Nous vous contactons sous 24h avec les meilleures options et prix
               </p>
             </div>
 
             {/* Step 4 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold">
                 4
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Réservation Confirmée</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold text-black mb-4">Réservation Confirmée</h3>
+              <p className="text-black">
                 Une fois votre choix fait, nous procédons à la réservation sécurisée
               </p>
             </div>
@@ -888,8 +888,8 @@ export default function Home() {
           
           <div className="text-center mt-12">
             <div className="bg-white rounded-xl p-8 shadow-lg inline-block">
-              <h3 className="text-2xl font-bold text-primary-600 mb-2">⏱️ Délai de Réponse</h3>
-              <p className="text-gray-600 text-lg">Maximum 24 heures pour recevoir votre devis</p>
+              <h3 className="text-2xl font-bold text-blue-500 mb-2">⏱️ Délai de Réponse</h3>
+              <p className="text-black text-lg">Maximum 24 heures pour recevoir votre devis</p>
             </div>
           </div>
         </div>
@@ -899,8 +899,8 @@ export default function Home() {
       <section ref={servicesRef} id="services" className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Nos Services</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl font-bold text-black mb-4">Nos Services</h2>
+            <p className="text-xl text-black max-w-2xl mx-auto">
               Une gamme complète de services pour faire de votre voyage une expérience inoubliable
             </p>
           </div>
@@ -908,16 +908,16 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Service 1 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M10 2L3 7v11a2 2 0 002 2h10a2 2 0 002-2V7l-7-5z"/>
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Recherche de Billets</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-2xl font-bold text-black mb-4">Recherche de Billets</h3>
+              <p className="text-black mb-6">
                 Nous recherchons les meilleurs tarifs auprès de toutes les compagnies aériennes pour vous offrir les prix les plus compétitifs.
               </p>
-              <ul className="text-gray-600 space-y-2">
+              <ul className="text-black space-y-2">
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
                   Recherche multi-compagnies
@@ -935,16 +935,16 @@ export default function Home() {
 
             {/* Service 2 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
-              <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-sky-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Conseil Personnalisé</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-2xl font-bold text-black mb-4">Conseil Personnalisé</h3>
+              <p className="text-black mb-6">
                 Nos experts vous accompagnent pour choisir la meilleure option selon vos besoins et votre budget.
               </p>
-              <ul className="text-gray-600 space-y-2">
+              <ul className="text-black space-y-2">
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
                   Conseillers expérimentés
@@ -962,16 +962,16 @@ export default function Home() {
 
             {/* Service 3 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Suivi de Demande</h3>
-              <p className="text-gray-600 mb-6">
+              <h3 className="text-2xl font-bold text-black mb-4">Suivi de Demande</h3>
+              <p className="text-black mb-6">
                 Nous vous tenons informés à chaque étape de votre demande et vous accompagnons jusqu'à la réservation finale.
               </p>
-              <ul className="text-gray-600 space-y-2">
+              <ul className="text-black space-y-2">
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
                   Suivi personnalisé
@@ -991,7 +991,7 @@ export default function Home() {
       </section>
 
       {/* Destinations Section */}
-      <section ref={destinationsRef} id="destinations" className="section-padding bg-gradient-to-br from-gray-900 via-primary-900 to-sky-900 relative overflow-hidden">
+      <section ref={destinationsRef} id="destinations" className="section-padding bg-gradient-to-br from-black via-black to-black relative overflow-hidden">
         {/* Background decoration */}
         <div className="bg-decoration absolute inset-0 opacity-10">
           <div className="floating-element absolute top-10 left-10 text-6xl">✈️</div>
@@ -1003,9 +1003,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-              Destinations <span className="text-orange-400">Populaires</span>
+              Destinations <span className="text-orange-500">Populaires</span>
             </h2>
-            <p className="text-xl text-gray-200 max-w-2xl mx-auto">
+            <p className="text-xl text-white max-w-2xl mx-auto">
               Découvrez nos destinations les plus prisées avec des tarifs exceptionnels
             </p>
           </div>
@@ -1015,49 +1015,49 @@ export default function Home() {
               { 
                 city: "Paris", 
                 country: "France", 
-                price: "À partir de 350,000 FCFA", 
+                price: "À partir de 450,000 FCFA", 
                 image: "🗼",
-                gradient: "from-purple-500 to-pink-500",
+                gradient: "from-blue-500 to-blue-500",
                 description: "Ville lumière et romance"
               },
               { 
                 city: "New York", 
                 country: "États-Unis", 
-                price: "À partir de 450,000 FCFA", 
+                price: "À partir de 650,000 FCFA", 
                 image: "🗽",
-                gradient: "from-blue-500 to-indigo-600",
+                gradient: "from-orange-500 to-orange-500",
                 description: "La ville qui ne dort jamais"
               },
               { 
                 city: "Dubai", 
                 country: "Émirats Arabes Unis", 
-                price: "À partir de 280,000 FCFA", 
+                price: "À partir de 380,000 FCFA", 
                 image: "🕌",
-                gradient: "from-yellow-500 to-orange-500",
+                gradient: "from-green-500 to-green-500",
                 description: "Luxe et modernité"
               },
               { 
                 city: "Londres", 
                 country: "Royaume-Uni", 
-                price: "À partir de 320,000 FCFA", 
+                price: "À partir de 420,000 FCFA", 
                 image: "🏰",
-                gradient: "from-green-500 to-teal-500",
+                gradient: "from-blue-500 to-blue-500",
                 description: "Histoire et tradition"
               },
               { 
                 city: "Istanbul", 
                 country: "Turquie", 
-                price: "À partir de 250,000 FCFA", 
+                price: "À partir de 350,000 FCFA", 
                 image: "🕌",
-                gradient: "from-red-500 to-pink-500",
+                gradient: "from-orange-500 to-orange-500",
                 description: "Pont entre deux continents"
               },
               { 
                 city: "Casablanca", 
                 country: "Maroc", 
-                price: "À partir de 180,000 FCFA", 
+                price: "À partir de 280,000 FCFA", 
                 image: "🏛️",
-                gradient: "from-amber-500 to-yellow-500",
+                gradient: "from-green-500 to-green-500",
                 description: "Perle du Maghreb"
               },
             ].map((destination, index) => (
@@ -1083,25 +1083,25 @@ export default function Home() {
                 <div className="p-6 relative">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary-600 transition-colors duration-300">
+                      <h3 className="text-2xl font-bold text-black group-hover:text-blue-500 transition-colors duration-300">
                         {destination.city}
                       </h3>
-                      <p className="text-gray-600 font-medium">{destination.country}</p>
+                      <p className="text-black font-medium">{destination.country}</p>
                     </div>
-                    <div className="bg-primary-50 rounded-full p-2">
-                      <span className="text-primary-600 text-sm">✈️</span>
+                    <div className="bg-blue-50 rounded-full p-2">
+                      <span className="text-blue-500 text-sm">✈️</span>
                     </div>
                   </div>
                   
-                  <p className="text-gray-500 text-sm mb-4 italic">{destination.description}</p>
+                  <p className="text-black text-sm mb-4 italic">{destination.description}</p>
                   
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-2xl font-bold text-primary-600">{destination.price}</span>
-                      <p className="text-xs text-gray-500">par personne</p>
+                      <span className="text-2xl font-bold text-blue-500">{destination.price}</span>
+                      <p className="text-xs text-black">par personne</p>
                     </div>
                     <Button 
-                      className="bg-gradient-to-r from-primary-600 to-sky-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-700 hover:to-sky-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      className="bg-gradient-to-r from-blue-500 to-blue-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
                       onClick={() => scrollToSection('quote-form')}
                     >
                       Demander Prix
@@ -1123,7 +1123,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-white mb-4">
                 🌟 Plus de 50 destinations disponibles !
               </h3>
-              <p className="text-gray-200 mb-6">
+              <p className="text-white mb-6">
                 Vous ne trouvez pas votre destination? Contactez-nous pour un devis personnalisé.
               </p>
               <Button 
@@ -1138,24 +1138,24 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section ref={statsRef} className="bg-primary-600 section-padding">
+      <section ref={statsRef} className="bg-blue-500 section-padding">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center text-white">
             <div className="animate-bounce-slow">
               <div className="stat-number text-4xl font-bold mb-2" data-count="200">0</div>
-              <div className="text-primary-100">Clients Satisfaits</div>
+              <div className="text-blue-100">Clients Satisfaits</div>
             </div>
             <div className="animate-bounce-slow" style={{animationDelay: '0.2s'}}>
               <div className="stat-number text-4xl font-bold mb-2" data-count="50">0</div>
-              <div className="text-primary-100">Destinations</div>
+              <div className="text-blue-100">Destinations</div>
             </div>
             <div className="animate-bounce-slow" style={{animationDelay: '0.4s'}}>
               <div className="text-4xl font-bold mb-2">8/7</div>
-              <div className="text-primary-100">Support Client</div>
+              <div className="text-blue-100">Support Client</div>
             </div>
             <div className="animate-bounce-slow" style={{animationDelay: '0.6s'}}>
               <div className="text-4xl font-bold mb-2">5★</div>
-              <div className="text-primary-100">Note Moyenne</div>
+              <div className="text-blue-100">Note Moyenne</div>
             </div>
           </div>
         </div>
@@ -1165,8 +1165,8 @@ export default function Home() {
       <section ref={testimonialsRef} className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Ce Que Disent Nos Clients</h2>
-            <p className="text-xl text-gray-600">Témoignages authentiques de voyageurs satisfaits</p>
+            <h2 className="text-4xl font-bold text-black mb-4">Ce Que Disent Nos Clients</h2>
+            <p className="text-xl text-black">Témoignages authentiques de voyageurs satisfaits</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1196,10 +1196,10 @@ export default function Home() {
                     <span key={i} className="text-yellow-400 text-xl">★</span>
                   ))}
                 </div>
-                <p className="text-gray-600 mb-6 italic">"{testimonial.content}"</p>
+                <p className="text-black mb-6 italic">"{testimonial.content}"</p>
                 <div>
-                  <div className="font-bold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-500">{testimonial.role}</div>
+                  <div className="font-bold text-black">{testimonial.name}</div>
+                  <div className="text-sm text-black">{testimonial.role}</div>
                 </div>
               </div>
             ))}
@@ -1208,7 +1208,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary-600 to-sky-600 section-padding">
+      <section className="bg-gradient-to-r from-blue-500 to-blue-500 section-padding">
         <div className="max-w-4xl mx-auto text-center text-white">
           <h2 className="text-4xl font-bold mb-6">Prêt à Partir à l'Aventure?</h2>
           <p className="text-xl mb-8 opacity-90">
@@ -1216,14 +1216,14 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
+              className="bg-white text-blue-500 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all duration-300"
               onClick={() => scrollToSection('quote-form')}
             >
               Demander un Devis
             </Button>
-            <a 
+            <a
               href="tel:677916832"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary-600 transition-all duration-300 text-center"
+              className="border-2 border-white text-white px-8 py-1 rounded-lg font-semibold hover:bg-white hover:text-blue-500 transition-all duration-300 text-center"
             >
               Appelez-nous: 6 77 91 68 32
             </a>
@@ -1232,12 +1232,12 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="bg-gray-900 text-white section-padding">
+      <footer id="contact" className="bg-black text-white section-padding">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <h3 className="text-2xl font-bold mb-6">Revolution Travel & Services</h3>
-              <p className="text-gray-300 mb-4">
+              <p className="text-white mb-4">
                 Votre partenaire de confiance pour tous vos voyages en avion.
               </p>
               <div className="flex space-x-4">
@@ -1245,14 +1245,14 @@ export default function Home() {
                   href="https://www.facebook.com/p/Revolution-Travel-Services-100064125607997/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center hover:bg-primary-700 transition-colors"
+                  className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
                 >
                   <span className="text-sm font-bold">f</span>
                 </a>
-                <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-sm">t</span>
                 </div>
-                <div className="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-sm">in</span>
                 </div>
               </div>
@@ -1260,34 +1260,34 @@ export default function Home() {
             
             <div>
               <h4 className="text-lg font-semibold mb-6">Services</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#quote-form" className="hover:text-white transition-colors">Demande de Devis</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Recherche de Billets</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Conseil Voyage</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Suivi de Demande</a></li>
+              <ul className="space-y-3 text-white">
+                <li><a href="#quote-form" className="hover:text-blue-500 transition-colors">Demande de Devis</a></li>
+                <li><a href="#services" className="hover:text-blue-500 transition-colors">Recherche de Billets</a></li>
+                <li><a href="#services" className="hover:text-blue-500 transition-colors">Conseil Voyage</a></li>
+                <li><a href="#services" className="hover:text-blue-500 transition-colors">Suivi de Demande</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-lg font-semibold mb-6">Destinations</h4>
-              <ul className="space-y-3 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Europe</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Amérique</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Asie</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Afrique</a></li>
+              <ul className="space-y-3 text-white">
+                <li><a href="#" className="hover:text-blue-500 transition-colors">Europe</a></li>
+                <li><a href="#" className="hover:text-blue-500 transition-colors">Amérique</a></li>
+                <li><a href="#" className="hover:text-blue-500 transition-colors">Asie</a></li>
+                <li><a href="#" className="hover:text-blue-500 transition-colors">Afrique</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-lg font-semibold mb-6">Contact</h4>
-              <div className="space-y-3 text-gray-300">
+              <div className="space-y-3 text-white">
                 <div className="flex items-center">
                   <span className="mr-3">📞</span>
-                  <a href="tel:677916832" className="hover:text-white transition-colors">6 77 91 68 32</a>
+                  <a href="tel:677916832" className="hover:text-blue-500 transition-colors">6 77 91 68 32</a>
                 </div>
                 <div className="flex items-center">
                   <span className="mr-3">✉️</span>
-                  <a href="mailto:p.revolutiontravel@yahoo.com" className="hover:text-white transition-colors">p.revolutiontravel@yahoo.com</a>
+                  <a href="mailto:p.revolutiontravel@yahoo.com" className="hover:text-blue-500 transition-colors">p.revolutiontravel@yahoo.com</a>
                 </div>
                 <div className="flex items-center">
                   <span className="mr-3">📍</span>
@@ -1297,7 +1297,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-700 mt-12 pt-8 text-center text-white">
             <p>&copy; 2025 Revolution Travel & Services. Tous droits réservés.</p>
           </div>
         </div>

@@ -15,8 +15,7 @@ import { CityCombobox } from "@/components/ui/city-combobox";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ChevronDownIcon, Search } from "lucide-react";
-import { SiteSearch } from "@/components/ui/site-search";
+import { ChevronDownIcon } from "lucide-react";
 import { StructuredData } from "@/components/StructuredData";
 
 // Register GSAP plugins
@@ -32,9 +31,9 @@ const formSchema = z.object({
   departureDate: z.date({ required_error: "Date de départ requise" }),
   returnDate: z.date().optional(),
   passengers: z.string().min(1, "Nombre de passagers requis"),
-  travelClass: z.string().default("economy"),
-  preferredAirline: z.string().default("none"),
-  budget: z.string().default("select-budget"),
+  travelClass: z.string().min(1, "Classe de voyage requise"),
+  preferredAirline: z.string().min(1, "Compagnie aérienne requise"),
+  budget: z.string().min(1, "Budget requis"),
   additionalInfo: z.string().optional()
 }).refine((data) => {
   // Validate that departure date is not more than 9 months ahead
@@ -69,26 +68,9 @@ export default function Home() {
 
   // Add hydration state to prevent SSR/client mismatch
   const [isHydrated, setIsHydrated] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
-    
-    // Keyboard shortcuts
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl/Cmd + K to open search
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsSearchOpen(true);
-      }
-      // Escape to close search
-      if (e.key === 'Escape') {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // Safe scroll function that only works after hydration
@@ -109,7 +91,7 @@ export default function Home() {
       destination: '',
       departureDate: new Date(),
       returnDate: undefined,
-      passengers: '',
+      passengers: '1',
       travelClass: 'economy',
       preferredAirline: 'none',
       budget: 'select-budget',
@@ -359,14 +341,6 @@ export default function Home() {
                 <a href="#services" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Services</a>
                 <a href="#destinations" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Destinations</a>
                 <a href="#contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Contact</a>
-                <button
-                  onClick={() => setIsSearchOpen(true)}
-                  className="inline-flex items-center gap-2 text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                  title="Rechercher (Ctrl+K)"
-                >
-                  <Search className="w-4 h-4" />
-                  <span className="hidden lg:inline">Rechercher</span>
-                </button>
               </div>
             </div>
           </div>
@@ -428,16 +402,21 @@ export default function Home() {
                 className="h-16 px-12 text-lg font-bold bg-gradient-to-r from-primary-600 to-sky-600 hover:from-primary-700 hover:to-sky-700 text-white shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
                 onClick={() => scrollToSection('quote-form')}
               >
-                Demander un Devis Gratuit
+                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+                Demander un Devis
               </Button>
               <Button 
-                variant="outline"
+                variant="outline" 
                 size="lg" 
-                className="h-16 px-8 text-lg font-semibold border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white shadow-lg transform hover:-translate-y-1 transition-all duration-300 rounded-2xl flex items-center gap-3" 
-                onClick={() => setIsSearchOpen(true)}
+                className="h-16 px-12 text-lg font-bold border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 rounded-2xl" 
+                onClick={() => scrollToSection('services')}
               >
-                <Search className="w-5 h-5" />
-                Rechercher
+                <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                Nos Services
               </Button>
             </div>
             
@@ -454,15 +433,6 @@ export default function Home() {
               <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
                 <span className="text-green-500 mr-2 text-lg">✓</span>
                 <span className="text-gray-700 font-semibold">Prix compétitifs</span>
-              </div>
-              {/* Search hint */}
-              <div 
-                className="flex items-center bg-primary-50/80 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg cursor-pointer hover:bg-primary-100/80 transition-colors"
-                onClick={() => setIsSearchOpen(true)}
-              >
-                <Search className="text-primary-600 mr-2 w-4 h-4" />
-                <span className="text-primary-700 font-semibold">Rechercher</span>
-                <span className="ml-2 text-xs text-primary-500 bg-white/50 px-2 py-1 rounded">Ctrl+K</span>
               </div>
             </div>
           </div>
@@ -1332,9 +1302,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Search Component */}
-      <SiteSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* Structured Data for SEO */}
       <StructuredData />

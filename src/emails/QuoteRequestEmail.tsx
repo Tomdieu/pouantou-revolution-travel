@@ -20,11 +20,53 @@ interface QuoteRequestEmailProps {
   destination: string;
   departureDate: string;
   returnDate?: string;
-  passengers: string;
+  adults: number;
+  children: number;
+  infants: number;
+  passengersTotal: number;
   travelClass: string;
   preferredAirline?: string;
+  nonStop?: boolean;
   budget?: string;
+  currencyCode?: string;
+  maxPrice?: number;
   additionalInfo?: string;
+  flightPrices?: {
+    offers: Array<{
+      id: string;
+      price: {
+        total: number;
+        currency: string;
+        formattedTotal: string;
+      };
+      duration?: string;
+      stops: number;
+      isNonStop: boolean;
+      departure: {
+        airport: string;
+        time: string;
+      };
+      arrival: {
+        airport: string;
+        time: string;
+      };
+      airline: string;
+      segments: Array<{
+        departure: any;
+        arrival: any;
+        airline: string;
+        flightNumber: string;
+        duration: string;
+        aircraft: string;
+      }>;
+      bookableSeats: number;
+      instantTicketing: boolean;
+      lastTicketingDate?: string;
+    }>;
+    meta: any;
+    dictionaries?: any;
+  } | null;
+  priceSearchError?: string | null;
 }
 
 export default function QuoteRequestEmail({
@@ -35,11 +77,19 @@ export default function QuoteRequestEmail({
   destination,
   departureDate,
   returnDate,
-  passengers,
+  adults,
+  children,
+  infants,
+  passengersTotal,
   travelClass,
   preferredAirline,
+  nonStop,
   budget,
+  currencyCode,
+  maxPrice,
   additionalInfo,
+  flightPrices,
+  priceSearchError,
 }: QuoteRequestEmailProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -147,12 +197,18 @@ export default function QuoteRequestEmail({
               </Row>
             )}
 
+            {/* Passenger Breakdown */}
             <Row style={infoRow}>
               <Column style={labelColumn}>
-                <Text style={label}>👥 Nombre de Passagers:</Text>
+                <Text style={label}>👥 Passagers:</Text>
               </Column>
               <Column style={valueColumn}>
-                <Text style={value}>{passengers}</Text>
+                <Text style={value}>
+                  {adults} Adulte{adults > 1 ? 's' : ''}
+                  {children > 0 && `, ${children} Enfant${children > 1 ? 's' : ''}`}
+                  {infants > 0 && `, ${infants} Bébé${infants > 1 ? 's' : ''}`}
+                  {` (Total: ${passengersTotal || adults + children + infants})`}
+                </Text>
               </Column>
             </Row>
 
@@ -164,6 +220,17 @@ export default function QuoteRequestEmail({
                 <Text style={value}>{travelClass}</Text>
               </Column>
             </Row>
+
+            {nonStop && (
+              <Row style={infoRow}>
+                <Column style={labelColumn}>
+                  <Text style={label}>✈️ Type de Vol:</Text>
+                </Column>
+                <Column style={valueColumn}>
+                  <Text style={value}>Vols directs uniquement</Text>
+                </Column>
+              </Row>
+            )}
 
             {preferredAirline && (
               <Row style={infoRow}>
@@ -207,6 +274,69 @@ export default function QuoteRequestEmail({
             <Text style={actionText}>
               Veuillez rechercher les meilleurs tarifs pour ce voyage et contacter le client sous 24h.
             </Text>
+
+            {/* Real-time Flight Prices Section */}
+            {flightPrices && flightPrices.offers && flightPrices.offers.length > 0 && (
+              <Section style={pricesSection}>
+                <Heading style={pricesSectionTitle}>💰 Prix en Temps Réel Trouvés</Heading>
+                <Text style={pricesIntro}>
+                  Voici les meilleurs tarifs trouvés automatiquement via Amadeus:
+                </Text>
+                
+                {flightPrices.offers.slice(0, 3).map((offer, index) => (
+                  <Section key={offer.id} style={priceCard}>
+                    <Row style={priceHeader}>
+                      <Column style={{width: '70%'}}>
+                        <Text style={priceTitle}>Option {index + 1}</Text>
+                      </Column>
+                      <Column style={{width: '30%', textAlign: 'right' as const}}>
+                        <Text style={priceAmount}>{offer.price.formattedTotal}</Text>
+                      </Column>
+                    </Row>
+                    
+                    <Row style={flightDetailsRow}>
+                      <Column style={{width: '50%'}}>
+                        <Text style={flightDetail}>
+                          <strong>✈️ Vol:</strong> {offer.departure.airport} → {offer.arrival.airport}
+                        </Text>
+                        <Text style={flightDetail}>
+                          <strong>🕒 Durée:</strong> {offer.duration || 'N/A'}
+                        </Text>
+                      </Column>
+                      <Column style={{width: '50%'}}>
+                        <Text style={flightDetail}>
+                          <strong>🛑 Escales:</strong> {offer.stops === 0 ? 'Vol direct' : `${offer.stops} escale${offer.stops > 1 ? 's' : ''}`}
+                        </Text>
+                        <Text style={flightDetail}>
+                          <strong>🏢 Compagnie:</strong> {offer.airline}
+                        </Text>
+                      </Column>
+                    </Row>
+                    
+                    <Text style={availabilityNote}>
+                      💺 {offer.bookableSeats} siège{offer.bookableSeats > 1 ? 's' : ''} disponible{offer.bookableSeats > 1 ? 's' : ''}
+                      {offer.lastTicketingDate && ` | 🎫 Réservation avant le ${new Date(offer.lastTicketingDate).toLocaleDateString('fr-FR')}`}
+                    </Text>
+                  </Section>
+                ))}
+                
+                <Text style={pricesNote}>
+                  ⚠️ Ces prix sont indicatifs et peuvent changer. Contactez rapidement le client pour finaliser la réservation.
+                </Text>
+              </Section>
+            )}
+
+            {/* Price Search Error */}
+            {priceSearchError && (
+              <Section style={errorSection}>
+                <Text style={errorText}>
+                  ⚠️ Impossible de récupérer les prix en temps réel: {priceSearchError}
+                </Text>
+                <Text style={errorText}>
+                  Veuillez effectuer une recherche manuelle pour ce client.
+                </Text>
+              </Section>
+            )}
             
             {/* Client Contact Info */}
             <Section style={clientContactSection}>
@@ -405,5 +535,91 @@ const footer = {
 const footerText = {
   color: '#6b7280',
   fontSize: '12px',
+  margin: '4px 0',
+};
+
+// Styles for flight prices section
+const pricesSection = {
+  backgroundColor: '#f0f9ff',
+  padding: '16px 20px',
+  borderRadius: '8px',
+  border: '1px solid #bae6fd',
+  margin: '16px 0',
+};
+
+const pricesSectionTitle = {
+  color: '#0c4a6e',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  margin: '0 0 12px 0',
+};
+
+const pricesIntro = {
+  color: '#374151',
+  fontSize: '14px',
+  margin: '0 0 16px 0',
+};
+
+const priceCard = {
+  backgroundColor: '#ffffff',
+  padding: '12px 16px',
+  borderRadius: '6px',
+  border: '1px solid #e5e7eb',
+  margin: '8px 0',
+};
+
+const priceHeader = {
+  marginBottom: '8px',
+};
+
+const priceTitle = {
+  color: '#1f2937',
+  fontSize: '14px',
+  fontWeight: 'bold',
+  margin: '0',
+};
+
+const priceAmount = {
+  color: '#059669',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  margin: '0',
+};
+
+const flightDetailsRow = {
+  marginBottom: '8px',
+};
+
+const flightDetail = {
+  color: '#6b7280',
+  fontSize: '12px',
+  margin: '2px 0',
+};
+
+const availabilityNote = {
+  color: '#7c3aed',
+  fontSize: '11px',
+  margin: '8px 0 0 0',
+  fontStyle: 'italic',
+};
+
+const pricesNote = {
+  color: '#dc2626',
+  fontSize: '12px',
+  margin: '12px 0 0 0',
+  fontWeight: 'bold',
+};
+
+const errorSection = {
+  backgroundColor: '#fef2f2',
+  padding: '12px 16px',
+  borderRadius: '6px',
+  border: '1px solid #fecaca',
+  margin: '16px 0',
+};
+
+const errorText = {
+  color: '#dc2626',
+  fontSize: '13px',
   margin: '4px 0',
 };

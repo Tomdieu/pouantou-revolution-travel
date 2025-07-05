@@ -17,7 +17,11 @@ interface ClientConfirmationEmailProps {
   departureCity: string;
   departureDate: string;
   returnDate?: string;
-  passengers: string;
+  passengers?: string; // For backward compatibility
+  adults?: number;
+  children?: number;
+  infants?: number;
+  passengersTotal?: number;
 }
 
 export default function ClientConfirmationEmail({
@@ -27,7 +31,14 @@ export default function ClientConfirmationEmail({
   departureDate,
   returnDate,
   passengers,
+  adults,
+  children,
+  infants,
+  passengersTotal,
 }: ClientConfirmationEmailProps) {
+  // Calculate passenger display string
+  const passengerDisplay = passengers || 
+    `${adults || 0} Adulte${(adults || 0) > 1 ? 's' : ''}${children ? `, ${children} Enfant${children > 1 ? 's' : ''}` : ''}${infants ? `, ${infants} Bébé${infants > 1 ? 's' : ''}` : ''} (Total: ${passengersTotal || (adults || 0) + (children || 0) + (infants || 0)})`;
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       weekday: 'long',
@@ -80,7 +91,7 @@ export default function ClientConfirmationEmail({
                 </Row>
               )}
               <Row style={summaryRow}>
-                <Text style={summaryItem}><strong>Passagers:</strong> {passengers}</Text>
+                <Text style={summaryItem}><strong>Passagers:</strong> {passengerDisplay}</Text>
               </Row>
             </Section>
 

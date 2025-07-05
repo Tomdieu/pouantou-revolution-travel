@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://www.revolutiontravel.cm/sitemap.xml',
+    sitemap: 'https://pouantou-revolution-travel.vercel.app/sitemap.xml',
   }
 }

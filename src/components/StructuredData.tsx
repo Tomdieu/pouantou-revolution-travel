@@ -6,9 +6,9 @@ export function StructuredData() {
     "@type": ["TravelAgency", "LocalBusiness"],
     "name": "Revolution Travel & Services",
     "alternateName": "Revolution Travel",
-    "url": "https://www.revolutiontravel.cm",
-    "logo": "https://www.revolutiontravel.cm/logo.png",
-    "image": "https://www.revolutiontravel.cm/og-image.jpg",
+    "url": "https://pouantou-revolution-travel.vercel.app",
+    "logo": "https://pouantou-revolution-travel.vercel.app/logo.png",
+    "image": "https://pouantou-revolution-travel.vercel.app/og-image.jpg",
     "description": "Agence de voyage professionnelle basée au Cameroun, spécialisée dans la réservation de billets d'avion vers toutes les destinations internationales. Votre partenaire de confiance pour tous vos voyages.",
     "address": {
       "@type": "PostalAddress",
@@ -259,7 +259,7 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Revolution Travel & Services",
-    "url": "https://www.revolutiontravel.cm",
+    "url": "https://pouantou-revolution-travel.vercel.app",
     "description": "Agence de voyage professionnelle au Cameroun pour la réservation de billets d'avion",
     "publisher": {
       "@type": "Organization",
@@ -269,7 +269,7 @@ export function StructuredData() {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": "https://www.revolutiontravel.cm?search={search_term_string}"
+        "urlTemplate": "https://pouantou-revolution-travel.vercel.app?search={search_term_string}"
       },
       "query-input": "required name=search_term_string"
     },
@@ -284,25 +284,25 @@ export function StructuredData() {
         "@type": "ListItem",
         "position": 1,
         "name": "Accueil",
-        "item": "https://www.revolutiontravel.cm"
+        "item": "https://pouantou-revolution-travel.vercel.app"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Services",
-        "item": "https://www.revolutiontravel.cm#services"
+        "item": "https://pouantou-revolution-travel.vercel.app#services"
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": "Destinations",
-        "item": "https://www.revolutiontravel.cm#destinations"
+        "item": "https://pouantou-revolution-travel.vercel.app#destinations"
       },
       {
         "@type": "ListItem",
         "position": 4,
         "name": "Contact",
-        "item": "https://www.revolutiontravel.cm#contact"
+        "item": "https://pouantou-revolution-travel.vercel.app#contact"
       }
     ]
   };

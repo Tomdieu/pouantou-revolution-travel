@@ -109,7 +109,7 @@ export function CityCombobox({
 
   const selectedAirport = React.useMemo(() => {
     return (airports as Airport[]).find(airport => 
-      `${airport.city}, ${airport.country}` === value || airport.city === value
+      airport.code === value || airport.city === value
     )
   }, [value])
 
@@ -151,13 +151,12 @@ export function CityCombobox({
             {filteredAirports.length > 0 && (
               <CommandGroup>
                 {filteredAirports.map((airport) => {
-                const airportValue = `${airport.city}, ${airport.country}`
-                const isSelected = value === airportValue || value === airport.city
+                const isSelected = value === airport.code
                 
                 const handleSelect = (e: React.MouseEvent) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  const newValue = isSelected ? "" : airport.city
+                  const newValue = isSelected ? "" : airport.code
                   onValueChange?.(newValue)
                   setOpen(false)
                   setSearchValue("")

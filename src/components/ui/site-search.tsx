@@ -217,7 +217,7 @@ export function SiteSearch({ onClose, isOpen = false }: SiteSearchProps) {
 
   useEffect(() => {
     performSearch(query);
-  }, [query]);
+  }, [query,performSearch]);
 
   useEffect(() => {
     if (isOpen && inputRef.current) {

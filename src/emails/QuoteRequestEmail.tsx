@@ -53,7 +53,7 @@ export default function QuoteRequestEmail({
   return (
     <Html>
       <Head />
-      <Preview>Nouvelle demande de devis - {fullName} vers {destination}</Preview>
+      <Preview>Demande de devis voyage - Client: {fullName} - Destination: {destination} - Revolution Travel Services</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
@@ -207,18 +207,46 @@ export default function QuoteRequestEmail({
             <Text style={actionText}>
               Veuillez rechercher les meilleurs tarifs pour ce voyage et contacter le client sous 24h.
             </Text>
+            
+            {/* Client Contact Info */}
+            <Section style={clientContactSection}>
+              <Heading style={clientContactTitle}>📞 Contact du Client</Heading>
+              <Row style={contactRow}>
+                <Column style={{width: '50%'}}>
+                  <Text style={clientContactText}>
+                    <strong>📱 Téléphone:</strong><br />
+                    {phone}
+                  </Text>
+                </Column>
+                <Column style={{width: '50%'}}>
+                  <Text style={clientContactText}>
+                    <strong>📧 Email:</strong><br />
+                    {email}
+                  </Text>
+                </Column>
+              </Row>
+            </Section>
+
             <Text style={contactInfo}>
-              <strong>Contact Client:</strong> {phone} | {email}
+              <strong>Vos Informations de Contact:</strong><br />
+              📞 Téléphone: +237 677 916 832<br />
+              📧 Email: p.revolutiontravel@yahoo.com
             </Text>
           </Section>
 
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              📧 Email envoyé automatiquement depuis le site web Revolution Travel Services
+              Revolution Travel & Services - Agence de Voyage Professionnelle
             </Text>
             <Text style={footerText}>
-              🕒 {new Date().toLocaleDateString('fr-FR')} à {new Date().toLocaleTimeString('fr-FR')}
+              Cameroun | Téléphone: +237 677 916 832 | Email: p.revolutiontravel@yahoo.com
+            </Text>
+            <Text style={footerText}>
+              Ce message a été envoyé automatiquement le {new Date().toLocaleDateString('fr-FR')} à {new Date().toLocaleTimeString('fr-FR')}
+            </Text>
+            <Text style={footerText}>
+              Vous recevez cet email car une demande de devis a été soumise sur notre site web.
             </Text>
           </Section>
         </Container>
@@ -242,24 +270,26 @@ const container = {
 };
 
 const header = {
-  backgroundColor: 'linear-gradient(135deg, #2563eb, #0ea5e9)',
-  padding: '20px 30px',
+  backgroundColor: '#2563eb',
+  padding: '25px 30px',
   borderRadius: '10px 10px 0 0',
   textAlign: 'center' as const,
 };
 
 const headerText = {
   color: '#ffffff',
-  fontSize: '24px',
+  fontSize: '22px',
   fontWeight: 'bold',
   margin: '0 0 8px 0',
+  lineHeight: '1.2',
 };
 
 const headerSubtext = {
   color: '#ffffff',
   fontSize: '16px',
   margin: '0',
-  opacity: 0.9,
+  opacity: 0.95,
+  lineHeight: '1.3',
 };
 
 const section = {
@@ -278,12 +308,13 @@ const infoRow = {
 };
 
 const labelColumn = {
-  width: '40%',
+  width: '35%',
   verticalAlign: 'top' as const,
+  paddingRight: '10px',
 };
 
 const valueColumn = {
-  width: '60%',
+  width: '65%',
   verticalAlign: 'top' as const,
 };
 
@@ -302,6 +333,8 @@ const value = {
   padding: '8px 12px',
   borderRadius: '6px',
   borderLeft: '4px solid #2563eb',
+  wordBreak: 'break-word' as const,
+  minWidth: '100px',
 };
 
 const divider = {
@@ -333,7 +366,33 @@ const actionText = {
 const contactInfo = {
   color: '#374151',
   fontSize: '14px',
+  margin: '16px 0 0 0',
+};
+
+const clientContactSection = {
+  backgroundColor: '#f0fdf4',
+  padding: '16px 20px',
+  borderRadius: '8px',
+  border: '1px solid #bbf7d0',
+  margin: '16px 0',
+};
+
+const clientContactTitle = {
+  color: '#065f46',
+  fontSize: '15px',
+  fontWeight: 'bold',
+  margin: '0 0 12px 0',
+};
+
+const contactRow = {
+  marginBottom: '8px',
+};
+
+const clientContactText = {
+  color: '#374151',
+  fontSize: '14px',
   margin: '0',
+  lineHeight: '1.4',
 };
 
 const footer = {

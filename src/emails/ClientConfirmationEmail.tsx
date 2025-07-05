@@ -40,7 +40,7 @@ export default function ClientConfirmationEmail({
   return (
     <Html>
       <Head />
-      <Preview>Confirmation de votre demande de devis - Revolution Travel</Preview>
+      <Preview>Confirmation demande devis voyage - Revolution Travel Services Cameroun - Réponse sous 24h</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}
@@ -119,10 +119,16 @@ export default function ClientConfirmationEmail({
           {/* Footer */}
           <Section style={footer}>
             <Text style={footerText}>
-              Revolution Travel Services - Votre agence de voyage de confiance
+              Revolution Travel & Services - Agence de Voyage Professionnelle au Cameroun
             </Text>
             <Text style={footerText}>
-              📧 Cet email a été envoyé automatiquement, merci de ne pas y répondre directement
+              Téléphone: +237 677 916 832 | Email: p.revolutiontravel@yahoo.com
+            </Text>
+            <Text style={footerText}>
+              Pour toute question urgente, appelez-nous directement ou répondez à cet email.
+            </Text>
+            <Text style={footerText}>
+              Merci de votre confiance. Nous vous répondrons sous 24 heures maximum.
             </Text>
           </Section>
         </Container>
@@ -146,8 +152,8 @@ const container = {
 };
 
 const header = {
-  backgroundColor: 'linear-gradient(135deg, #2563eb, #0ea5e9)',
-  padding: '20px 30px',
+  backgroundColor: '#2563eb',
+  padding: '25px 30px',
   borderRadius: '10px 10px 0 0',
   textAlign: 'center' as const,
 };

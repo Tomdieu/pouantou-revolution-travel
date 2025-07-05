@@ -1,0 +1,66 @@
+{
+  "name": "Revolution Travel & Services",
+  "short_name": "Revolution Travel",
+  "description": "Votre agence de voyage spécialisée en recherche et réservation de billets d'avion partout dans le monde. Service 7 jours/7.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "business", "lifestyle"],
+  "lang": "fr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo-image.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/logo-image.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/logo-image.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Demander un Devis",
+      "short_name": "Devis",
+      "description": "Accès direct au formulaire de demande de devis",
+      "url": "/#quote-form",
+      "icons": [
+        {
+          "src": "/plane.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Nos Services",
+      "short_name": "Services",
+      "description": "Découvrir tous nos services de voyage",
+      "url": "/#services",
+      "icons": [
+        {
+          "src": "/plane.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

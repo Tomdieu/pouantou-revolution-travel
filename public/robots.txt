@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# PWA files
+Allow: /manifest.json
+Allow: /sw.js
+Allow: /workbox-*.js
+
+# Sitemap
+Sitemap: https://puantou-revolution-travel.vercel.app/sitemap.xml

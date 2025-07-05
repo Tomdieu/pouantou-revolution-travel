@@ -63,9 +63,9 @@ const formSchema = z.object({
     required_error: "Classe de voyage requise"
   }),
   preferredAirline: z.string().optional(),
-  nonStop: z.boolean().default(false),
+  nonStop: z.boolean(),
   budget: z.string().optional(),
-  currencyCode: z.string().length(3, "Code devise invalide").default("XAF"),
+  currencyCode: z.string().length(3, "Code devise invalide"),
   maxPrice: z.number().optional(),
   additionalInfo: z.string().optional()
 }).refine((data) => {
@@ -623,10 +623,13 @@ export default function LandingPage() {
             {/* Plane Image - Better mobile handling */}
             <div className="order-1 lg:order-2 mb-8 lg:mb-0">
               <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto">
-                <img 
+                <Image 
                   src="/plane.png" 
                   alt="Airplane - Revolution Travel Services" 
+                  width={800}
+                  height={600}
                   className="w-full h-auto object-contain opacity-60 sm:opacity-80 animate-float"
+                  priority
                 />
                 {/* Decorative elements around the plane - Smaller on mobile */}
                 <div className="absolute -top-2 sm:-top-4 -right-2 sm:-right-4 w-8 h-8 sm:w-12 sm:h-12 bg-blue-500/20 rounded-full animate-pulse"></div>

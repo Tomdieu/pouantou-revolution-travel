@@ -21,12 +21,60 @@ export async function POST(request: NextRequest) {
       destination,
       departureDate,
       returnDate,
-      passengers,
+      adults,
+      children,
+      infants,
+      adultsCount,
+      childrenCount,
+      infantsCount,
+      passengersTotal,
       travelClass,
       preferredAirline,
+      nonStop,
       budget,
+      currencyCode,
+      maxPrice,
       additionalInfo
     } = formData;
+
+    // Try to get real-time flight prices from Amadeus
+    let flightPrices = null;
+    let priceSearchError = null;
+    
+    try {
+      const amadeusSearchParams = {
+        originLocationCode: departureCity, // This should be an airport code from CityCombobox
+        destinationLocationCode: destination, // This should be an airport code from CityCombobox
+        departureDate,
+        returnDate,
+        adults: adults || adultsCount || 1,
+        children: children || childrenCount || 0,
+        infants: infants || infantsCount || 0,
+        travelClass,
+        nonStop,
+        currencyCode: currencyCode || 'XAF',
+        maxPrice,
+        max: 5 // Limit to top 5 results for email
+      };
+
+      const amadeusResponse = await fetch(`${process.env.NODE_ENV === 'production' ? 'https://' + request.headers.get('host') : 'http://localhost:3000'}/api/amadeus/flight-search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(amadeusSearchParams),
+      });
+
+      if (amadeusResponse.ok) {
+        const amadeusData = await amadeusResponse.json();
+        if (amadeusData.success) {
+          flightPrices = amadeusData.data;
+        }
+      }
+    } catch (error) {
+      console.log('Amadeus price search failed, continuing with email without prices:', error);
+      priceSearchError = error instanceof Error ? error.message : 'Unknown error';
+    }
 
     // Render email templates using React Email
     const agencyEmailHtml = await render(QuoteRequestEmail({
@@ -37,17 +85,25 @@ export async function POST(request: NextRequest) {
       destination,
       departureDate,
       returnDate,
-      passengers,
+      adults: adults || adultsCount || 1,
+      children: children || childrenCount || 0,
+      infants: infants || infantsCount || 0,
+      passengersTotal: passengersTotal || (adults + children + infants) || 1,
       travelClass,
       preferredAirline,
+      nonStop,
       budget,
+      currencyCode,
+      maxPrice,
       additionalInfo,
+      flightPrices, // Add real-time flight prices
+      priceSearchError, // Include any errors for context
     }));
 
     // Send email to the agency
     try {
       const result = await sendEmail({
-        to: ['ivan.tomdieu@gmail.com','p.revolutiontravel@yahoo.com'], // Your email
+        to: ['ivan.tomdieu@gmail.com','p.revolutiontravel@yahoo.com','tsilieuj@gmail.com'], // Your email
         // to: ['p.revolutiontravel@yahoo.com'], // Your aunt's email
         subject: `Nouvelle demande de devis voyage - ${fullName} vers ${destination}`,
         html: agencyEmailHtml,
@@ -60,10 +116,16 @@ Destination: ${destination}
 Départ: ${departureCity}
 Date de départ: ${departureDate}
 ${returnDate ? `Date de retour: ${returnDate}` : 'Vol aller simple'}
-Passagers: ${passengers}
+Adultes: ${adults || adultsCount}
+Enfants: ${children || childrenCount} 
+Bébés: ${infants || infantsCount}
+Total passagers: ${passengersTotal || (adults + children + infants)}
 Classe: ${travelClass}
-${preferredAirline ? `Compagnie préférée: ${preferredAirline}` : ''}
+${preferredAirline && preferredAirline !== 'none' ? `Compagnie préférée: ${preferredAirline}` : ''}
+${nonStop ? 'Vols directs uniquement: Oui' : ''}
 ${budget ? `Budget: ${budget}` : ''}
+${currencyCode ? `Devise: ${currencyCode}` : ''}
+${maxPrice ? `Prix maximum: ${maxPrice}` : ''}
 ${additionalInfo ? `Informations supplémentaires: ${additionalInfo}` : ''}
 
 Revolution Travel Services - Cameroun
@@ -87,7 +149,10 @@ Merci de contacter le client sous 24h.`,
       departureCity,
       departureDate,
       returnDate,
-      passengers,
+      adults: adults || adultsCount || 1,
+      children: children || childrenCount || 0,
+      infants: infants || infantsCount || 0,
+      passengersTotal: passengersTotal || (adults + children + infants) || 1,
     }));
 
     // Send confirmation to client
@@ -105,7 +170,10 @@ Résumé de votre demande:
 - Départ: ${departureCity}
 - Date de départ: ${departureDate}
 ${returnDate ? `- Date de retour: ${returnDate}` : '- Type: Aller Simple'}
-- Passagers: ${passengers}
+- Adultes: ${adults || adultsCount}
+- Enfants: ${children || childrenCount}
+- Bébés: ${infants || infantsCount}
+- Total passagers: ${passengersTotal || (adults + children + infants)}
 
 Notre équipe va rechercher les meilleures offres et vous contactera sous 24 heures.
 

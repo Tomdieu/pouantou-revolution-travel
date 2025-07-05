@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Revolution Travel & Services - Agence de Voyage Cameroun | Billets d'Avion",
@@ -183,6 +184,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning={true}>
         {children}
+        <Analytics />
         <Toaster />
       </body>
     </html>

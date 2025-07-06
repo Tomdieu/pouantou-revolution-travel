@@ -114,7 +114,7 @@ export default function ClientConfirmationEmail({
               <Heading style={contactTitle}>📞 Nous Contacter</Heading>
               <Text style={contactDetail}><strong>Téléphone:</strong> 6 77 91 68 32</Text>
               <Text style={contactDetail}><strong>Email:</strong> p.revolutiontravel@yahoo.com</Text>
-              <Text style={contactDetail}><strong>Horaires:</strong> 8h/7 (8h par jour, pas le dimanche sauf urgence)</Text>
+              <Text style={contactDetail}><strong>Horaires:</strong> 24h/7</Text>
             </Section>
 
             <Text style={paragraph}>

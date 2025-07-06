@@ -1551,7 +1551,7 @@ export default function LandingPage() {
               <div className="text-blue-100">Destinations</div>
             </div>
             <div className="animate-bounce-slow" style={{animationDelay: '0.4s'}}>
-              <div className="text-4xl font-bold mb-2">8/7</div>
+              <div className="text-4xl font-bold mb-2">24/7</div>
               <div className="text-blue-100">Support Client</div>
             </div>
             <div className="animate-bounce-slow" style={{animationDelay: '0.6s'}}>

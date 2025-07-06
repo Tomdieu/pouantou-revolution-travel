@@ -90,7 +90,7 @@ export const metadata: Metadata = {
     siteName: 'Revolution Travel & Services',
     images: [
       {
-        url: 'https://puantou-revolution-travel.vercel.app/og-image.jpg',
+        url: 'https://puantou-revolution-travel.vercel.app/logo-image.png',
         width: 1200,
         height: 630,
         alt: 'Revolution Travel & Services - Agence de Voyage Cameroun',
@@ -101,7 +101,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Revolution Travel & Services - Agence de Voyage Cameroun',
     description: 'Réservation de billets d\'avion depuis le Cameroun. Devis gratuit sous 1h.',
-    images: ['https://puantou-revolution-travel.vercel.app/twitter-image.jpg'],
+    images: ['https://puantou-revolution-travel.vercel.app/logo-image.png'],
   },
   verification: {
     google: 'oL_X940seqpUmflSfAjNxmf39DH707nkgHr__ALLx7c',

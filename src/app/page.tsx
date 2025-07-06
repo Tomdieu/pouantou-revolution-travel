@@ -577,7 +577,7 @@ export default function LandingPage() {
               </h1>
               
               <p className="text-lg sm:text-xl lg:text-2xl text-black mb-8 sm:mb-12 max-w-4xl leading-relaxed">
-                Spécialistes en recherche et réservation de billets d'avion. 
+                Spécialistes en <span className="font-semibold text-blue-600">réservation et vente de billets d'avion</span> - <span className="font-semibold text-purple-600">réservation hôtel</span>
                 <span className="block mt-2 text-blue-500 font-semibold">
                   Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 1h.
                 </span>
@@ -1281,11 +1281,11 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-black mb-4">Nos Services</h2>
             <p className="text-xl text-black max-w-2xl mx-auto">
-              Une gamme complète de services pour faire de votre voyage une expérience inoubliable
+              Une gamme complète de services pour faire de votre voyage une expérience inoubliable : billets d'avion, réservations d'hôtels et accompagnement personnalisé
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Service 1 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
@@ -1313,6 +1313,33 @@ export default function LandingPage() {
 
             {/* Service 2 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-4">Réservation Hôtel</h3>
+              <p className="text-black mb-6">
+                Trouvez et réservez les meilleurs hébergements selon votre budget et vos préférences partout dans le monde.
+              </p>
+              <ul className="text-black space-y-2">
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Hôtels de qualité
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Prix négociés
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Toutes catégories
+                </li>
+              </ul>
+            </div>
+
+            {/* Service 3 */}
+            <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-orange-500" />
               </div>
@@ -1336,7 +1363,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Service 3 */}
+            {/* Service 4 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle className="w-8 h-8 text-green-500" />
@@ -1641,6 +1668,7 @@ export default function LandingPage() {
               <ul className="space-y-3 text-white">
                 <li><a href="#quote-form" className="hover:text-blue-500 transition-colors">Demande de Devis</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Recherche de Billets</a></li>
+                <li><a href="#services" className="hover:text-blue-500 transition-colors">Réservation Hôtel</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Conseil Voyage</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Suivi de Demande</a></li>
               </ul>

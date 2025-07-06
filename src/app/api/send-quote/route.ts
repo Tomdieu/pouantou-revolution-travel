@@ -163,7 +163,7 @@ Veuillez effectuer une recherche manuelle pour ce client.`
 }
 
 Revolution Travel Services - Cameroun
-Merci de contacter le client sous 24h.`,
+Merci de contacter le client sous 1h.`,
         replyTo: email, // Client's email for easy reply
       });
 

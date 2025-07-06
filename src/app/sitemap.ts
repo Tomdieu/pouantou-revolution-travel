@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
  
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://puantou-revolution-travel.vercel.app/'
@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
+      images: [`${baseUrl}logo-image.png`],
     },
     {
       url: `${baseUrl}/#services`,

@@ -206,10 +206,10 @@ export default function LandingPage() {
       console.log('API response:', { status: response.status, result });
 
       if (response.ok && result.success) {
-        toast.success('Demande envoyée avec succès! Vous recevrez votre devis sous 24h.');
+        toast.success('Demande envoyée avec succès! Vous recevrez votre devis sous 1h.');
         setSubmitStatus({
           type: 'success',
-          message: 'Demande envoyée avec succès! Vous recevrez votre devis sous 24h.'
+          message: 'Demande envoyée avec succès! Vous recevrez votre devis sous 1h.'
         });
         // Reset form
         form.reset({
@@ -579,7 +579,7 @@ export default function LandingPage() {
               <p className="text-lg sm:text-xl lg:text-2xl text-black mb-8 sm:mb-12 max-w-4xl leading-relaxed">
                 Spécialistes en recherche et réservation de billets d'avion. 
                 <span className="block mt-2 text-blue-500 font-semibold">
-                  Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 24h.
+                  Soumettez votre demande de voyage et recevez les meilleurs tarifs personnalisés sous 1h.
                 </span>
               </p>
               
@@ -610,7 +610,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
                   <CheckCircle className="text-green-500 mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-black font-semibold text-sm sm:text-base">Réponse sous 24h</span>
+                  <span className="text-black font-semibold text-sm sm:text-base">Réponse sous 1h</span>
                 </div>
                 <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full px-4 sm:px-6 py-2 sm:py-3 shadow-lg">
                   <Award className="text-green-500 mr-2 w-4 h-4 sm:w-5 sm:h-5" />
@@ -663,7 +663,7 @@ export default function LandingPage() {
               Demande de Devis
             </h2>
             <p className="text-black">
-              Remplissez le formulaire et recevez votre devis personnalisé sous 24h.
+              Remplissez le formulaire et recevez votre devis personnalisé sous 1h.
             </p>
           </div>
 
@@ -1250,7 +1250,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold text-black mb-4">Vous Recevez le Devis</h3>
               <p className="text-black">
-                Nous vous contactons sous 24h avec les meilleures options et prix
+                Nous vous contactons sous 1h avec les meilleures options et prix
               </p>
             </div>
 
@@ -1306,7 +1306,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
-                  Devis sous 24h
+                  Devis sous 1h
                 </li>
               </ul>
             </div>
@@ -1659,15 +1659,15 @@ export default function LandingPage() {
             <div>
               <h4 className="text-lg font-semibold mb-6">Contact</h4>
               <div className="space-y-3 text-white">
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   <Phone className="size-4"/>
                   <a href="tel:677916832" className="hover:text-blue-500 transition-colors">6 77 91 68 32</a>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   <Mail className="size-4"/>
                   <a href="mailto:p.revolutiontravel@yahoo.com" className="hover:text-blue-500 transition-colors">p.revolutiontravel@yahoo.com</a>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-2">
                   <MapPin className="size-4"/>
                   <span>Cameroun</span>
                 </div>

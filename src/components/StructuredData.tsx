@@ -8,7 +8,7 @@ export function StructuredData() {
     "alternateName": "Revolution Travel",
     "url": "https://puantou-revolution-travel.vercel.app",
     "logo": "https://puantou-revolution-travel.vercel.app/logo.png",
-    // "image": "https://puantou-revolution-travel.vercel.app/og-image.jpg",
+    // "image": "https://puantou-revolution-travel.vercel.app/logo-image.png",
     "description": "Agence de voyage professionnelle basée au Cameroun, spécialisée dans la réservation de billets d'avion vers toutes les destinations internationales. Votre partenaire de confiance pour tous vos voyages.",
     "address": {
       "@type": "PostalAddress",

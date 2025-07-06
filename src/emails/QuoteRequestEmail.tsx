@@ -272,7 +272,7 @@ export default function QuoteRequestEmail({
           <Section style={actionSection}>
             <Heading style={actionTitle}>⏰ Action Requise</Heading>
             <Text style={actionText}>
-              Veuillez rechercher les meilleurs tarifs pour ce voyage et contacter le client sous 24h.
+              Veuillez rechercher les meilleurs tarifs pour ce voyage et contacter le client sous 1h.
             </Text>
 
             {/* Real-time Flight Prices Section */}

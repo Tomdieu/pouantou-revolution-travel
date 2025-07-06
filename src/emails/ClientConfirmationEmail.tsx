@@ -51,7 +51,7 @@ export default function ClientConfirmationEmail({
   return (
     <Html>
       <Head />
-      <Preview>Confirmation demande devis voyage - Revolution Travel Services Cameroun - Réponse sous 24h</Preview>
+      <Preview>Confirmation demande devis voyage - Revolution Travel Services Cameroun - Réponse sous 1h</Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header */}

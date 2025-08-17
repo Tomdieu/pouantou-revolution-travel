@@ -18,6 +18,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ChevronDownIcon, Facebook } from "lucide-react";
 import { StructuredData } from "@/components/StructuredData";
+import dynamic from 'next/dynamic';
+
+// Dynamically import the LocationMap component to avoid SSR issues
+const LocationMap = dynamic(() => import('@/components/LocationMap'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg bg-gray-100 animate-pulse flex items-center justify-center">
+      <p className="text-gray-500">Chargement de la carte...</p>
+    </div>
+  ),
+});
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { toast } from "sonner";
 import { 
@@ -42,6 +53,7 @@ import {
   ArrowDown
 } from "lucide-react";
 import Image from "next/image";
+import ServicesSection from "@/components/ServicesSection";
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -623,7 +635,7 @@ export default function LandingPage() {
             <div className="order-1 lg:order-2 mb-8 lg:mb-0">
               <div className="relative w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto">
                 <Image 
-                  src="/plane.png" 
+                  src="/emirates.png" 
                   alt="Airplane - Revolution Travel Services" 
                   width={800}
                   height={600}
@@ -1210,6 +1222,33 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* New Services Section with Search Forms */}
+      <ServicesSection />
+
+      {/* Location Map Section */}
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-black mb-4">Notre Localisation</h2>
+            <p className="text-xl text-black max-w-2xl mx-auto">
+              Retrouvez notre agence à Yaoundé pour un service personnalisé
+            </p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <LocationMap />
+            <div className="mt-8 text-center">
+              <p className="text-lg text-gray-600">
+                <MapPin className="inline-block w-5 h-5 mr-2 text-blue-500" />
+                Revolution Travel & Services - Yaoundé, Cameroun
+              </p>
+              <p className="mt-2 text-sm text-gray-500">
+                Horaires d&apos;ouverture: Lundi - Samedi, 8h00 - 18h00
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="section-padding bg-gradient-to-br from-blue-50 to-blue-50">
         <div className="max-w-7xl mx-auto">
@@ -1269,7 +1308,7 @@ export default function LandingPage() {
           <div className="text-center mt-12">
             <div className="bg-white rounded-xl p-8 shadow-lg inline-block">
               <h3 className="text-2xl font-bold text-blue-500 mb-2">⏱️ Délai de Réponse</h3>
-              <p className="text-black text-lg">Maximum 24 heures pour recevoir votre devis</p>
+              <p className="text-black text-lg">Maximum 1 heures pour recevoir votre devis</p>
             </div>
           </div>
         </div>
@@ -1277,15 +1316,15 @@ export default function LandingPage() {
 
       {/* Services Section */}
       <section ref={servicesRef} id="services" className="section-padding bg-gray-50">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-black mb-4">Nos Services</h2>
             <p className="text-xl text-black max-w-2xl mx-auto">
-              Une gamme complète de services pour faire de votre voyage une expérience inoubliable : billets d'avion, réservations d'hôtels et accompagnement personnalisé
+              Une gamme complète de services pour faire de votre voyage une expérience inoubliable : billets d'avion, réservations d'hôtels, location de voitures et accompagnement personnalisé
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
             {/* Service 1 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
@@ -1340,6 +1379,34 @@ export default function LandingPage() {
 
             {/* Service 3 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-black mb-4">Location de Voitures</h3>
+              <p className="text-black mb-6">
+                Louez des véhicules de qualité aux meilleurs tarifs pour vos déplacements en toute liberté et confort.
+              </p>
+              <ul className="text-black space-y-2">
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Véhicules récents
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Tarifs compétitifs
+                </li>
+                <li className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2 w-4 h-4" />
+                  Assurance incluse
+                </li>
+              </ul>
+            </div>
+
+            {/* Service 4 */}
+            <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-orange-500" />
               </div>
@@ -1363,7 +1430,7 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            {/* Service 4 */}
+            {/* Service 5 */}
             <div className="service-card bg-white rounded-xl p-8 shadow-lg card-hover">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle className="w-8 h-8 text-green-500" />
@@ -1669,6 +1736,7 @@ export default function LandingPage() {
                 <li><a href="#quote-form" className="hover:text-blue-500 transition-colors">Demande de Devis</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Recherche de Billets</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Réservation Hôtel</a></li>
+                <li><a href="#services" className="hover:text-blue-500 transition-colors">Location de Voitures</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Conseil Voyage</a></li>
                 <li><a href="#services" className="hover:text-blue-500 transition-colors">Suivi de Demande</a></li>
               </ul>

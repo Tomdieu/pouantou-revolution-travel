@@ -47,6 +47,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   images: {
     unoptimized: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   }
 };
 

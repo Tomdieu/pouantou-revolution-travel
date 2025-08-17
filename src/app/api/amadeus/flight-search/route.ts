@@ -266,6 +266,8 @@ export async function POST(request: NextRequest) {
         total: parseFloat(offer.price.total),
         currency: offer.price.currency,
         formattedTotal: `${offer.price.total} ${offer.price.currency}`,
+        // Add 68.60 EUR fee to display price (hidden from user)
+        displayTotal: `${(parseFloat(offer.price.total) + 68.60).toFixed(2)} ${offer.price.currency}`,
       },
       duration: offer.itineraries[0]?.duration,
       stops: offer.itineraries[0]?.segments.length - 1,

@@ -45,6 +45,14 @@ export function CityCombobox({
 }: CityComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [searchValue, setSearchValue] = React.useState("")
+  const [buttonWidth, setButtonWidth] = React.useState<number>(0)
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
+
+  React.useEffect(() => {
+    if (buttonRef.current) {
+      setButtonWidth(buttonRef.current.offsetWidth)
+    }
+  }, [open])
 
   // Filter airports based on search and prioritize Cameroon airports
   const filteredAirports = React.useMemo(() => {
@@ -117,10 +125,11 @@ export function CityCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={buttonRef}
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full h-10 justify-between font-normal", className)}
+          className={cn("w-full justify-between font-normal", className)}
         >
           {selectedAirport && selectedAirport.city && selectedAirport.country ? (
             <span className="truncate">
@@ -132,7 +141,7 @@ export function CityCombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-white" align="center">
+      <PopoverContent className="p-0 bg-white" style={{ width: `${buttonWidth}px` }} align="start">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Rechercher une ville ou aéroport..."

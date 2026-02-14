@@ -39,20 +39,29 @@ export function Combobox({
   className,
   options
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false)
+  const [buttonWidth, setButtonWidth] = React.useState<number>(0)
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
+
+  React.useEffect(() => {
+    if (buttonRef.current) {
+      setButtonWidth(buttonRef.current.offsetWidth)
+    }
+  }, [open])
 
   const selectedOption = React.useMemo(() => {
-    return options.find(option => option.value === value);
-  }, [options, value]);
+    return options.find(option => option.value === value)
+  }, [options, value])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          ref={buttonRef}
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full h-10 justify-between font-normal", className)}
+          className={cn("w-full justify-between font-normal", className)}
         >
           {selectedOption ? (
             <span className="truncate">{selectedOption.label}</span>
@@ -62,8 +71,8 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0 bg-white" align="center">
-        <Command shouldFilter={false}>
+      <PopoverContent className="p-0 bg-white" style={{ width: `${buttonWidth}px` }} align="start">
+        <Command shouldFilter={true}>
           <CommandInput placeholder="Rechercher..." />
           <CommandList>
             <CommandEmpty>Aucune option trouvée.</CommandEmpty>

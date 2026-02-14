@@ -7,6 +7,7 @@ const registerSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
     password: z.string().min(6),
+    phone: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -14,14 +15,23 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const validatedData = registerSchema.parse(body);
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { email: validatedData.email },
+        // Check if user already exists by email or phone
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: validatedData.email },
+                    { phone: validatedData.phone || undefined },
+                ],
+            },
         });
 
         if (existingUser) {
+            const isEmailConflict = existingUser.email === validatedData.email;
             return NextResponse.json(
-                { error: 'Un compte avec cet email existe déjà' },
+                {
+                    error: `Un compte avec cet ${isEmailConflict ? 'email' : 'numéro de téléphone'} existe déjà`,
+                    field: isEmailConflict ? 'email' : 'phone'
+                },
                 { status: 400 }
             );
         }
@@ -34,6 +44,7 @@ export async function POST(request: NextRequest) {
             data: {
                 name: validatedData.name,
                 email: validatedData.email,
+                phone: validatedData.phone,
                 password: hashedPassword,
                 role: 'USER', // Default role
             },
@@ -41,6 +52,7 @@ export async function POST(request: NextRequest) {
                 id: true,
                 name: true,
                 email: true,
+                phone: true,
                 role: true,
             },
         });

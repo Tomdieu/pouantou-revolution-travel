@@ -122,7 +122,7 @@ async function getAmadeusAccessToken(): Promise<string> {
   }
 
   const tokenUrl = 'https://test.api.amadeus.com/v1/security/oauth2/token';
-  
+
   const tokenResponse = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
@@ -142,7 +142,7 @@ async function getAmadeusAccessToken(): Promise<string> {
   }
 
   const tokenData: AmadeusTokenResponse = await tokenResponse.json();
-  
+
   // Cache the token (expires in seconds, so convert to milliseconds and subtract 5 minutes for safety)
   tokenCache = {
     token: tokenData.access_token,
@@ -155,13 +155,13 @@ async function getAmadeusAccessToken(): Promise<string> {
 export async function POST(request: NextRequest) {
   try {
     const searchParams: FlightSearchParams = await request.json();
-    
+
     // Validate required parameters
     if (!searchParams.originLocationCode || !searchParams.destinationLocationCode || !searchParams.departureDate || !searchParams.adults) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Paramètres requis manquants: ville de départ, destination, date de départ et nombre d\'adultes' 
+        {
+          success: false,
+          error: 'Paramètres requis manquants: ville de départ, destination, date de départ et nombre d\'adultes'
         },
         { status: 400 }
       );
@@ -188,27 +188,27 @@ export async function POST(request: NextRequest) {
     if (searchParams.returnDate) {
       queryParams.append('returnDate', searchParams.returnDate);
     }
-    
-    if (searchParams.children && searchParams.children > 0) {
+
+    if (typeof searchParams.children === 'number' && searchParams.children > 0) {
       queryParams.append('children', searchParams.children.toString());
     }
-    
-    if (searchParams.infants && searchParams.infants > 0) {
+
+    if (typeof searchParams.infants === 'number' && searchParams.infants > 0) {
       queryParams.append('infants', searchParams.infants.toString());
     }
-    
+
     if (searchParams.travelClass) {
       queryParams.append('travelClass', searchParams.travelClass);
     }
-    
+
     if (searchParams.nonStop) {
       queryParams.append('nonStop', 'true');
     }
-    
+
     if (searchParams.currencyCode) {
       queryParams.append('currencyCode', searchParams.currencyCode);
     }
-    
+
     if (searchParams.maxPrice) {
       queryParams.append('maxPrice', searchParams.maxPrice.toString());
     }
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     // Make request to Amadeus Flight Offers Search API
     const amadeusUrl = `https://test.api.amadeus.com/v2/shopping/flight-offers?${queryParams}`;
-    
+
     console.log('Amadeus API URL:', amadeusUrl);
 
     const amadeusResponse = await fetch(amadeusUrl, {
@@ -236,22 +236,22 @@ export async function POST(request: NextRequest) {
         statusText: amadeusResponse.statusText,
         error: errorText
       });
-      
+
       // Handle specific Amadeus errors
       if (amadeusResponse.status === 400) {
         return NextResponse.json(
-          { 
-            success: false, 
-            error: 'Paramètres de recherche invalides. Vérifiez les codes d\'aéroport et les dates.' 
+          {
+            success: false,
+            error: 'Paramètres de recherche invalides. Vérifiez les codes d\'aéroport et les dates.'
           },
           { status: 400 }
         );
       }
-      
+
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Erreur lors de la recherche de vols. Veuillez réessayer.' 
+        {
+          success: false,
+          error: 'Erreur lors de la recherche de vols. Veuillez réessayer.'
         },
         { status: 500 }
       );
@@ -323,21 +323,21 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in Amadeus flight search:', error);
-    
+
     if (error instanceof Error) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Erreur de recherche: ${error.message}` 
+        {
+          success: false,
+          error: `Erreur de recherche: ${error.message}`
         },
         { status: 500 }
       );
     }
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Erreur interne du serveur lors de la recherche de vols' 
+      {
+        success: false,
+        error: 'Erreur interne du serveur lors de la recherche de vols'
       },
       { status: 500 }
     );

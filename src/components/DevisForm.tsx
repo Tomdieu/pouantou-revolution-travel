@@ -15,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ChevronDownIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { InputPhone } from "@/components/ui/input-phone";
 
 // Zod schema for form validation - Updated to match Amadeus API
 const formSchema = z.object({
@@ -96,13 +98,15 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
     setIsHydrated(true);
   }, []);
 
+  const { data: session } = useSession();
+
   // Form setup with react-hook-form and zod - Updated for Amadeus API
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
-      phone: "",
-      email: "",
+      fullName: session?.user?.name || "",
+      phone: session?.user?.phone || "",
+      email: session?.user?.email || "",
       departureCity: "",
       destination: "",
       adults: 1,
@@ -114,6 +118,21 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
       additionalInfo: ""
     },
   });
+
+  // Pre-populate form when session data becomes available
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.name) {
+        form.setValue('fullName', session.user.name);
+      }
+      if (session.user.email) {
+        form.setValue('email', session.user.email);
+      }
+      if (session.user.phone) {
+        form.setValue('phone', session.user.phone);
+      }
+    }
+  }, [session, form]);
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -241,7 +260,7 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
       </div>
 
       {/* Form Container */}
-      <div className="glass-premium rounded-3xl p-6 sm:p-10 border border-white/40 shadow-2xl relative overflow-hidden group">
+      <div className="bg-white rounded-xl p-6 sm:p-10 border border-stone-200 shadow-md relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
           <span className="text-8xl">{steps[step - 1].icon}</span>
         </div>
@@ -622,8 +641,8 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                         <FormItem>
                           <FormLabel className="text-sm font-bold text-gray-700">Téléphone <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
-                            <Input
-                              type="tel"
+                            <InputPhone
+                              defaultCountry='CM'
                               placeholder="+237 ..."
                               className="h-12 border-gray-200 rounded-xl bg-white/50 focus:ring-blue-500 transition-all font-semibold"
                               {...field}

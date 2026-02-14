@@ -13,6 +13,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
+import { forgotPassword } from '@/actions/auth-actions';
+
 const forgotPasswordSchema = z.object({
     email: z.string().email('Email invalide'),
 });
@@ -33,11 +35,17 @@ export default function ForgotPasswordPage() {
     const onSubmit = async (data: ForgotPasswordFormData) => {
         setIsLoading(true);
         try {
-            // TODO: Implement password reset logic
-            // For now, just show a success message
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            setIsSubmitted(true);
-            toast.success('Instructions envoyées par email');
+            const formData = new FormData();
+            formData.append('email', data.email);
+
+            const result = await forgotPassword(formData);
+
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                setIsSubmitted(true);
+                toast.success('Instructions envoyées par email');
+            }
         } catch (error) {
             toast.error('Une erreur est survenue');
         } finally {

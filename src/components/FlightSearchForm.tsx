@@ -36,7 +36,6 @@ const flightSearchSchema = z.object({
   nonStop: z.boolean().optional(),
   email: z.string().email("Email invalide").optional().or(z.literal("")),
   phone: z.string().optional(),
-  sendToTeam: z.boolean().optional(),
 }).refine((data) => data.email || data.phone, {
   message: "Email ou téléphone requis",
   path: ["email"],
@@ -115,7 +114,6 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
       nonStop: false,
       email: session?.user?.email || '',
       phone: session?.user?.phone || '',
-      sendToTeam: false,
     },
   });
 
@@ -283,6 +281,18 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
             contactName: searchData.email?.split('@')[0] || 'User',
             contactEmail: searchData.email || '',
             contactPhone: searchData.phone || '',
+          }),
+        });
+
+        // Always send email to agent as well
+        await fetch('/api/flight-search-request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...searchData,
+            selectedFlight: offer,
           }),
         });
 
@@ -672,29 +682,6 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                         />
                       </div>
 
-                      <FormField
-                        control={form.control}
-                        name="sendToTeam"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-4 space-y-0 rounded-2xl border-2 border-dashed border-blue-100 bg-blue-50/30 p-5 transition-all hover:border-blue-200 hover:bg-blue-50/50">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="w-6 h-6 rounded-lg border-2 border-blue-200 mt-1 data-[state=checked]:bg-blue-600"
-                              />
-                            </FormControl>
-                            <div className="space-y-1">
-                              <FormLabel className="text-base font-bold text-blue-900 cursor-pointer">
-                                Envoyer ma demande à un agent
-                              </FormLabel>
-                              <p className="text-sm text-blue-700/70 font-medium">
-                                Notre équipe trouvera pour vous les meilleures options et tarifs négociés.
-                              </p>
-                            </div>
-                          </FormItem>
-                        )}
-                      />
                     </div>
                   )}
 

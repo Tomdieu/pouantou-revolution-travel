@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/next"
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Revolution Travel & Services - Agence de Voyage Cameroun | Billets d'Avion",
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   },
   keywords: [
     "agence voyage cameroun",
-    "billet avion cameroun", 
+    "billet avion cameroun",
     "voyage douala yaoundé",
     "réservation vol international",
     "devis voyage gratuit",
@@ -132,7 +133,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-tap-highlight" content="no" />
         <meta name="theme-color" content="#3b82f6" />
-        
+
         {/* Developer & SEO Meta Tags */}
         <meta name="developer" content="TOMDIEU TCHADIEUKO IVAN GOTTFRIED" />
         <meta name="author" content="Tomdieu Ivan, Revolution Travel Services" />
@@ -140,7 +141,7 @@ export default function RootLayout({
         <meta name="programmer" content="TOMDIEU TCHADIEUKO IVAN GOTTFRIED" />
         <meta name="web-developer" content="Ivan Tomdieu" />
         <meta name="creator" content="Tomdieu Tchadieuko Ivan Gottfried" />
-        
+
         {/* Additional SEO */}
         <meta name="rating" content="general" />
         <meta name="distribution" content="global" />
@@ -149,19 +150,19 @@ export default function RootLayout({
         <meta name="geo.region" content="CM" />
         <meta name="geo.country" content="Cameroon" />
         <meta name="geo.placename" content="Douala, Yaoundé" />
-        
+
         {/* Viewport for PWA */}
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
         />
-        
+
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/logo-image.png" />
         <link rel="apple-touch-icon" sizes="152x152" href="/logo-image.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/logo-image.png" />
         <link rel="apple-touch-icon" sizes="167x167" href="/logo-image.png" />
-        
+
         {/* Splash Screens */}
         <link
           rel="apple-touch-startup-image"
@@ -178,12 +179,14 @@ export default function RootLayout({
           href="/logo-image.png"
           media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
         />
-        
+
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="antialiased" suppressHydrationWarning={true}>
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
         <Analytics />
         <Toaster />
       </body>

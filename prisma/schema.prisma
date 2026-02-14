@@ -1,0 +1,148 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums for the booking system
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BookingType {
+  FLIGHT
+  HOTEL
+  CAR_RENTAL
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?   @map("email_verified")
+  image         String?
+  password      String?
+  role          UserRole    @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  searchLogs    SearchLog[]
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Booking {
+  id     String        @id @default(cuid())
+  userId String        @map("user_id")
+  type   BookingType
+  status BookingStatus @default(PENDING)
+
+  // Search details stored as JSON string
+  searchDetails String @map("search_details")
+
+  // Pricing information
+  price    Float?
+  currency String? @default("EUR")
+
+  // Contact information
+  contactName  String @map("contact_name")
+  contactEmail String @map("contact_email")
+  contactPhone String @map("contact_phone")
+
+  // Additional notes
+  notes String?
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+}
+
+model Destination {
+  id          String   @id @default(cuid())
+  name        String // e.g., "Paris"
+  country     String // e.g., "France"
+  description String // e.g., "Ville lumière et romance"
+  price       Float // Starting price in FCFA
+  currency    String   @default("FCFA")
+  imageUrl    String? // URL to destination image
+  emoji       String? // Emoji icon (fallback if no image)
+  badge       String? // e.g., "Plus Populaire", "Best Seller"
+  isPopular   Boolean  @default(false) // Show on homepage
+  isActive    Boolean  @default(true) // Enable/disable
+  order       Int      @default(0) // Display order
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("destinations")
+}
+
+model SearchLog {
+  id            String      @id @default(cuid())
+  userId        String?     @map("user_id")
+  type          BookingType
+  searchDetails String      @map("search_details") // JSON string
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("search_logs")
+}

@@ -39,7 +39,7 @@ const destinationSchema = z.object({
     order: z.coerce.number().int().default(0),
 });
 
-type DestinationFormData = z.infer<typeof destinationSchema>;
+type DestinationFormData = z.input<typeof destinationSchema>;
 
 interface DestinationFormProps {
     initialData?: Partial<DestinationFormData> & { id?: string };

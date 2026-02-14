@@ -77,8 +77,7 @@ export async function POST(request: NextRequest) {
     // Send email using the email service
     try {
       await sendEmail({
-        to: ['ivan.tomdieu@gmail.com'],
-        // to: ['ivan.tomdieu@gmail.com', 'p.revolutiontravel@yahoo.com', 'tsilieuj@gmail.com'],
+        to: ['ivan.tomdieu@gmail.com', 'p.revolutiontravel@yahoo.com', 'tsilieuj@gmail.com'],
 
         subject: `🚗 Nouvelle demande de location - ${carRentalData.brand} ${carRentalData.model}`,
         html: emailHtml,

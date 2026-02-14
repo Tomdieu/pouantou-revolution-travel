@@ -47,8 +47,8 @@ export default function ForgotPasswordPage() {
 
     return (
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
-            <div className="w-full max-w-[440px] animate-fade-in-up">
-                <div className="glass-premium rounded-[2.5rem] p-8 md:p-10 border border-white/40 shadow-2xl relative overflow-hidden group">
+            <div className="w-full max-w-xl animate-fade-in-up">
+                <div className="p-8 md:p-10 border rounded-md relative overflow-hidden group">
                     {/* Decorative Background Icon */}
                     <div className="absolute top-[-20px] right-[-20px] p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700 pointer-events-none rotate-[25deg]">
                         <Mail className="w-40 h-40" />
@@ -152,12 +152,6 @@ export default function ForgotPasswordPage() {
                     </div>
                 </div>
 
-                {/* Footer simple for Auth */}
-                <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-                        &copy; {new Date().getFullYear()} Pouantou Revolution Travel
-                    </p>
-                </div>
             </div>
         </div>
     );

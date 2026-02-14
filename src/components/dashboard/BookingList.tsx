@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plane } from "lucide-react";
+import { Plane, Building2, Car, Clock, CheckCircle2, XCircle, PartyPopper, Filter, Inbox } from "lucide-react";
 import { BookingCard } from './BookingCard';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BookingType, BookingStatus } from '@prisma/client';
 
 interface Booking {
@@ -26,6 +25,21 @@ interface BookingListProps {
     bookings: Booking[];
 }
 
+const typeConfig = {
+    ALL: { label: 'Tous', icon: Filter },
+    FLIGHT: { label: 'Vols', icon: Plane },
+    HOTEL: { label: 'Hôtels', icon: Building2 },
+    CAR_RENTAL: { label: 'Voitures', icon: Car },
+};
+
+const statusConfig = {
+    ALL: { label: 'Tous', color: 'bg-stone-100 text-stone-700' },
+    PENDING: { label: 'En attente', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+    CONFIRMED: { label: 'Confirmée', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+    CANCELLED: { label: 'Annulée', color: 'bg-red-50 text-red-700 border-red-200' },
+    COMPLETED: { label: 'Terminée', color: 'bg-green-50 text-green-700 border-green-200' },
+};
+
 export function BookingList({ bookings }: BookingListProps) {
     const [filterType, setFilterType] = useState<string>('ALL');
     const [filterStatus, setFilterStatus] = useState<string>('ALL');
@@ -38,73 +52,111 @@ export function BookingList({ bookings }: BookingListProps) {
 
     if (bookings.length === 0) {
         return (
-            <div className="p-16 text-center animate-fade-in-up">
-                <div className="w-20 h-20 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <Plane className="w-10 h-10 text-blue-600 opacity-50" />
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center mb-6 border border-blue-100">
+                    <Inbox className="w-8 h-8 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2 tracking-tight">Aucune réservation trouvée</h3>
-                <p className="text-gray-500 font-medium mb-8 max-w-sm mx-auto">Vous n'avez pas encore de demandes en cours. Commencez votre voyage dès aujourd'hui !</p>
-                <Button className="rounded-xl h-12 px-8 font-bold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20" asChild>
-                    <a href="#services-hub">Faire ma première demande</a>
-                </Button>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Aucune réservation
+                </h3>
+                <p className="text-sm text-gray-600 max-w-sm leading-relaxed">
+                    Vous n'avez pas encore de demandes en cours. Commencez votre voyage dès aujourd'hui.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col">
-            {/* Filter Hub */}
-            <div className="p-8 border-b border-gray-100 bg-gray-50/30 backdrop-blur-sm">
-                <div className="flex flex-col lg:flex-row lg:items-end gap-6">
-                    <div className="flex-1 space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Filtrer par Type</label>
-                        <Select value={filterType} onValueChange={setFilterType}>
-                            <SelectTrigger className="h-12 rounded-2xl border-2 border-white bg-white/50 backdrop-blur-sm shadow-sm hover:border-blue-200 transition-all font-bold text-gray-700">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-white/50 backdrop-blur-xl">
-                                <SelectItem value="ALL" className="font-bold">Tous les types</SelectItem>
-                                <SelectItem value="FLIGHT" className="font-bold">✈️ Vols Internationaux</SelectItem>
-                                <SelectItem value="HOTEL" className="font-bold">🏨 Hôtels & Séjours</SelectItem>
-                                <SelectItem value="CAR_RENTAL" className="font-bold">🚗 Location de voiture</SelectItem>
-                            </SelectContent>
-                        </Select>
+        <div className="space-y-6">
+            {/* Filters */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5">
+                {/* Type Filter */}
+                <div>
+                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-3">
+                        Type de réservation
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                        {Object.entries(typeConfig).map(([key, config]) => {
+                            const Icon = config.icon;
+                            const isActive = filterType === key;
+                            return (
+                                <Button
+                                    key={key}
+                                    variant={isActive ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setFilterType(key)}
+                                    className={`h-9 gap-2 text-xs font-medium transition-all ${
+                                        isActive
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    <Icon className="w-4 h-4" />
+                                    {config.label}
+                                </Button>
+                            );
+                        })}
                     </div>
+                </div>
 
-                    <div className="flex-1 space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Filtrer par Statut</label>
-                        <Select value={filterStatus} onValueChange={setFilterStatus}>
-                            <SelectTrigger className="h-12 rounded-2xl border-2 border-white bg-white/50 backdrop-blur-sm shadow-sm hover:border-blue-200 transition-all font-bold text-gray-700">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-white/50 backdrop-blur-xl">
-                                <SelectItem value="ALL" className="font-bold">Tous les statuts</SelectItem>
-                                <SelectItem value="PENDING" className="font-bold">⏳ En attente</SelectItem>
-                                <SelectItem value="CONFIRMED" className="font-bold">✓ Confirmée</SelectItem>
-                                <SelectItem value="CANCELLED" className="font-bold">✗ Annulée</SelectItem>
-                                <SelectItem value="COMPLETED" className="font-bold">🎉 Terminée</SelectItem>
-                            </SelectContent>
-                        </Select>
+                {/* Status Filter */}
+                <div>
+                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-3">
+                        Statut
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                        {Object.entries(statusConfig).map(([key, config]) => {
+                            const isActive = filterStatus === key;
+                            return (
+                                <Button
+                                    key={key}
+                                    variant={isActive ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setFilterStatus(key)}
+                                    className={`h-9 text-xs font-medium transition-all ${
+                                        isActive
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    {config.label}
+                                </Button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* List Engine */}
-            <div className="p-6 sm:p-8">
-                {filteredBookings.length === 0 ? (
-                    <div className="text-center py-20 opacity-50">
-                        <p className="text-gray-900 font-bold uppercase tracking-widest text-xs">Aucun résultat correspondant</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-6">
-                        {filteredBookings.map((booking, idx) => (
-                            <div key={booking.id} className="animate-fade-in-up" style={{ animationDelay: `${idx * 0.05}s` }}>
-                                <BookingCard booking={booking} />
-                            </div>
-                        ))}
-                    </div>
+            {/* Results Count */}
+            <div className="flex items-center justify-between">
+                <div className="text-sm px-4">
+                    <span className="font-semibold text-gray-900">{filteredBookings.length}</span>
+                    <span className="text-gray-600 ml-1">réservation{filteredBookings.length > 1 ? 's' : ''}</span>
+                </div>
+                {(filterType !== 'ALL' || filterStatus !== 'ALL') && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setFilterType('ALL'); setFilterStatus('ALL'); }}
+                        className="text-xs text-gray-500 hover:text-gray-900 h-8"
+                    >
+                        Réinitialiser les filtres
+                    </Button>
                 )}
             </div>
+
+            {/* List */}
+            {filteredBookings.length === 0 ? (
+                <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                    <p className="text-sm text-gray-500">Aucun résultat correspondant à vos critères</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {filteredBookings.map((booking) => (
+                        <BookingCard key={booking.id} booking={booking} />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

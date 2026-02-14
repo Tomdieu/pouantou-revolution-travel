@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -89,6 +90,7 @@ interface FlightSearchFormProps {
 }
 
 export default function FlightSearchForm({ userId }: FlightSearchFormProps = {}) {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<FlightOffer[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -111,11 +113,23 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
       infants: 0,
       travelClass: 'ECONOMY',
       nonStop: false,
-      email: '',
-      phone: '',
+      email: session?.user?.email || '',
+      phone: session?.user?.phone || '',
       sendToTeam: false,
     },
   });
+
+  // Pre-populate form when session data becomes available
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.email) {
+        form.setValue('email', session.user.email);
+      }
+      if (session.user.phone) {
+        form.setValue('phone', session.user.phone);
+      }
+    }
+  }, [session, form]);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof FlightSearchFormData)[] = [];
@@ -539,7 +553,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                       </div>
 
                       {/* Passengers (Small summary here or in step 3? Let's move them to Step 2) */}
-                      <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100/50">
+                      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100/50">
                         <p className="text-sm font-bold text-blue-900 mb-4 ml-1">Passagers</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <FormField
@@ -554,7 +568,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                                       <SelectValue />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className='bg-white rounded-md shadow-2xl border-gray-100'>
+                                  <SelectContent className='bg-white rounded-md shadow-lg border-gray-100'>
                                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                       <SelectItem className='hover:bg-blue-50 transition-colors' key={num} value={num.toString()}>{num}</SelectItem>
                                     ))}
@@ -577,7 +591,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                                       <SelectValue />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className='bg-white rounded-md shadow-2xl border-gray-100'>
+                                  <SelectContent className='bg-white rounded-md shadow-lg border-gray-100'>
                                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                       <SelectItem className='hover:bg-blue-50 transition-colors' key={num} value={num.toString()}>{num}</SelectItem>
                                     ))}
@@ -600,7 +614,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                                       <SelectValue />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className='bg-white rounded-md shadow-2xl border-gray-100'>
+                                  <SelectContent className='bg-white rounded-md shadow-lg border-gray-100'>
                                     {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                                       <SelectItem className='hover:bg-blue-50 transition-colors' key={num} value={num.toString()}>{num}</SelectItem>
                                     ))}

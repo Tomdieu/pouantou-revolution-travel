@@ -63,6 +63,7 @@ model User {
   name          String?
   email         String?     @unique
   emailVerified DateTime?   @map("email_verified")
+  phone         String?     @unique
   image         String?
   password      String?
   role          UserRole    @default(USER)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -10,7 +11,11 @@ import { InputPhone } from '@/components/ui/input-phone';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Search, Building } from 'lucide-react';
+import { Loader2, Search, Building, CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { CityCombobox } from './ui/city-combobox';
 import { Combobox } from './ui/combobox';
 import citiesData from '@/constants/cities.json';
@@ -53,8 +58,12 @@ const hotelSearchSchema = z.object({
   city: z.string().min(1, "Ville requise"),
   phone: z.string().min(1, "Numéro de téléphone requis"),
   budget: z.number().min(1, "Budget requis").max(10000, "Budget maximum 10,000"),
-  checkInDate: z.string().optional(),
-  checkOutDate: z.string().optional(),
+  checkInDate: z.date({
+    required_error: "Date d'arrivée requise",
+  }),
+  checkOutDate: z.date({
+    required_error: "Date de départ requise",
+  }),
   adults: z.number().min(1, "Au moins 1 adulte requis").max(8, "Maximum 8 adultes").optional(),
   radius: z.number().min(1).max(300, "Rayon maximum 300km").optional(),
 });
@@ -81,12 +90,19 @@ interface Hotel {
   };
 }
 
-export default function HotelSearchForm() {
+interface HotelSearchFormProps {
+  userId?: string;
+}
+
+export default function HotelSearchForm({ userId }: HotelSearchFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [results, setResults] = useState<Hotel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const [isCheckInOpen, setIsCheckInOpen] = useState(false);
+  const [isCheckOutOpen, setIsCheckOutOpen] = useState(false);
   const [step, setStep] = useState(1);
 
   const form = useForm<HotelSearchFormData>({
@@ -96,8 +112,8 @@ export default function HotelSearchForm() {
       city: '',
       phone: '',
       budget: 0,
-      checkInDate: '',
-      checkOutDate: '',
+      checkInDate: undefined,
+      checkOutDate: undefined,
       adults: 2,
       radius: 50,
     },
@@ -141,15 +157,54 @@ export default function HotelSearchForm() {
     setError(null);
     setResults([]);
 
-    // Analytics logging
+    // 1. Analytics logging
     fetch('/api/search-logs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'HOTEL',
-        searchDetails: data
+        searchDetails: {
+          ...data,
+          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
+        }
       }),
     }).catch(err => console.error('Failed to log hotel search:', err));
+
+    // 2. Create booking in DB early if userId is provided
+    // This ensures the demand is saved even if search fails
+    if (userId) {
+      try {
+        const bookingResponse = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId,
+            type: 'HOTEL',
+            searchDetails: {
+              ...data,
+              checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+              checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
+            },
+            price: data.budget,
+            currency: 'EUR',
+            contactName: 'User',
+            contactEmail: '',
+            contactPhone: data.phone,
+          }),
+        });
+
+        if (bookingResponse.ok) {
+          console.log('Hotel search demand saved to bookings for user:', userId);
+        } else {
+          console.error('Failed to save hotel demand to bookings');
+        }
+      } catch (err) {
+        console.error('Error creating booking record:', err);
+      }
+    }
 
     try {
       // Find the selected city
@@ -159,6 +214,7 @@ export default function HotelSearchForm() {
 
       if (!selectedCity) {
         setError('Ville sélectionnée non trouvée');
+        setIsSubmitted(true);
         return;
       }
 
@@ -175,6 +231,8 @@ export default function HotelSearchForm() {
           },
           body: JSON.stringify({
             ...data,
+            checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+            checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
             searchError: 'Code IATA non trouvé pour cette ville. Recherche manuelle requise.',
           }),
         });
@@ -192,8 +250,8 @@ export default function HotelSearchForm() {
         body: JSON.stringify({
           cityCode: cityIataCode,
           budget: data.budget,
-          checkInDate: data.checkInDate,
-          checkOutDate: data.checkOutDate,
+          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
           adults: data.adults,
           radius: data.radius,
         }),
@@ -209,6 +267,8 @@ export default function HotelSearchForm() {
         },
         body: JSON.stringify({
           ...data,
+          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
           foundHotels: searchData.success ? searchData.data.hotels : undefined,
           searchError: !searchData.success ? (searchData.error || 'Aucun hôtel trouvé') : undefined,
         }),
@@ -230,6 +290,8 @@ export default function HotelSearchForm() {
         },
         body: JSON.stringify({
           ...data,
+          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
           searchError: err instanceof Error ? err.message : 'Erreur de recherche d\'hôtels',
         }),
       });
@@ -252,7 +314,7 @@ export default function HotelSearchForm() {
       {!isSubmitted && (
         <div className="max-w-4xl mx-auto w-full">
           {/* Step Indicator */}
-          <div className="mb-10 relative">
+          <div className="mb-10 px-4 relative">
             <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-100 z-0" />
             <div
               className="absolute top-5 left-0 h-0.5 bg-indigo-600 z-0 transition-all duration-500"
@@ -278,7 +340,7 @@ export default function HotelSearchForm() {
             </div>
           </div>
 
-          <div className="glass-premium rounded-3xl p-8 sm:p-10 border border-white/40 shadow-2xl relative overflow-hidden group">
+          <div className="p-8 sm:p-10 relative overflow-hidden group">
             {/* Decorative Icon Background */}
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
               {steps[step - 1].icon}
@@ -306,7 +368,7 @@ export default function HotelSearchForm() {
                                     setSelectedCountry(value);
                                     form.setValue('city', '');
                                   }}
-                                  placeholder="Sélectionnez un pays"
+                                  placeholder="Rechercher un pays..."
                                   options={countries.map(country => ({ value: country.name, label: country.name }))}
                                   className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
                                 />
@@ -322,24 +384,21 @@ export default function HotelSearchForm() {
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
                               <FormLabel className="text-sm font-bold text-gray-700 ml-1">Ville *</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                disabled={!selectedCountry}
-                              >
-                                <FormControl>
-                                  <SelectTrigger className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all">
-                                    <SelectValue placeholder={selectedCountry ? "Sélectionnez une ville" : "Sélectionnez d'abord un pays"} />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent className="bg-white rounded-xl shadow-2xl border-gray-100">
-                                  {availableCities.map((city) => (
-                                    <SelectItem key={`${city.country}-${city.city}`} value={city.city} className="hover:bg-indigo-50 transition-colors">
-                                      {city.city}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormControl>
+                                <Combobox
+                                  value={field.value}
+                                  onValueChange={field.onChange}
+                                  placeholder={selectedCountry ? "Rechercher une ville..." : "Sélectionnez d'abord un pays"}
+                                  options={availableCities.map(city => ({
+                                    value: city.city,
+                                    label: city.city
+                                  }))}
+                                  className={cn(
+                                    "h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all",
+                                    !selectedCountry && "opacity-50 cursor-not-allowed"
+                                  )}
+                                />
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -356,15 +415,42 @@ export default function HotelSearchForm() {
                           control={form.control}
                           name="checkInDate"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date d'arrivée</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  {...field}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
-                                />
-                              </FormControl>
+                              <Popover open={isCheckInOpen} onOpenChange={setIsCheckInOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 rounded-xl transition-all",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "PPP", { locale: fr })
+                                      ) : (
+                                        <span>Choisir une date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setIsCheckInOpen(false);
+                                    }}
+                                    disabled={(date) =>
+                                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                                    }
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -374,15 +460,45 @@ export default function HotelSearchForm() {
                           control={form.control}
                           name="checkOutDate"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de départ</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  {...field}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
-                                />
-                              </FormControl>
+                              <Popover open={isCheckOutOpen} onOpenChange={setIsCheckOutOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 rounded-xl transition-all",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "PPP", { locale: fr })
+                                      ) : (
+                                        <span>Choisir une date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setIsCheckOutOpen(false);
+                                    }}
+                                    disabled={(date) => {
+                                      const checkInDate = form.getValues('checkInDate');
+                                      const today = new Date(new Date().setHours(0, 0, 0, 0));
+                                      const minDate = checkInDate || today;
+                                      return date < minDate;
+                                    }}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}

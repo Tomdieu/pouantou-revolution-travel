@@ -9,7 +9,13 @@ export async function POST(request: NextRequest) {
 
     // Render email template
     const emailHtml = await render(FlightSearchRequestEmail({
-      ...searchData,
+      searchData,
+      selectedOffer: searchData.selectedFlight,
+      contactInfo: {
+        email: searchData.email,
+        phone: searchData.phone
+      },
+      searchError: searchData.searchError
     }));
 
     // Prepare plain text version

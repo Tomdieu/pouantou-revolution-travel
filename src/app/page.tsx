@@ -62,6 +62,7 @@ import StatsSection from "@/components/homepage/StatsSection";
 import TestimonialsSection from "@/components/homepage/TestimonialsSection";
 import DevisForm from "@/components/DevisForm";
 import ServicesSection from "@/components/ServicesSection";
+import { ReviewsSection } from "@/components/homepage/ReviewsSection";
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
 
@@ -321,7 +322,7 @@ export default function LandingPage() {
 
       <DestinationsSection />
 
-      <TestimonialsSection />
+      <ReviewsSection />
 
       {/* Final CTA Section */}
       <section className="py-24 bg-blue-600 relative overflow-hidden">

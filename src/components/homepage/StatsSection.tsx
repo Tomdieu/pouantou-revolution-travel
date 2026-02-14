@@ -6,7 +6,7 @@ import { Users, Globe, Award, Headphones } from 'lucide-react';
 const stats = [
     {
         icon: <Users className="w-8 h-8" />,
-        value: "10,000+",
+        value: "1,000+",
         label: "Clients Satisfaits",
         desc: "Voyageurs heureux"
     },

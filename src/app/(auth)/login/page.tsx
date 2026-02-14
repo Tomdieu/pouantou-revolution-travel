@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Mail, Lock, Plane } from 'lucide-react';
+import { Loader2, Mail, Lock, Plane, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -26,6 +26,7 @@ export default function LoginPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -178,10 +179,21 @@ export default function LoginPage() {
                                                         </div>
                                                         <Input
                                                             {...field}
-                                                            type="password"
+                                                            type={showPassword ? "text" : "password"}
                                                             placeholder="••••••••"
-                                                            className="pl-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
+                                                            className="pl-12 pr-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
                                                         />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowPassword(!showPassword)}
+                                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors z-10"
+                                                        >
+                                                            {showPassword ? (
+                                                                <EyeOff className="h-5 w-5" />
+                                                            ) : (
+                                                                <Eye className="h-5 w-5" />
+                                                            )}
+                                                        </button>
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />

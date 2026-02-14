@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -95,6 +96,7 @@ interface HotelSearchFormProps {
 }
 
 export default function HotelSearchForm({ userId }: HotelSearchFormProps = {}) {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [results, setResults] = useState<Hotel[]>([]);
@@ -110,7 +112,7 @@ export default function HotelSearchForm({ userId }: HotelSearchFormProps = {}) {
     defaultValues: {
       country: '',
       city: '',
-      phone: '',
+      phone: session?.user?.phone || '',
       budget: 0,
       checkInDate: undefined,
       checkOutDate: undefined,
@@ -118,6 +120,13 @@ export default function HotelSearchForm({ userId }: HotelSearchFormProps = {}) {
       radius: 50,
     },
   });
+
+  // Pre-populate form when session data becomes available
+  useEffect(() => {
+    if (session?.user?.phone) {
+      form.setValue('phone', session.user.phone);
+    }
+  }, [session, form]);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof HotelSearchFormData)[] = [];

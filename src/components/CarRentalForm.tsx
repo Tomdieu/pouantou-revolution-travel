@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -41,6 +42,7 @@ interface CarRentalFormProps {
 }
 
 export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,13 +64,20 @@ export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
       brand: '',
       model: '',
       budgetPerDay: 0,
-      phone: '',
+      phone: session?.user?.phone || '',
       location: '',
       startDate: undefined,
       endDate: undefined,
       driverAge: 25,
     },
   });
+
+  // Pre-populate form when session data becomes available
+  useEffect(() => {
+    if (session?.user?.phone) {
+      form.setValue('phone', session.user.phone);
+    }
+  }, [session, form]);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof CarRentalFormData)[] = [];

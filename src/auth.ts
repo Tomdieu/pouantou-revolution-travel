@@ -17,6 +17,7 @@ async function getUser(email: string) {
                 password: true,
                 role: true,
                 image: true,
+                phone: true,
             },
         });
         return user;
@@ -68,17 +69,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         async session({ session, token }) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
-                // Add role to session
+                // Add role and phone to session
                 if (token.role) {
                     session.user.role = token.role as "USER" | "ADMIN";
+                }
+                if (token.phone) {
+                    session.user.phone = token.phone as string;
                 }
             }
             return session;
         },
         async jwt({ token, user }) {
-            // Add role to token on sign in
+            // Add role and phone to token on sign in
             if (user) {
                 token.role = user.role;
+                token.phone = user.phone;
             }
             return token;
         },

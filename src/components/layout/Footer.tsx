@@ -29,12 +29,9 @@ export default function Footer() {
                     <div>
                         <h4 className="text-lg font-semibold mb-6">Services</h4>
                         <ul className="space-y-3 text-white">
-                            <li><Link href="/#quote-form" className="hover:text-blue-500 transition-colors">Demande de Devis</Link></li>
                             <li><Link href="/#services" className="hover:text-blue-500 transition-colors">Recherche de Billets</Link></li>
                             <li><Link href="/#services" className="hover:text-blue-500 transition-colors">Réservation Hôtel</Link></li>
                             <li><Link href="/#services" className="hover:text-blue-500 transition-colors">Location de Voitures</Link></li>
-                            <li><Link href="/#services" className="hover:text-blue-500 transition-colors">Conseil Voyage</Link></li>
-                            <li><Link href="/#services" className="hover:text-blue-500 transition-colors">Suivi de Demande</Link></li>
                         </ul>
                     </div>
 

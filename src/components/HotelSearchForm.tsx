@@ -6,13 +6,16 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { InputPhone} from '@/components/ui/input-phone';
+import { InputPhone } from '@/components/ui/input-phone';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Search, Building } from 'lucide-react';
+import { CityCombobox } from './ui/city-combobox';
+import { Combobox } from './ui/combobox';
 import citiesData from '@/constants/cities.json';
 import iataCodesData from '@/constants/IATA_Codes_CityNames.json';
+import { toast } from 'sonner';
 
 // Type for city data
 interface CityData {
@@ -84,6 +87,7 @@ export default function HotelSearchForm() {
   const [results, setResults] = useState<Hotel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [step, setStep] = useState(1);
 
   const form = useForm<HotelSearchFormData>({
     resolver: zodResolver(hotelSearchSchema),
@@ -99,6 +103,26 @@ export default function HotelSearchForm() {
     },
   });
 
+  const nextStep = async () => {
+    let fieldsToValidate: (keyof HotelSearchFormData)[] = [];
+    if (step === 1) {
+      fieldsToValidate = ['country', 'city'];
+    } else if (step === 2) {
+      fieldsToValidate = ['checkInDate', 'checkOutDate', 'adults', 'radius'];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate);
+    if (isValid) {
+      setStep(prev => Math.min(prev + 1, 3));
+    } else {
+      toast.error("Veuillez corriger les erreurs avant de continuer");
+    }
+  };
+
+  const prevStep = () => {
+    setStep(prev => Math.max(prev - 1, 1));
+  };
+
   // Get unique countries from cities data
   const countries = Array.from(new Set(cities.map(city => city.country)))
     .sort()
@@ -108,7 +132,7 @@ export default function HotelSearchForm() {
     }));
 
   // Get cities for selected country
-  const availableCities = selectedCountry 
+  const availableCities = selectedCountry
     ? cities.filter(city => city.country === selectedCountry)
     : [];
 
@@ -116,6 +140,16 @@ export default function HotelSearchForm() {
     setIsLoading(true);
     setError(null);
     setResults([]);
+
+    // Analytics logging
+    fetch('/api/search-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'HOTEL',
+        searchDetails: data
+      }),
+    }).catch(err => console.error('Failed to log hotel search:', err));
 
     try {
       // Find the selected city
@@ -129,8 +163,8 @@ export default function HotelSearchForm() {
       }
 
       // Try to find IATA code for the city
-      const cityIataCode = cityToIataCode[selectedCity.city.toLowerCase()] || 
-                          cityToIataCode[selectedCity.city_ascii.toLowerCase()];
+      const cityIataCode = cityToIataCode[selectedCity.city.toLowerCase()] ||
+        cityToIataCode[selectedCity.city_ascii.toLowerCase()];
 
       if (!cityIataCode) {
         // If no IATA code is found, send email to admin without searching
@@ -185,7 +219,7 @@ export default function HotelSearchForm() {
       } else {
         setError(searchData.error || 'Aucun hôtel trouvé pour cette recherche');
       }
-      
+
       setIsSubmitted(true);
     } catch (err) {
       // Send email to admin with error
@@ -207,282 +241,396 @@ export default function HotelSearchForm() {
     }
   };
 
+  const steps = [
+    { id: 1, title: 'Destination', icon: <Building className="w-5 h-5" /> },
+    { id: 2, title: 'Détails', icon: <Search className="w-5 h-5" /> },
+    { id: 3, title: 'Budget & Contact', icon: <Building className="w-5 h-5" /> }
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="w-5 h-5" />
-            Recherche d'Hôtels
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Country Selection */}
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pays *</FormLabel>
-                    <Select 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedCountry(value);
-                        form.setValue('city', ''); // Reset city when country changes
-                      }} 
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionnez un pays" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.name} value={country.name}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* City Selection */}
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ville *</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      value={field.value}
-                      disabled={!selectedCountry}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={selectedCountry ? "Sélectionnez une ville" : "Sélectionnez d'abord un pays"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableCities.map((city) => (
-                          <SelectItem key={`${city.country}-${city.city}`} value={city.city}>
-                            {city.city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Budget */}
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Budget par nuit (EUR) *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="ex: 150" 
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Phone Number */}
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Numéro de téléphone *</FormLabel>
-                    <FormControl>
-                      <InputPhone
-                        defaultCountry="CM"
-                        value={field.value}
-                        onChange={(value) => field.onChange(value || '')}
-                        className="w-full"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Optional Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="checkInDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date d'arrivée (optionnel)</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="checkOutDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date de départ (optionnel)</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="adults"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre d'adultes</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {[1,2,3,4,5,6,7,8].map(num => (
-                            <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="radius"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rayon de recherche (km)</FormLabel>
-                      <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="10">10 km</SelectItem>
-                          <SelectItem value="25">25 km</SelectItem>
-                          <SelectItem value="50">50 km</SelectItem>
-                          <SelectItem value="100">100 km</SelectItem>
-                          <SelectItem value="200">200 km</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                    Recherche en cours...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center">
-                    <Search className="mr-2 h-4 w-4" />
-                    Rechercher des hôtels
-                  </span>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-
-      {/* Error Message */}
-      {error && (
-        <Card className="border-red-200 bg-red-50">
-          <CardContent className="pt-6">
-            <p className="text-red-600 font-medium">{error}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Search Results */}
-      {results.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Résultats de recherche ({results.length} hôtels trouvés)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {results.map((hotel) => (
-                <div key={hotel.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold text-lg text-blue-600">{hotel.name}</h3>
-                      <p className="text-sm text-gray-600">{hotel.address}</p>
-                    </div>
-                    <div className="text-right">
-                      {hotel.rating && (
-                        <p className="text-sm text-gray-600">
-                          ⭐ {hotel.rating}/5
-                        </p>
-                      )}
-                      {hotel.distance && (
-                        <p className="text-sm text-gray-600">
-                          📍 {hotel.distance.value} {hotel.distance.unit}
-                        </p>
-                      )}
-                    </div>
+    <div className='flex flex-col gap-10'>
+      {!isSubmitted && (
+        <div className="max-w-4xl mx-auto w-full">
+          {/* Step Indicator */}
+          <div className="mb-10 relative">
+            <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-100 z-0" />
+            <div
+              className="absolute top-5 left-0 h-0.5 bg-indigo-600 z-0 transition-all duration-500"
+              style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+            />
+            <div className="flex justify-between relative z-10">
+              {steps.map((s) => (
+                <div key={s.id} className="flex flex-col items-center">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 border-2 ${step >= s.id
+                      ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110'
+                      : 'bg-white border-gray-200 text-gray-400'
+                      }`}
+                  >
+                    {step > s.id ? '✓' : s.id}
                   </div>
-                  
-                  {hotel.amenities && hotel.amenities.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-sm text-gray-600">
-                        <strong>Équipements:</strong> {hotel.amenities.slice(0, 5).join(', ')}
-                        {hotel.amenities.length > 5 && '...'}
-                      </p>
-                    </div>
-                  )}
-
-                  {hotel.contact && (
-                    <div className="text-sm text-gray-600 mb-3">
-                      {hotel.contact.phone && <p>📞 {hotel.contact.phone}</p>}
-                      {hotel.contact.email && <p>✉️ {hotel.contact.email}</p>}
-                    </div>
-                  )}
-
-                  <Button variant="outline" className="w-full">
-                    Voir les détails
-                  </Button>
+                  <span className={`mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= s.id ? 'text-indigo-600' : 'text-gray-400'
+                    }`}>
+                    {s.title}
+                  </span>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="glass-premium rounded-3xl p-8 sm:p-10 border border-white/40 shadow-2xl relative overflow-hidden group">
+            {/* Decorative Icon Background */}
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
+              {steps[step - 1].icon}
+            </div>
+
+            <div className='flex flex-col gap-8 relative z-10'>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                  {/* STEP 1: DESTINATION */}
+                  {step === 1 && (
+                    <div className="animate-fade-in-up space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="country"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Pays *</FormLabel>
+                              <FormControl>
+                                <Combobox
+                                  value={field.value}
+                                  onValueChange={(value) => {
+                                    field.onChange(value);
+                                    setSelectedCountry(value);
+                                    form.setValue('city', '');
+                                  }}
+                                  placeholder="Sélectionnez un pays"
+                                  options={countries.map(country => ({ value: country.name, label: country.name }))}
+                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="city"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Ville *</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={!selectedCountry}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all">
+                                    <SelectValue placeholder={selectedCountry ? "Sélectionnez une ville" : "Sélectionnez d'abord un pays"} />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="bg-white rounded-xl shadow-2xl border-gray-100">
+                                  {availableCities.map((city) => (
+                                    <SelectItem key={`${city.country}-${city.city}`} value={city.city} className="hover:bg-indigo-50 transition-colors">
+                                      {city.city}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 2: DETAILS */}
+                  {step === 2 && (
+                    <div className="animate-fade-in-up space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="checkInDate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date d'arrivée</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="checkOutDate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de départ</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  {...field}
+                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <FormField
+                            control={form.control}
+                            name="adults"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Nombre d'adultes</FormLabel>
+                                <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                                  <FormControl>
+                                    <SelectTrigger className="h-11 bg-white/70 border-gray-200 rounded-xl">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="bg-white rounded-xl shadow-2xl border-gray-100">
+                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                                      <SelectItem key={num} value={num.toString()} className="hover:bg-indigo-50 transition-colors">{num}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="radius"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Rayon (km)</FormLabel>
+                                <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
+                                  <FormControl>
+                                    <SelectTrigger className="h-11 bg-white/70 border-gray-200 rounded-xl">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="bg-white rounded-xl shadow-2xl border-gray-100">
+                                    <SelectItem value="10">10 km</SelectItem>
+                                    <SelectItem value="25">25 km</SelectItem>
+                                    <SelectItem value="50">50 km</SelectItem>
+                                    <SelectItem value="100">100 km</SelectItem>
+                                    <SelectItem value="200">200 km</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 3: BUDGET & CONTACT */}
+                  {step === 3 && (
+                    <div className="animate-fade-in-up space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="budget"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Budget par nuit (EUR) *</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="ex: 150"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Téléphone *</FormLabel>
+                              <FormControl>
+                                <InputPhone
+                                  defaultCountry="CM"
+                                  value={field.value}
+                                  onChange={(value) => field.onChange(value || '')}
+                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-indigo-500 rounded-xl transition-all"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation Buttons */}
+                  <div className="flex gap-4 pt-6 border-t border-gray-100">
+                    {step > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevStep}
+                        disabled={isLoading}
+                        className="flex-1 h-14 rounded-2xl border-2 border-gray-100 font-bold hover:bg-gray-50 transition-all"
+                      >
+                        Précédent
+                      </Button>
+                    )}
+                    {step < 3 ? (
+                      <Button
+                        type="button"
+                        onClick={nextStep}
+                        className="flex-[2] h-14 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-indigo-200 transition-all hover:-translate-y-1 active:scale-95"
+                      >
+                        Continuer
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-[2] h-14 bg-gradient-to-r from-violet-600 to-indigo-600 hover:shadow-lg hover:shadow-indigo-500/40 text-lg font-bold rounded-2xl transition-all duration-300 transform active:scale-[0.98]"
+                      >
+                        {isLoading ? (
+                          <span className="flex items-center justify-center text-white">
+                            <Loader2 className="animate-spin -ml-1 mr-3 h-6 w-6" />
+                            Recherche...
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center text-white">
+                            <Search className="mr-3 h-5 w-5" />
+                            Rechercher des hôtels
+                          </span>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="max-w-4xl mx-auto w-full animate-fade-in">
+          <div className="bg-red-50 border border-red-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+              <span className="text-red-600 font-bold text-xl">!</span>
+            </div>
+            <p className="text-red-800 font-bold py-2">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Search Results */}
+      {isSubmitted && (
+        <div className="max-w-4xl mx-auto w-full animate-fade-in-up">
+          <div className="flex justify-start mb-6">
+            <Button
+              variant="outline"
+              className="rounded-xl border-indigo-200 hover:bg-indigo-50 font-bold"
+              onClick={() => {
+                setIsSubmitted(false);
+                setStep(1);
+              }}
+            >
+              ← Nouvelle recherche
+            </Button>
+          </div>
+
+          {results.length > 0 ? (
+            <div className="glass-premium rounded-[2rem] p-8 border border-white/40 shadow-xl">
+              <h3 className="text-2xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-600/10 rounded-xl flex items-center justify-center">
+                  <Building className="w-6 h-6 text-indigo-600" />
+                </div>
+                Hôtels à proximité ({results.length})
+              </h3>
+
+              <div className="grid grid-cols-1 gap-6">
+                {results.map((hotel) => (
+                  <div key={hotel.id} className="bg-white/50 backdrop-blur-sm border border-white/60 rounded-3xl p-6 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 group">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-2">
+                          {hotel.name}
+                        </h4>
+                        <div className="flex items-center gap-2 text-gray-500 text-sm mb-4 font-bold">
+                          <span className="shrink-0">📍</span>
+                          {hotel.address}
+                        </div>
+
+                        {hotel.amenities && hotel.amenities.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-6">
+                            {hotel.amenities.slice(0, 5).map((amenity, idx) => (
+                              <span key={idx} className="px-3 py-1 bg-white/80 border border-white/60 rounded-lg text-[10px] font-black text-gray-400 uppercase tracking-tighter shadow-sm">
+                                {amenity.replace(/_/g, ' ')}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col items-end gap-3 text-right">
+                        {hotel.rating && (
+                          <div className="flex items-center gap-2 bg-amber-400/10 px-4 py-2 rounded-2xl border border-amber-200/50">
+                            <span className="text-amber-600 text-sm font-black">⭐ {hotel.rating}</span>
+                          </div>
+                        )}
+                        {hotel.distance && (
+                          <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                            {hotel.distance.value} {hotel.distance.unit} du centre
+                          </p>
+                        )}
+
+                        <Button className="mt-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all hover:-translate-y-1">
+                          Réserver
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : !error && (
+            <div className="glass-premium rounded-3xl p-12 text-center border border-white/40">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Search className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Demande Transmise</h3>
+              <p className="text-gray-500 font-medium">
+                Nous n'avons pas trouvé de tarifs immédiats, mais notre équipe a reçu votre demande et vous contactera avec les meilleures offres.
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

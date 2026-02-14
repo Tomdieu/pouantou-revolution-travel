@@ -704,9 +704,6 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
         )}
       </div>
 
-      <p className="mt-8 text-center text-xs text-gray-400 font-bold uppercase tracking-widest">
-        100% Sécurisé • Confidentialité Garantie • Support 24/7
-      </p>
     </div>
   );
 }

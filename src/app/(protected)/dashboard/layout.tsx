@@ -14,6 +14,10 @@ export default async function DashboardLayout({
         redirect('/login');
     }
 
+    if (!session.user.phone) {
+        redirect('/onboarding');
+    }
+
     const userForHeader = {
         id: session.user.id,
         name: session.user.name,

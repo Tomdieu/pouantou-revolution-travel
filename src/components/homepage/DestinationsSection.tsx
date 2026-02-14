@@ -61,15 +61,7 @@ export function DestinationsSection() {
     }
 
     if (error || destinations.length === 0) {
-        return (
-            <section className="section-padding bg-gradient-to-br from-blue-50 via-white to-blue-50">
-                <div className="container mx-auto px-4">
-                    <div className="text-center py-20">
-                        <p className="text-gray-600">{error || 'Aucune destination disponible pour le moment'}</p>
-                    </div>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     return (

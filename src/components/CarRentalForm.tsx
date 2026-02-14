@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputPhone } from '@/components/ui/input-phone';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Loader2, Send, Car, Check, ChevronsUpDown } from 'lucide-react';
+import { Loader2, Send, Car, Check, ChevronsUpDown, CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import carsData from '@/constants/cars.json';
 import { toast } from 'sonner';
 
@@ -23,18 +25,28 @@ const carRentalSchema = z.object({
   budgetPerDay: z.number().min(1, "Budget par jour requis").max(700000, "Budget maximum 700,000 XOF"),
   phone: z.string().min(1, "Numéro de téléphone requis"),
   location: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
+  startDate: z.date({
+    required_error: "Date de départ requise",
+  }),
+  endDate: z.date({
+    required_error: "Date de retour requise",
+  }),
   driverAge: z.number().min(18, "Âge minimum 18 ans").max(80, "Âge maximum 80 ans").optional(),
 });
 
 type CarRentalFormData = z.infer<typeof carRentalSchema>;
 
-export default function CarRentalForm() {
+interface CarRentalFormProps {
+  userId?: string;
+}
+
+export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string>('');
+  const [isStartDateOpen, setIsStartDateOpen] = useState(false);
+  const [isEndDateOpen, setIsEndDateOpen] = useState(false);
   const [brandOpen, setBrandOpen] = useState(false);
   const [modelOpen, setModelOpen] = useState(false);
   const [brandButtonWidth, setBrandButtonWidth] = useState<number>(0);
@@ -52,8 +64,8 @@ export default function CarRentalForm() {
       budgetPerDay: 0,
       phone: '',
       location: '',
-      startDate: '',
-      endDate: '',
+      startDate: undefined,
+      endDate: undefined,
       driverAge: 25,
     },
   });
@@ -109,7 +121,11 @@ export default function CarRentalForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'CAR_RENTAL',
-        searchDetails: data
+        searchDetails: {
+          ...data,
+          startDate: format(data.startDate, 'yyyy-MM-dd'),
+          endDate: format(data.endDate, 'yyyy-MM-dd'),
+        }
       }),
     }).catch(err => console.error('Failed to log car rental search:', err));
 
@@ -127,8 +143,8 @@ export default function CarRentalForm() {
             budgetPerDay: data.budgetPerDay,
             phone: data.phone,
             location: data.location,
-            startDate: data.startDate,
-            endDate: data.endDate,
+            startDate: format(data.startDate, 'yyyy-MM-dd'),
+            endDate: format(data.endDate, 'yyyy-MM-dd'),
             driverAge: data.driverAge,
           },
           timestamp: new Date().toISOString(),
@@ -149,6 +165,41 @@ export default function CarRentalForm() {
       toast.error(err instanceof Error ? err.message : 'Erreur de connexion');
     } finally {
       setIsLoading(false);
+    }
+
+    // If userId is provided, create a booking in the database
+    if (userId) {
+      try {
+        const bookingResponse = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId,
+            type: 'CAR_RENTAL',
+            searchDetails: {
+              ...data,
+              startDate: format(data.startDate, 'yyyy-MM-dd'),
+              endDate: format(data.endDate, 'yyyy-MM-dd'),
+            },
+            price: data.budgetPerDay,
+            currency: 'XAF',
+            contactName: 'User',
+            contactEmail: '',
+            contactPhone: data.phone,
+          }),
+        });
+
+        if (bookingResponse.ok) {
+          console.log('Car rental booking saved successfully for user:', userId);
+          toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
+          // Refresh the page to show the new booking
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error creating booking:', err);
+      }
     }
   };
 
@@ -356,15 +407,42 @@ export default function CarRentalForm() {
                           control={form.control}
                           name="startDate"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de début</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  {...field}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
-                                />
-                              </FormControl>
+                              <Popover open={isStartDateOpen} onOpenChange={setIsStartDateOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "PPP", { locale: fr })
+                                      ) : (
+                                        <span>Choisir une date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setIsStartDateOpen(false);
+                                    }}
+                                    disabled={(date) =>
+                                      date < new Date(new Date().setHours(0, 0, 0, 0))
+                                    }
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -374,15 +452,45 @@ export default function CarRentalForm() {
                           control={form.control}
                           name="endDate"
                           render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col">
                               <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de fin</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  {...field}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
-                                />
-                              </FormControl>
+                              <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        format(field.value, "PPP", { locale: fr })
+                                      ) : (
+                                        <span>Choisir une date</span>
+                                      )}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={(date) => {
+                                      field.onChange(date);
+                                      setIsEndDateOpen(false);
+                                    }}
+                                    disabled={(date) => {
+                                      const startDate = form.getValues('startDate');
+                                      const today = new Date(new Date().setHours(0, 0, 0, 0));
+                                      const minDate = startDate || today;
+                                      return date < minDate;
+                                    }}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
                               <FormMessage />
                             </FormItem>
                           )}

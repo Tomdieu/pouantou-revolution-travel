@@ -11,7 +11,7 @@ const createBookingSchema = z.object({
     currency: z.string().optional(),
     contactName: z.string().min(2),
     contactEmail: z.string().email(),
-    contactPhone: z.string().min(8),
+    contactPhone: z.string().optional(),
     notes: z.string().optional(),
 });
 
@@ -99,17 +99,38 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const validatedData = createBookingSchema.parse(body);
 
+        // Verify user exists in database and get correct ID
+        let dbUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+        });
+
+        // Fallback: search by email if ID not found (handles stale session tokens)
+        if (!dbUser && session.user.email) {
+            dbUser = await prisma.user.findUnique({
+                where: { email: session.user.email },
+            });
+        }
+
+        if (!dbUser) {
+            return NextResponse.json(
+                { error: 'Utilisateur non trouvé dans la base de données. Veuillez vous reconnecter.' },
+                { status: 404 }
+            );
+        }
+
+        const userId = dbUser.id;
+
         // Create booking
         const booking = await prisma.booking.create({
             data: {
-                userId: session.user.id,
+                userId: userId,
                 type: validatedData.type,
                 searchDetails: JSON.stringify(validatedData.searchDetails),
                 price: validatedData.price,
                 currency: validatedData.currency || 'EUR',
                 contactName: validatedData.contactName,
                 contactEmail: validatedData.contactEmail,
-                contactPhone: validatedData.contactPhone,
+                contactPhone: validatedData.contactPhone || '',
                 notes: validatedData.notes,
                 status: 'PENDING',
             },

@@ -71,7 +71,7 @@ export default function LoginPage() {
     return (
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
             <div className="w-full max-w-[440px] animate-fade-in-up">
-                <div className="glass-premium rounded-[2.5rem] p-8 md:p-10 border border-white/40 shadow-2xl relative overflow-hidden group">
+                <div className="rounded-md p-8 md:p-10 border border-white/40 shadow relative overflow-hidden group">
                     {/* Decorative Background Icon */}
                     <div className="absolute top-[-20px] right-[-20px] p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700 pointer-events-none rotate-12">
                         <Lock className="w-40 h-40" />

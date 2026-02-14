@@ -79,12 +79,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             return session;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             // Add role and phone to token on sign in
             if (user) {
                 token.role = user.role;
                 token.phone = user.phone;
             }
+
+            // Handle session update
+            if (trigger === "update" && session?.user) {
+                if (session.user.phone) token.phone = session.user.phone;
+                if (session.user.role) token.role = session.user.role;
+            }
+
             return token;
         },
         async signIn({ user, account }) {

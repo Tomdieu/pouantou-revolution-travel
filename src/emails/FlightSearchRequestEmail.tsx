@@ -11,59 +11,24 @@ import {
   Hr,
 } from '@react-email/components';
 
-interface FlightSearchRequestEmailProps {
-  originLocationCode: string;
-  destinationLocationCode: string;
-  departureDate: string;
-  returnDate?: string;
-  adults: number;
-  children?: number;
-  infants?: number;
-  travelClass?: string;
-  nonStop?: boolean;
-  email?: string;
-  phone?: string;
-  selectedFlight?: {
-    id: string;
-    price: {
-      total: number;
-      currency: string;
-      formattedTotal: string;
-      displayTotal: string;
-    };
-    duration?: string;
-    stops: number;
-    isNonStop: boolean;
-    departure: {
-      airport: string;
-      time: string;
-    };
-    arrival: {
-      airport: string;
-      time: string;
-    };
-    airline: string;
-    bookableSeats: number;
-    instantTicketing: boolean;
-    lastTicketingDate?: string;
-  };
-  searchError?: string;
-}
+import { FlightSearchRequestEmailProps } from '@/types/flight-search';
+
 
 export default function FlightSearchRequestEmail({
-  originLocationCode,
-  destinationLocationCode,
-  departureDate,
-  returnDate,
-  adults,
-  children = 0,
-  infants = 0,
-  travelClass = 'ECONOMY',
-  nonStop,
-  email,
-  phone,
-  selectedFlight,
-  searchError,
+  searchData: {
+    originLocationCode,
+    destinationLocationCode,
+    departureDate,
+    returnDate,
+    adults,
+    children,
+    infants,
+    travelClass,
+    nonStop,
+  },
+  selectedOffer: selectedFlight,
+  contactInfo: { email, phone },
+  searchError
 }: FlightSearchRequestEmailProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -105,7 +70,7 @@ export default function FlightSearchRequestEmail({
             {/* Search Details */}
             <Section style={summarySection}>
               <Heading style={summaryTitle}>📋 Détails de la Recherche:</Heading>
-              
+
               <Row style={summaryRow}>
                 <Text style={summaryItem}><strong>Départ:</strong> {originLocationCode}</Text>
               </Row>
@@ -122,12 +87,12 @@ export default function FlightSearchRequestEmail({
               )}
               <Row style={summaryRow}>
                 <Text style={summaryItem}><strong>Passagers:</strong> {adults} adulte(s)
-                  {children > 0 ? `, ${children} enfant(s)` : ''}
-                  {infants > 0 ? `, ${infants} bébé(s)` : ''}
+                  {(children ?? 0) > 0 ? `, ${children} enfant(s)` : ''}
+                  {(infants ?? 0) > 0 ? `, ${infants} bébé(s)` : ''}
                 </Text>
               </Row>
               <Row style={summaryRow}>
-                <Text style={summaryItem}><strong>Classe:</strong> {getTravelClassName(travelClass)}</Text>
+                <Text style={summaryItem}><strong>Classe:</strong> {getTravelClassName(travelClass ?? '')}</Text>
               </Row>
               <Row style={summaryRow}>
                 <Text style={summaryItem}><strong>Vol direct uniquement:</strong> {nonStop ? 'Oui' : 'Non'}</Text>

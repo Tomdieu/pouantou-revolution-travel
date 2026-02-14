@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { BookingType, BookingStatus } from '@prisma/client';
-import { Plane, Building, Car, Calendar, User, Mail, Phone, Euro, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Plane, Building, Car, Calendar, User, Mail, Phone, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { convertCurrency, formatCurrency } from '@/lib/utils';
 
 interface Booking {
     id: string;
@@ -40,11 +42,11 @@ const typeLabels = {
     CAR_RENTAL: 'Location de voiture',
 };
 
-const statusColors = {
-    PENDING: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    CONFIRMED: 'bg-green-100 text-green-800 border-green-200',
-    CANCELLED: 'bg-red-100 text-red-800 border-red-200',
-    COMPLETED: 'bg-blue-100 text-blue-800 border-blue-200',
+const statusVariants: Record<BookingStatus, "default" | "secondary" | "destructive" | "outline"> = {
+    PENDING: 'secondary',
+    CONFIRMED: 'default',
+    CANCELLED: 'destructive',
+    COMPLETED: 'outline',
 };
 
 const statusLabels = {
@@ -57,7 +59,35 @@ const statusLabels = {
 export function BookingCard({ booking }: BookingCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
+    const [convertedPrice, setConvertedPrice] = useState<number | null>(null);
+    const [isLoadingRate, setIsLoadingRate] = useState(false);
     const router = useRouter();
+
+    // Fetch exchange rate and convert price
+    useEffect(() => {
+        const fetchConvertedPrice = async () => {
+            if (!booking.price) return;
+
+            setIsLoadingRate(true);
+            try {
+                // If price is in XAF, convert to EUR
+                if (booking.currency === 'XAF') {
+                    const converted = await convertCurrency(booking.price, 'XAF', 'EUR');
+                    setConvertedPrice(converted);
+                } else if (booking.currency === 'EUR') {
+                    // If price is in EUR, convert to XAF
+                    const converted = await convertCurrency(booking.price, 'EUR', 'XAF');
+                    setConvertedPrice(converted);
+                }
+            } catch (error) {
+                console.error('Error converting currency:', error);
+            } finally {
+                setIsLoadingRate(false);
+            }
+        };
+
+        fetchConvertedPrice();
+    }, [booking.price, booking.currency]);
 
     const Icon = typeIcons[booking.type];
 
@@ -85,49 +115,28 @@ export function BookingCard({ booking }: BookingCardProps) {
         }
     };
 
-    const statusConfigs = {
-        PENDING: {
-            label: 'En attente',
-            classes: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
-        },
-        CONFIRMED: {
-            label: 'Confirmée',
-            classes: 'bg-green-500/10 text-green-600 border-green-500/20',
-        },
-        CANCELLED: {
-            label: 'Annulée',
-            classes: 'bg-red-500/10 text-red-600 border-red-500/20',
-        },
-        COMPLETED: {
-            label: 'Terminée',
-            classes: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-        },
-    };
-
-    const currentStatus = statusConfigs[booking.status];
-
     return (
-        <Card className="glass-premium border border-white/40 shadow-xl rounded-[2rem] overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:border-white/60">
+        <Card className='border-none'>
             <CardContent className="p-0">
                 {/* Main Visible Area */}
-                <div className="p-6 sm:p-8 flex flex-col md:flex-row items-start justify-between gap-6 relative">
-                    <div className="flex items-start gap-5">
-                        <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                            <Icon className="w-8 h-8 text-blue-600" />
+                <div className="p-6 flex flex-col md:flex-row items-start justify-between gap-6">
+                    <div className="flex items-start gap-4 flex-1">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Icon className="w-7 h-7 text-blue-600" />
                         </div>
-                        <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="text-xl font-black text-gray-900 tracking-tight">{typeLabels[booking.type]}</h3>
-                                <Badge className={`rounded-xl px-3 py-1 font-black text-[10px] uppercase tracking-widest border ${currentStatus.classes}`}>
-                                    {currentStatus.label}
+                        <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <h3 className="text-lg font-semibold text-gray-900">{typeLabels[booking.type]}</h3>
+                                <Badge variant={statusVariants[booking.status]} className="text-xs font-medium">
+                                    {statusLabels[booking.status]}
                                 </Badge>
                             </div>
-                            <div className="flex items-center gap-2 text-gray-400">
-                                <Calendar className="w-3.5 h-3.5" />
-                                <p className="text-xs font-bold uppercase tracking-widest font-mono">
+                            <div className="flex items-center gap-2 text-gray-500 text-sm">
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                                <p>
                                     {new Date(booking.createdAt).toLocaleDateString('fr-FR', {
-                                        day: '2-digit',
-                                        month: '2-digit',
+                                        day: 'numeric',
+                                        month: 'long',
                                         year: 'numeric',
                                     })}
                                 </p>
@@ -135,80 +144,122 @@ export function BookingCard({ booking }: BookingCardProps) {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-3 self-stretch md:self-auto">
+                    <div className="flex flex-col items-end gap-3 md:items-end">
                         {booking.price && (
-                            <div className="bg-blue-600/5 px-4 py-2 rounded-2xl border border-blue-600/10">
-                                <p className="text-2xl font-black text-blue-600">
-                                    {booking.price.toLocaleString('fr-FR')} <span className="text-sm opacity-60 font-black">{booking.currency || 'XAF'}</span>
-                                </p>
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3 rounded-lg border border-blue-200 shadow-sm min-w-max">
+                                <div className="flex flex-col items-end gap-1.5">
+                                    {/* Primary Currency */}
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-lg font-bold text-blue-700">
+                                            {booking.price.toLocaleString('fr-FR', {
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 2,
+                                            })}
+                                        </p>
+                                        <span className="text-sm font-semibold text-blue-600">{booking.currency || 'XAF'}</span>
+                                    </div>
+
+                                    {/* Converted Currency */}
+                                    {convertedPrice && !isLoadingRate && (
+                                        <div className="flex items-baseline gap-2 text-sm">
+                                            <p className="text-base font-semibold text-gray-600">
+                                                {convertedPrice.toLocaleString('fr-FR', {
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 2,
+                                                })}
+                                            </p>
+                                            <span className="text-xs font-medium text-gray-500">
+                                                {booking.currency === 'XAF' ? 'EUR' : 'XAF'}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Loading state */}
+                                    {isLoadingRate && (
+                                        <p className="text-xs text-gray-400">Conversion...</p>
+                                    )}
+                                </div>
                             </div>
                         )}
-                        <div className="flex items-center gap-2">
-                            <div className="flex -space-x-1.5">
-                                <User className="w-4 h-4 text-gray-400" />
-                                <span className="text-xs font-bold text-gray-500 pl-2">{booking.contactName}</span>
-                            </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <User className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium">{booking.contactName}</span>
                         </div>
                     </div>
                 </div>
 
+                <Separator />
+
                 {/* Info Bar */}
-                <div className="px-8 py-4 bg-gray-50/50 border-y border-gray-100/50 flex flex-wrap gap-6 items-center">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                        <Mail className="w-3.5 h-3.5" />
-                        <span className="truncate max-w-[150px]">{booking.contactEmail}</span>
+                <div className="px-6 py-4 bg-gray-50/50 flex flex-wrap gap-4 md:gap-8 items-center text-sm">
+                    <div className="flex items-center gap-2 text-gray-600 min-w-0">
+                        <Mail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        <span className="truncate text-sm">{booking.contactEmail}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                        <Phone className="w-3.5 h-3.5" />
-                        <span>{booking.contactPhone}</span>
+                    <div className="flex items-center gap-2 text-gray-600">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm">{booking.contactPhone}</span>
                     </div>
-                    <div className="ml-auto">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">ID: {booking.id.slice(-8)}</span>
+                    <div className="ml-auto text-xs text-gray-400 font-mono">
+                        ID: {booking.id.slice(-8)}
                     </div>
                 </div>
 
                 {/* Expanded Details Section */}
                 {isExpanded && (
-                    <div className="p-8 bg-white/20 backdrop-blur-sm animate-fade-in-up">
-                        <h4 className="text-xs font-black text-gray-900 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                            <div className="w-1 h-3 bg-blue-600 rounded-full" />
-                            Détails de l'itinéraire
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {Object.entries(booking.searchDetails).map(([key, value]) => (
-                                <div key={key} className="bg-white/40 border border-gray-100 rounded-2xl p-4 flex flex-col gap-1 transition-all hover:border-blue-100">
-                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                    <span className="text-sm font-bold text-gray-900">{String(value)}</span>
+                    <>
+                        <Separator />
+                        <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100/50">
+                            {booking.type === 'FLIGHT' ? (
+                                <FlightDetails details={booking.searchDetails} />
+                            ) : (
+                                <>
+                                    <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">
+                                        Détails de la demande
+                                    </h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {Object.entries(booking.searchDetails)
+                                            .filter(([key]) => typeof booking.searchDetails[key] !== 'object')
+                                            .map(([key, value]) => (
+                                                <div key={key} className="bg-white border border-gray-200 p-4 rounded-lg flex flex-col gap-1 shadow-sm hover:shadow-md transition-shadow">
+                                                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                    <span className="text-sm font-semibold text-gray-900">{String(value)}</span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </>
+                            )}
+
+                            {booking.notes && (
+                                <div className="mt-6 space-y-2">
+                                    <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Notes Particulières</h4>
+                                    <p className="text-sm text-gray-600 bg-white border border-gray-200 p-4 rounded-lg italic shadow-sm">
+                                        "{booking.notes}"
+                                    </p>
                                 </div>
-                            ))}
+                            )}
                         </div>
-                        {booking.notes && (
-                            <div className="mt-6 space-y-2">
-                                <h4 className="text-[10px] font-black text-gray-900 uppercase tracking-[0.2em]">Notes Particulières</h4>
-                                <p className="text-sm font-medium text-gray-500 bg-white/40 border border-gray-100 rounded-2xl p-4 leading-relaxed italic">
-                                    "{booking.notes}"
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                    </>
                 )}
 
+                <Separator />
+
                 {/* Interactive Footer */}
-                <div className="p-4 sm:p-6 bg-white/40 flex items-center gap-3">
+                <div className="p-4 bg-white flex items-center gap-3 flex-wrap">
                     <Button
-                        variant="ghost"
+                        variant="outline"
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] hover:bg-blue-600 hover:text-white transition-all group/btn"
+                        className="flex-1 min-w-[150px] gap-2 font-medium border-gray-300 hover:bg-gray-50 transition-colors"
                     >
                         {isExpanded ? (
                             <>
-                                <ChevronUp className="w-4 h-4 mr-2 group-hover/btn:-translate-y-0.5 transition-transform" />
-                                Fermer les Détails
+                                <ChevronUp className="w-4 h-4" />
+                                Fermer les détails
                             </>
                         ) : (
                             <>
-                                <ChevronDown className="w-4 h-4 mr-2 group-hover/btn:translate-y-0.5 transition-transform" />
-                                Explorer la demande
+                                <ChevronDown className="w-4 h-4" />
+                                Voir les détails
                             </>
                         )}
                     </Button>
@@ -218,13 +269,13 @@ export function BookingCard({ booking }: BookingCardProps) {
                             variant="destructive"
                             onClick={handleCancel}
                             disabled={isCancelling}
-                            className="rounded-2xl h-12 px-6 font-black uppercase tracking-widest text-[10px] bg-red-100 hover:bg-red-600 text-red-600 hover:text-white border-none transition-all"
+                            className="gap-2 font-medium transition-colors"
                         >
                             {isCancelling ? (
-                                'Encours...'
+                                'Annulation...'
                             ) : (
                                 <>
-                                    <X className="w-4 h-4 mr-2" />
+                                    <X className="w-4 h-4" />
                                     Annuler
                                 </>
                             )}
@@ -233,5 +284,127 @@ export function BookingCard({ booking }: BookingCardProps) {
                 </div>
             </CardContent>
         </Card>
+    );
+}
+
+function FlightDetails({ details }: { details: any }) {
+    const flight = details.selectedFlight;
+    if (!flight) return <p className="text-sm text-gray-500">Détails du vol non disponibles</p>;
+
+    const formatTime = (dateString: string) => {
+        return new Date(dateString).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
+    const formatDuration = (duration: string) => {
+        const match = duration.match(/PT(\d+H)?(\d+M)?/);
+        if (!match) return duration;
+        const hours = match[1] ? match[1].replace('H', 'h ') : '';
+        const minutes = match[2] ? match[2].replace('M', 'min') : '';
+        return `${hours}${minutes}`.trim();
+    };
+
+    return (
+        <div className="space-y-6">
+            <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Itinéraire Complet</h4>
+
+            {/* Timeline View */}
+            <div className="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                    <div className="text-center">
+                        <p className="text-2xl font-bold text-gray-900">{formatTime(flight.departure.time)}</p>
+                        <p className="text-sm font-semibold text-blue-600 mt-2">{flight.departure.airport}</p>
+                        <p className="text-xs text-gray-500 mt-1 font-medium">{formatDate(flight.departure.time)}</p>
+                    </div>
+
+                    <div className="flex-1 mx-6 md:mx-8 relative flex flex-col items-center">
+                        <div className="w-full h-0.5 bg-gradient-to-r from-gray-200 via-blue-300 to-gray-200 absolute top-1/2 -translate-y-1/2"></div>
+                        <div className="relative bg-white px-3 py-1 flex flex-col items-center border border-blue-100 rounded-lg shadow-sm">
+                            <Plane className="w-5 h-5 text-blue-600 mb-0.5" />
+                            <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wide">
+                                {flight.duration ? formatDuration(flight.duration) : 'DIRECT'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-2xl font-bold text-gray-900">{formatTime(flight.arrival.time)}</p>
+                        <p className="text-sm font-semibold text-blue-600 mt-2">{flight.arrival.airport}</p>
+                        <p className="text-xs text-gray-500 mt-1 font-medium">{formatDate(flight.arrival.time)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Segments */}
+            {flight.segments && (
+                <div className="space-y-3">
+                    <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider pl-1">Détails des segments</p>
+                    {flight.segments.map((segment: any, idx: number) => (
+                        <div key={idx} className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center border border-blue-200 flex-shrink-0">
+                                    <span className="text-xs font-semibold text-gray-900">{segment.airline}</span>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-900">{segment.airline} {segment.flightNumber}</p>
+                                    <p className="text-xs text-gray-500 font-medium">{segment.aircraft}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 md:gap-6">
+                                <div className="flex flex-col items-start md:items-end">
+                                    <p className="text-sm font-bold text-gray-900">{formatTime(segment.departure.at)}</p>
+                                    <p className="text-[10px] font-semibold text-gray-500 uppercase">{segment.departure.iataCode}</p>
+                                </div>
+                                <div className="text-gray-300 font-bold">→</div>
+                                <div className="flex flex-col items-start">
+                                    <p className="text-sm font-bold text-gray-900">{formatTime(segment.arrival.at)}</p>
+                                    <p className="text-[10px] font-semibold text-gray-500 uppercase">{segment.arrival.iataCode}</p>
+                                </div>
+                            </div>
+
+                            <div className="text-right md:min-w-fit">
+                                <p className="text-xs font-semibold text-gray-600">{formatDuration(segment.duration)}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Other Metadata */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                    <p className="text-[10px] font-semibold text-gray-600 uppercase mb-2 tracking-wider">Passagers</p>
+                    <p className="text-sm font-bold text-gray-900">
+                        {details.adults} Adulte{details.adults > 1 ? 's' : ''}
+                        {details.children > 0 && `, ${details.children} Enfant${details.children > 1 ? 's' : ''}`}
+                    </p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                    <p className="text-[10px] font-semibold text-gray-600 uppercase mb-2 tracking-wider">Classe</p>
+                    <p className="text-sm font-bold text-gray-900">{details.travelClass === 'ECONOMY' ? 'Économique' : details.travelClass}</p>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                    <p className="text-[10px] font-semibold text-gray-600 uppercase mb-2 tracking-wider">Type</p>
+                    <p className="text-sm font-bold text-gray-900">{flight.instantTicketing ? 'Instantané' : 'Sur réservation'}</p>
+                </div>
+                {flight.lastTicketingDate && (
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg shadow-sm">
+                        <p className="text-[10px] font-semibold text-gray-600 uppercase mb-2 tracking-wider">Délai réservation</p>
+                        <p className="text-sm font-bold text-gray-900">{formatDate(flight.lastTicketingDate)}</p>
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

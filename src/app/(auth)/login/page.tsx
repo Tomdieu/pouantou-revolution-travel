@@ -70,7 +70,7 @@ export default function LoginPage() {
 
     return (
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
-            <div className="w-full max-w-[440px] animate-fade-in-up">
+            <div className="w-full max-w-xl animate-fade-in-up">
                 <div className="rounded-md p-8 md:p-10 border border-white/40 shadow relative overflow-hidden group">
                     {/* Decorative Background Icon */}
                     <div className="absolute top-[-20px] right-[-20px] p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700 pointer-events-none rotate-12">
@@ -141,7 +141,7 @@ export default function LoginPage() {
                                                 <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Email</FormLabel>
                                                 <FormControl>
                                                     <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-400 group-focus-within:text-blue-600">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-400 group-focus-within:text-blue-600 z-10">
                                                             <Mail className="h-5 w-5" />
                                                         </div>
                                                         <Input
@@ -173,7 +173,7 @@ export default function LoginPage() {
                                                 </div>
                                                 <FormControl>
                                                     <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-400 group-focus-within:text-blue-600">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-400 group-focus-within:text-blue-600 z-10">
                                                             <Lock className="h-5 w-5" />
                                                         </div>
                                                         <Input

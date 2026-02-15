@@ -169,9 +169,9 @@ export function DestinationsSection() {
 
                 {/* Call to Action */}
                 <div className="text-center mt-12">
-                    <p className="text-gray-600 mb-6">
+                    {/* <p className="text-gray-600 mb-6">
                         🌟 Plus de 50 destinations disponibles !
-                    </p>
+                    </p> */}
                     <Button
                         size="lg"
                         className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"

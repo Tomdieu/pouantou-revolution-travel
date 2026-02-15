@@ -114,7 +114,7 @@ model PasswordResetToken {
 
 model Booking {
   id     String        @id @default(cuid())
-  userId String        @map("user_id")
+  userId String?       @map("user_id")
   type   BookingType
   status BookingStatus @default(PENDING)
 
@@ -138,7 +138,7 @@ model Booking {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("bookings")
 }
@@ -172,4 +172,15 @@ model SearchLog {
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("search_logs")
+}
+
+model Visitor {
+  id        String   @id @default(cuid())
+  ip        String
+  country   String?
+  userAgent String?
+  visitedAt DateTime @default(now()) @map("visited_at")
+
+  @@index([visitedAt])
+  @@map("visitors")
 }

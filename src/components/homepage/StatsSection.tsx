@@ -12,7 +12,7 @@ const stats = [
     },
     {
         icon: <Globe className="w-8 h-8" />,
-        value: "150+",
+        value: "100+",
         label: "Destinations",
         desc: "Partout dans le monde"
     },

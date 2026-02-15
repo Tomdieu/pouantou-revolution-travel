@@ -130,7 +130,7 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
                                             <FormLabel className="text-sm font-bold text-gray-700 ml-1">Nom Complet</FormLabel>
                                             <FormControl>
                                                 <div className="relative group">
-                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
                                                         <User className="h-4 w-4" />
                                                     </div>
                                                     <Input
@@ -157,8 +157,9 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
                                                         <Phone className="h-4 w-4" />
                                                     </div>
                                                     <InputPhone
+                                                        defaultCountry="CM"
                                                         {...field}
-                                                        placeholder="+33 6 12 34 56 78"
+                                                        placeholder="+237 6 12 34 56 78"
                                                         disabled={!isEditing || isLoading}
                                                         className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
                                                     />

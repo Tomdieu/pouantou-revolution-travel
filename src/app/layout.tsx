@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react";
 
@@ -183,9 +184,12 @@ export default function RootLayout({
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="antialiased" suppressHydrationWarning={true}>
+      <body className="antialiased w-full h-full flex flex-col scroll-smooth" suppressHydrationWarning={true}>
         <SessionProvider>
-          {children}
+          <VisitorTracker />
+          <main className="overflow-auto flex-1">
+            {children}
+          </main>
         </SessionProvider>
         <Analytics />
         <Toaster />

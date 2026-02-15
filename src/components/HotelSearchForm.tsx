@@ -182,37 +182,37 @@ export default function HotelSearchForm({ userId }: HotelSearchFormProps = {}) {
 
     // 2. Create booking in DB early if userId is provided
     // This ensures the demand is saved even if search fails
-    if (userId) {
-      try {
-        const bookingResponse = await fetch('/api/bookings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+    // 2. Create booking in DB (works for both guests and logged-in users)
+    // This ensures the demand is saved even if search fails
+    try {
+      const bookingResponse = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId || undefined,
+          type: 'HOTEL',
+          searchDetails: {
+            ...data,
+            checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
+            checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
           },
-          body: JSON.stringify({
-            userId,
-            type: 'HOTEL',
-            searchDetails: {
-              ...data,
-              checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
-              checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
-            },
-            price: data.budget,
-            currency: 'EUR',
-            contactName: 'User',
-            contactEmail: '',
-            contactPhone: data.phone,
-          }),
-        });
+          price: data.budget,
+          currency: 'EUR',
+          contactName: 'Guest', // We don't have a name in this form, maybe add it later? For now, 'Guest'
+          contactEmail: '',     // We don't have email in this form
+          contactPhone: data.phone,
+        }),
+      });
 
-        if (bookingResponse.ok) {
-          console.log('Hotel search demand saved to bookings for user:', userId);
-        } else {
-          console.error('Failed to save hotel demand to bookings');
-        }
-      } catch (err) {
-        console.error('Error creating booking record:', err);
+      if (bookingResponse.ok) {
+        console.log('Hotel search demand saved to bookings');
+      } else {
+        console.error('Failed to save hotel demand to bookings');
       }
+    } catch (err) {
+      console.error('Error creating booking record:', err);
     }
 
     try {

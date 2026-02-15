@@ -70,8 +70,17 @@ export default async function BookingsPage() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex flex-col">
-                                            <span className="font-medium">{booking.user?.name || 'Invité'}</span>
-                                            <span className="text-xs text-muted-foreground">{booking.user?.email || 'N/A'}</span>
+                                            {booking.user ? (
+                                                <>
+                                                    <span className="font-medium">{booking.user.name || 'Utilisateur'}</span>
+                                                    <span className="text-xs text-muted-foreground">{booking.user.email}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="font-medium italic text-slate-500">Invité</span>
+                                                    <span className="text-xs text-slate-400">Non enregistré</span>
+                                                </>
+                                            )}
                                         </div>
                                     </TableCell>
                                     <TableCell>

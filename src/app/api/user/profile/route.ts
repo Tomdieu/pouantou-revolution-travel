@@ -11,7 +11,7 @@ export async function PATCH(req: Request) {
         }
 
         const body = await req.json();
-        const { name, email } = body;
+        const { name, email, phone } = body;
 
         // Fetch user to check if they are an OAuth user
         const user = await prisma.user.findUnique({
@@ -28,6 +28,17 @@ export async function PATCH(req: Request) {
         const updateData: any = {};
 
         if (name) updateData.name = name;
+        if (phone) {
+            // Check if phone is already taken
+            const existingUserPhone = await prisma.user.findUnique({
+                where: { phone }
+            });
+
+            if (existingUserPhone && existingUserPhone.id !== session.user.id) {
+                return new NextResponse('Phone number already in use', { status: 400 });
+            }
+            updateData.phone = phone;
+        }
 
         // Only allow email update if not an OAuth user
         if (email && !isOAuth) {

@@ -121,11 +121,13 @@ async function getDashboardStats() {
 export default async function AdminDashboardPage() {
     const stats = await getDashboardStats();
 
-    const formatCurrency = (amount: number) => {
+    const formatCurrency = (amountInEur: number) => {
+        const amountInXaf = amountInEur * 655.957;
         return new Intl.NumberFormat("fr-FR", {
             style: "currency",
             currency: "XAF",
-        }).format(amount);
+            maximumFractionDigits: 0,
+        }).format(amountInXaf);
     };
 
     return (
@@ -156,7 +158,7 @@ export default async function AdminDashboardPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Revenus (Est.)</CardTitle>
+                        <CardTitle className="text-sm font-medium">Revenus (Est. XAF)</CardTitle>
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>

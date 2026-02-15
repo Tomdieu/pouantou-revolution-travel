@@ -88,42 +88,33 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const session = await auth();
-
-        if (!session?.user) {
-            return NextResponse.json(
-                { error: 'Non autorisé' },
-                { status: 401 }
-            );
-        }
-
         const body = await request.json();
         const validatedData = createBookingSchema.parse(body);
 
-        // Verify user exists in database and get correct ID
-        let dbUser = await prisma.user.findUnique({
-            where: { id: session.user.id },
-        });
+        let userId: string | undefined;
 
-        // Fallback: search by email if ID not found (handles stale session tokens)
-        if (!dbUser && session.user.email) {
-            dbUser = await prisma.user.findUnique({
-                where: { email: session.user.email },
+        if (session?.user) {
+            // Verify user exists in database and get correct ID
+            let dbUser = await prisma.user.findUnique({
+                where: { id: session.user.id },
             });
-        }
 
-        if (!dbUser) {
-            return NextResponse.json(
-                { error: 'Utilisateur non trouvé dans la base de données. Veuillez vous reconnecter.' },
-                { status: 404 }
-            );
-        }
+            // Fallback: search by email if ID not found (handles stale session tokens)
+            if (!dbUser && session.user.email) {
+                dbUser = await prisma.user.findUnique({
+                    where: { email: session.user.email },
+                });
+            }
 
-        const userId = dbUser.id;
+            if (dbUser) {
+                userId = dbUser.id;
+            }
+        }
 
         // Create booking
         const booking = await prisma.booking.create({
             data: {
-                userId: userId,
+                userId: userId, // Can be undefined now
                 type: validatedData.type,
                 searchDetails: JSON.stringify(validatedData.searchDetails),
                 price: validatedData.price,

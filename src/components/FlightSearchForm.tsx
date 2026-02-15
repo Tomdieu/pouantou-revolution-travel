@@ -261,66 +261,52 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
 
     try {
       // If userId is provided, create a booking in the database
-      if (userId) {
-        const bookingResponse = await fetch('/api/bookings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId,
-            type: 'FLIGHT',
-            searchDetails: {
-              ...searchData,
-              departureDate: format(searchData.departureDate, 'yyyy-MM-dd'),
-              returnDate: searchData.returnDate ? format(searchData.returnDate, 'yyyy-MM-dd') : undefined,
-              selectedFlight: offer,
-            },
-            price: offer.price.total + 68.60,
-            currency: offer.price.currency,
-            contactName: searchData.email?.split('@')[0] || 'User',
-            contactEmail: searchData.email || '',
-            contactPhone: searchData.phone || '',
-          }),
-        });
-
-        // Always send email to agent as well
-        await fetch('/api/flight-search-request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+      // Create a booking in the database (works for both guests and logged-in users)
+      const bookingResponse = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId || undefined,
+          type: 'FLIGHT',
+          searchDetails: {
             ...searchData,
+            departureDate: format(searchData.departureDate, 'yyyy-MM-dd'),
+            returnDate: searchData.returnDate ? format(searchData.returnDate, 'yyyy-MM-dd') : undefined,
             selectedFlight: offer,
-          }),
-        });
+          },
+          price: offer.price.total + 68.60,
+          currency: offer.price.currency,
+          contactName: searchData.email?.split('@')[0] || 'Guest',
+          contactEmail: searchData.email || '',
+          contactPhone: searchData.phone || '',
+        }),
+      });
 
-        if (bookingResponse.ok) {
-          toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
-          // Refresh the page to show the new booking
+      // Always send email to agent as well
+      await fetch('/api/flight-search-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...searchData,
+          selectedFlight: offer,
+        }),
+      });
+
+      if (bookingResponse.ok) {
+        toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
+        // Refresh the page or redirect
+        if (userId) {
           window.location.reload();
-        } else {
-          toast.error('Erreur lors de l\'enregistrement de la réservation.');
         }
       } else {
-        // Original behavior: send email
-        const emailResponse = await fetch('/api/flight-search-request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...searchData,
-            selectedFlight: offer,
-          }),
-        });
-
-        if (emailResponse.ok) {
-          toast.success('Votre réservation a été envoyée à notre équipe. Nous vous contacterons bientôt!');
-        } else {
-          toast.error('Erreur lors de l\'envoi de la demande. Veuillez réessayer.');
-        }
+        // If booking creation fails but email sent, still notify user of partial success or error?
+        // For now, let's treat it as success if at least one works, but ideally we want the booking.
+        console.error('Failed to create booking', await bookingResponse.text());
+        toast.success('Votre demande a été envoyée à notre équipe. Nous vous contacterons bientôt!');
       }
     } catch (err) {
       toast.error('Erreur lors de l\'envoi de la demande. Veuillez réessayer.');

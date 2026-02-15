@@ -1,114 +1,208 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
-import { BookingsTable } from '@/components/admin/BookingsTable';
-import { StatsOverview } from '@/components/admin/StatsOverview';
-import { Button } from '@/components/ui/button';
-import { Shield, LogOut } from 'lucide-react';
-import Link from 'next/link';
-import { signOut } from '@/auth';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { VisitorChart } from "@/components/admin/VisitorChart";
+import { prisma } from "@/lib/prisma";
+import { CalendarDays, Users, Star, TrendingUp, Eye } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
-export default async function AdminPage() {
-    const session = await auth();
+async function getDashboardStats() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
-        redirect('/dashboard');
-    }
-
-    // Fetch all bookings
-    const bookings = await prisma.booking.findMany({
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                },
+    const [
+        userCount,
+        bookingCount,
+        reviewCount,
+        bookings,
+        recentBookings,
+        recentReviews,
+        dailyVisitors
+    ] = await Promise.all([
+        prisma.user.count(),
+        prisma.booking.count(),
+        prisma.review.count({ where: { isModerated: false } }),
+        prisma.booking.findMany({
+            select: { price: true, status: true }
+        }),
+        prisma.booking.findMany({
+            take: 5,
+            orderBy: { createdAt: 'desc' },
+            include: { user: true }
+        }),
+        prisma.review.findMany({
+            take: 5,
+            orderBy: { createdAt: 'desc' }
+        }),
+        prisma.visitor.groupBy({
+            by: ['visitedAt'],
+            _count: {
+                ip: true
             },
+            take: 7,
+            orderBy: {
+                visitedAt: 'desc'
+            }
+        })
+    ]);
+
+    // Calculate revenue (excluding cancelled)
+    const revenue = bookings
+        .filter(b => b.status !== 'CANCELLED' && b.price)
+        .reduce((acc, curr) => acc + (curr.price || 0), 0);
+
+    // Process visitor data for chart (group by day) - Simplified for now since groupBy date part in Prisma is tricky without raw query
+    // We will do a raw query for better date grouping or just use the last 7 days count
+    // Switching to findMany for visitors in last 7 days and grouping manually in JS for accuracy
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const rawVisitors = await prisma.visitor.findMany({
+        where: {
+            visitedAt: {
+                gte: sevenDaysAgo
+            }
         },
         orderBy: {
-            createdAt: 'desc',
-        },
+            visitedAt: 'asc'
+        }
     });
 
-    // Parse searchDetails JSON
-    type Booking = typeof bookings[number];
-    const bookingsWithParsedDetails = bookings.map((booking: Booking) => ({
-        ...booking,
-        searchDetails: JSON.parse(booking.searchDetails),
+    const visitorsByDay: Record<string, number> = {};
+    const last7Days: string[] = [];
+
+    for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        visitorsByDay[dateStr] = 0;
+        last7Days.unshift(dateStr);
+    }
+
+    rawVisitors.forEach(v => {
+        const dateStr = v.visitedAt.toISOString().split('T')[0];
+        if (visitorsByDay[dateStr] !== undefined) {
+            visitorsByDay[dateStr]++;
+        }
+    });
+
+    const visitorChartData = last7Days.map(date => ({
+        date: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }),
+        count: visitorsByDay[date]
     }));
 
-    // Calculate stats
-    const stats = {
-        total: bookings.length,
-        pending: bookings.filter((b: Booking) => b.status === 'PENDING').length,
-        confirmed: bookings.filter((b: Booking) => b.status === 'CONFIRMED').length,
-        completed: bookings.filter((b: Booking) => b.status === 'COMPLETED').length,
-        cancelled: bookings.filter((b: Booking) => b.status === 'CANCELLED').length,
-        flights: bookings.filter((b: Booking) => b.type === 'FLIGHT').length,
-        hotels: bookings.filter((b: Booking) => b.type === 'HOTEL').length,
-        carRentals: bookings.filter((b: Booking) => b.type === 'CAR_RENTAL').length,
+    const totalVisitors = Object.values(visitorsByDay).reduce((a, b) => a + b, 0);
+
+    return {
+        userCount,
+        bookingCount,
+        reviewCount,
+        revenue,
+        visitorChartData,
+        totalVisitors,
+        recentActivity: [
+            ...recentBookings.map(b => ({
+                id: b.id,
+                type: 'BOOKING',
+                title: `${b.contactName || 'Client'} a réservé ${b.type}`,
+                subtitle: b.status,
+                date: b.createdAt
+            })),
+            ...recentReviews.map(r => ({
+                id: r.id,
+                type: 'REVIEW',
+                title: `${r.name} a laissé un avis`,
+                subtitle: `${r.stars} étoiles`,
+                date: r.createdAt
+            }))
+        ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 7)
+    };
+}
+
+export default async function AdminDashboardPage() {
+    const stats = await getDashboardStats();
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat("fr-FR", {
+            style: "currency",
+            currency: "XAF",
+        }).format(amount);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-            {/* Header */}
-            <header className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <Shield className="w-8 h-8" />
-                            <div>
-                                <h1 className="text-2xl font-bold">Panneau d'Administration</h1>
-                                <p className="text-sm text-blue-100">Gestion des réservations</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <Link href="/admin/destinations">
-                                <Button variant="secondary">
-                                    Destinations
-                                </Button>
-                            </Link>
-                            <Link href="/dashboard">
-                                <Button variant="secondary">
-                                    Mon Dashboard
-                                </Button>
-                            </Link>
-                            <Link href="/">
-                                <Button variant="secondary">
-                                    Accueil
-                                </Button>
-                            </Link>
-                            <form
-                                action={async () => {
-                                    'use server';
-                                    await signOut({ redirectTo: '/' });
-                                }}
-                            >
-                                <Button type="submit" variant="secondary" className="text-red-600 hover:text-red-700">
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    Déconnexion
-                                </Button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </header>
+        <div className="space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Tableau de bord</h1>
+                <p className="text-slate-500 mt-2">Vue d&apos;ensemble de votre activité en temps réel.</p>
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Stats Overview */}
-                <StatsOverview stats={stats} />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.userCount}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Réservations</CardTitle>
+                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.bookingCount}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Revenus (Est.)</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.revenue)}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Visiteurs (7j)</CardTitle>
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{stats.totalVisitors}</div>
+                        <p className="text-xs text-muted-foreground">Uniques par jour</p>
+                    </CardContent>
+                </Card>
+            </div>
 
-                {/* Bookings Table */}
-                <div className="bg-white rounded-lg shadow-sm border mt-8">
-                    <div className="p-6 border-b">
-                        <h2 className="text-xl font-bold text-gray-900">Toutes les Réservations</h2>
-                        <p className="text-sm text-gray-600 mt-1">Gérez toutes les demandes de réservation des clients</p>
-                    </div>
-                    <BookingsTable bookings={bookingsWithParsedDetails} />
-                </div>
-            </main>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+                <VisitorChart data={stats.visitorChartData} />
+
+                <Card className="col-span-3">
+                    <CardHeader>
+                        <CardTitle>Activités Récentes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-8">
+                            {stats.recentActivity.length === 0 ? (
+                                <p className="text-sm text-slate-500">Aucune activité récente.</p>
+                            ) : (
+                                stats.recentActivity.map((activity, i) => (
+                                    <div key={i} className="flex items-center">
+                                        <div className="ml-4 space-y-1">
+                                            <p className="text-sm font-medium leading-none">{activity.title}</p>
+                                            <p className="text-sm text-muted-foreground">{activity.subtitle}</p>
+                                        </div>
+                                        <div className="ml-auto font-medium text-xs text-slate-400">
+                                            {formatDistanceToNow(activity.date, { addSuffix: true, locale: fr })}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

@@ -79,7 +79,7 @@ export async function getApprovedReviews() {
     }
 }
 
-export async function moderateReview(id: string, approve: boolean) {
+export async function toggleReviewStatus(id: string) {
     const session = await auth();
 
     if (session?.user?.role !== 'ADMIN') {
@@ -87,22 +87,40 @@ export async function moderateReview(id: string, approve: boolean) {
     }
 
     try {
-        if (approve) {
-            await prisma.review.update({
-                where: { id },
-                data: { isModerated: true },
-            });
-            revalidatePath('/');
-            return { success: "Avis approuvé" };
-        } else {
-            await prisma.review.delete({
-                where: { id },
-            });
-            revalidatePath('/');
-            return { success: "Avis supprimé" };
-        }
+        const review = await prisma.review.findUnique({ where: { id } });
+        if (!review) return { error: "Avis non trouvé" };
+
+        await prisma.review.update({
+            where: { id },
+            data: { isModerated: !review.isModerated },
+        });
+
+        revalidatePath('/admin/reviews');
+        revalidatePath('/');
+        return { success: "Statut mis à jour" };
     } catch (error) {
-        console.error('Moderate review error:', error);
-        return { error: "Une erreur est survenue lors de la modération." };
+        console.error('Toggle review status error:', error);
+        return { error: "Une erreur est survenue." };
+    }
+}
+
+export async function deleteReview(id: string) {
+    const session = await auth();
+
+    if (session?.user?.role !== 'ADMIN') {
+        return { error: "Non autorisé" };
+    }
+
+    try {
+        await prisma.review.delete({
+            where: { id },
+        });
+
+        revalidatePath('/admin/reviews');
+        revalidatePath('/');
+        return { success: "Avis supprimé" };
+    } catch (error) {
+        console.error('Delete review error:', error);
+        return { error: "Une erreur est survenue lors de la suppression." };
     }
 }

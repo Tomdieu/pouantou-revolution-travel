@@ -177,38 +177,39 @@ export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
     }
 
     // If userId is provided, create a booking in the database
-    if (userId) {
-      try {
-        const bookingResponse = await fetch('/api/bookings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+    // Create a booking in the database (works for both guests and logged-in users)
+    try {
+      const bookingResponse = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId || undefined,
+          type: 'CAR_RENTAL',
+          searchDetails: {
+            ...data,
+            startDate: format(data.startDate, 'yyyy-MM-dd'),
+            endDate: format(data.endDate, 'yyyy-MM-dd'),
           },
-          body: JSON.stringify({
-            userId,
-            type: 'CAR_RENTAL',
-            searchDetails: {
-              ...data,
-              startDate: format(data.startDate, 'yyyy-MM-dd'),
-              endDate: format(data.endDate, 'yyyy-MM-dd'),
-            },
-            price: data.budgetPerDay,
-            currency: 'XAF',
-            contactName: 'User',
-            contactEmail: '',
-            contactPhone: data.phone,
-          }),
-        });
+          price: data.budgetPerDay,
+          currency: 'XAF',
+          contactName: 'Guest',
+          contactEmail: '',
+          contactPhone: data.phone,
+        }),
+      });
 
-        if (bookingResponse.ok) {
-          console.log('Car rental booking saved successfully for user:', userId);
+      if (bookingResponse.ok) {
+        console.log('Car rental booking saved successfully');
+        if (userId) {
           toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
           // Refresh the page to show the new booking
           window.location.reload();
         }
-      } catch (err) {
-        console.error('Error creating booking:', err);
       }
+    } catch (err) {
+      console.error('Error creating booking:', err);
     }
   };
 

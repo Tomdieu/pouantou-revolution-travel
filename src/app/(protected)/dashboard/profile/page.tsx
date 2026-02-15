@@ -30,7 +30,7 @@ export default async function ProfilePage() {
         : user.email?.[0].toUpperCase() || 'U';
 
     return (
-        <div className="min-h-screen bg-stone-50 py-12 px-4">
+        <div className="bg-stone-50 py-12 px-4">
             <div className="max-w-2xl mx-auto space-y-8">
 
                 {/* Page Header */}

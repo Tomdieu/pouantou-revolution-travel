@@ -28,27 +28,21 @@ export default async function EditDestinationPage({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-            {/* Header */}
-            <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center gap-4">
-                        <Link href="/admin/destinations">
-                            <Button variant="secondary" size="sm">
-                                <ArrowLeft className="w-4 h-4 mr-2" />
-                                Retour
-                            </Button>
-                        </Link>
-                        <div>
-                            <h1 className="text-2xl font-bold">Modifier la Destination</h1>
-                            <p className="text-sm text-purple-100">{destination.name}, {destination.country}</p>
-                        </div>
-                    </div>
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Modifier la Destination</h1>
+                    <p className="text-slate-500 mt-2">{destination.name}, {destination.country}</p>
                 </div>
-            </header>
+                <Link href="/admin/destinations">
+                    <Button variant="outline">
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Retour
+                    </Button>
+                </Link>
+            </div>
 
-            {/* Main Content */}
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="bg-white">
                 <DestinationForm
                     mode="edit"
                     initialData={{
@@ -66,7 +60,7 @@ export default async function EditDestinationPage({
                         order: destination.order,
                     }}
                 />
-            </main>
+            </div>
         </div>
     );
 }

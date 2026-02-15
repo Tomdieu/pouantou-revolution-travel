@@ -10,11 +10,12 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Eye, Plane, Hotel, Car, Calendar, User, Mail, Phone, Clock, CheckCircle, XCircle, PlayCircle } from "lucide-react";
+import { Eye, Plane, Hotel, Car, Calendar, User, Mail, Phone, Clock, CheckCircle, XCircle, PlayCircle, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { updateBookingStatus } from "@/actions/booking-actions";
+import { updateBookingStatus, updateBookingPrice } from "@/actions/booking-actions";
 import { toast } from "sonner";
 import { BookingStatus } from "@prisma/client";
 
@@ -54,6 +55,32 @@ const statusVariants: any = {
 
 export function BookingDetailsDialog({ booking, children }: BookingDetailsDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isEditingPrice, setIsEditingPrice] = useState(false);
+    const [priceValue, setPriceValue] = useState(booking.price?.toString() || '');
+
+    const handlePriceUpdate = async () => {
+        setIsLoading(true);
+        try {
+            const price = parseFloat(priceValue);
+            if (isNaN(price)) {
+                toast.error("Prix invalide");
+                setIsLoading(false);
+                return;
+            }
+
+            const result = await updateBookingPrice(booking.id, price);
+            if (result.success) {
+                toast.success("Prix mis à jour");
+                setIsEditingPrice(false);
+            } else {
+                toast.error("Erreur lors de la mise à jour");
+            }
+        } catch (error) {
+            toast.error("Une erreur est survenue");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     let details: any = {};
     try {
@@ -155,10 +182,56 @@ export function BookingDetailsDialog({ booking, children }: BookingDetailsDialog
 
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
                                 <p className="text-sm font-medium text-slate-500 mb-1 uppercase tracking-wide">Montant Total</p>
-                                <div className="flex items-baseline gap-2">
-                                    <p className="text-3xl font-bold text-slate-900">{formatCurrency(booking.price, booking.currency)}</p>
-                                    <span className="text-sm font-medium text-slate-500">{booking.currency || 'EUR'}</span>
-                                </div>
+                                {isEditingPrice ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                type="number"
+                                                value={priceValue}
+                                                onChange={(e) => setPriceValue(e.target.value)}
+                                                className="h-8 text-lg font-bold"
+                                                autoFocus
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium">
+                                                {booking.currency || 'EUR'}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                            onClick={handlePriceUpdate}
+                                            disabled={isLoading}
+                                        >
+                                            <CheckCircle className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            onClick={() => {
+                                                setIsEditingPrice(false);
+                                                setPriceValue(booking.price?.toString() || '');
+                                            }}
+                                            disabled={isLoading}
+                                        >
+                                            <XCircle className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-baseline gap-2 group">
+                                        <p className="text-3xl font-bold text-slate-900">{formatCurrency(booking.price, booking.currency)}</p>
+                                        <span className="text-sm font-medium text-slate-500">{booking.currency || 'EUR'}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity ml-2"
+                                            onClick={() => setIsEditingPrice(true)}
+                                        >
+                                            <Pencil className="h-3.5 w-3.5 text-slate-400 hover:text-blue-600" />
+                                        </Button>
+                                    </div>
+                                )}
                                 {booking.status === 'PENDING' && (
                                     <p className="text-xs text-orange-600 mt-1 flex items-center gap-1">
                                         <Clock className="w-3 h-3" /> En attente de confirmation

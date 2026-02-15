@@ -14,13 +14,15 @@ import { MoreHorizontal, CheckCircle, XCircle, PlayCircle } from "lucide-react";
 import { BookingDetailsDialog } from "@/components/admin/BookingDetailsDialog";
 import { updateBookingStatus } from "@/actions/booking-actions";
 import { toast } from "sonner";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, Booking, User } from "@prisma/client";
 
-interface BookingActionsProps {
-    booking: any; // We can improve typing later
+interface BookingActionProps {
+    booking: Booking & {
+        user: User | null;
+    };
 }
 
-export function BookingActions({ booking }: BookingActionsProps) {
+export function BookingActions({ booking }: BookingActionProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleStatusChange = async (status: BookingStatus) => {

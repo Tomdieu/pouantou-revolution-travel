@@ -6,11 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { InputPhone } from '@/components/ui/input-phone';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, User, Mail, Shield, Key } from 'lucide-react';
+import { Loader2, Save, User, Mail, Shield, Key, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ChangePasswordModal } from './ChangePasswordModal';
@@ -18,6 +19,7 @@ import { ChangePasswordModal } from './ChangePasswordModal';
 const profileSchema = z.object({
     name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
     email: z.string().email('Email invalide'),
+    phone: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -27,6 +29,7 @@ interface ProfileFormProps {
         id: string;
         name?: string | null;
         email?: string | null;
+        phone?: string | null;
         role?: string;
     };
     isOAuth: boolean;
@@ -42,6 +45,7 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
         defaultValues: {
             name: user.name || '',
             email: user.email || '',
+            phone: user.phone || '',
         },
     });
 
@@ -131,6 +135,30 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
                                                     </div>
                                                     <Input
                                                         {...field}
+                                                        disabled={!isEditing || isLoading}
+                                                        className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
+                                                    />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-bold text-gray-700 ml-1">Téléphone</FormLabel>
+                                            <FormControl>
+                                                <div className="relative group">
+                                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+                                                        <Phone className="h-4 w-4" />
+                                                    </div>
+                                                    <InputPhone
+                                                        {...field}
+                                                        placeholder="+33 6 12 34 56 78"
                                                         disabled={!isEditing || isLoading}
                                                         className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
                                                     />

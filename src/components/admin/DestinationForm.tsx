@@ -110,9 +110,9 @@ export function DestinationForm({ initialData, mode }: DestinationFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
                 {/* Image Upload Section */}
-                <Card>
+                <Card className=''>
                     <CardContent className="pt-6">
                         <FormLabel>Image de la destination</FormLabel>
                         <FormDescription className="mb-4">

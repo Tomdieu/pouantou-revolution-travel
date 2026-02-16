@@ -4,9 +4,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react";
+import { StructuredData } from "@/components/StructuredData";
 
 export const metadata: Metadata = {
-  title: "Revolution Travel & Services - Agence de Voyage Cameroun | Billets d'Avion",
+  title: "Revolution Travel Cameroun - Agence de Voyage & Services | Billets d'Avion",
   description: "Agence de voyage professionnelle au Cameroun. Réservation de billets d'avion vers toutes destinations. Devis gratuit sous 1h. Service 7j/7. Meilleurs tarifs garantis.",
   icons: {
     icon: [
@@ -87,7 +88,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'fr_CM',
     url: 'https://puantou-revolution-travel.vercel.app',
-    title: 'Revolution Travel & Services - Votre Agence de Voyage au Cameroun',
+    title: 'Revolution Travel Cameroun - Votre Agence de Voyage & Services',
     description: 'Spécialistes en réservation de billets d\'avion depuis le Cameroun. Obtenez votre devis gratuit sous 1h. Service professionnel 7j/7.',
     siteName: 'Revolution Travel & Services',
     images: [
@@ -95,13 +96,13 @@ export const metadata: Metadata = {
         url: 'https://puantou-revolution-travel.vercel.app/logo-image.png',
         width: 1200,
         height: 630,
-        alt: 'Revolution Travel & Services - Agence de Voyage Cameroun',
+        alt: 'Revolution Travel Cameroun - Agence de Voyage',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Revolution Travel & Services - Agence de Voyage Cameroun',
+    title: 'Revolution Travel Cameroun - Agence de Voyage & Services',
     description: 'Réservation de billets d\'avion depuis le Cameroun. Devis gratuit sous 1h.',
     images: ['https://puantou-revolution-travel.vercel.app/logo-image.png'],
   },
@@ -127,7 +128,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Revolution Travel" />
-        <meta name="description" content="Agence de voyage professionnelle au Cameroun" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
@@ -191,6 +191,7 @@ export default function RootLayout({
             {children}
           </main>
         </SessionProvider>
+        <StructuredData />
         <Analytics />
         <Toaster />
       </body>

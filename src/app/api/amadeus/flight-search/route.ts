@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { calculateFlightServiceFee } from '@/lib/service-fees';
 
 // Validate required environment variables
 if (!process.env.AMADEUS_API_KEY || !process.env.AMADEUS_API_KEY_SECRET) {
@@ -260,39 +261,43 @@ export async function POST(request: NextRequest) {
     const flightData: AmadeusResponse = await amadeusResponse.json();
 
     // Transform the data for easier consumption
-    const transformedOffers = flightData.data.map(offer => ({
-      id: offer.id,
-      price: {
-        total: parseFloat(offer.price.total),
-        currency: offer.price.currency,
-        formattedTotal: `${offer.price.total} ${offer.price.currency}`,
-        // Add 68.60 EUR fee to display price (hidden from user)
-        displayTotal: `${(parseFloat(offer.price.total) + 68.60).toFixed(2)} ${offer.price.currency}`,
-      },
-      duration: offer.itineraries[0]?.duration,
-      stops: offer.itineraries[0]?.segments.length - 1,
-      isNonStop: (offer.itineraries[0]?.segments.length || 0) === 1,
-      departure: {
-        airport: offer.itineraries[0]?.segments[0]?.departure.iataCode,
-        time: offer.itineraries[0]?.segments[0]?.departure.at,
-      },
-      arrival: {
-        airport: offer.itineraries[0]?.segments[offer.itineraries[0]?.segments.length - 1]?.arrival.iataCode,
-        time: offer.itineraries[0]?.segments[offer.itineraries[0]?.segments.length - 1]?.arrival.at,
-      },
-      airline: offer.validatingAirlineCodes[0],
-      segments: offer.itineraries[0]?.segments.map(segment => ({
-        departure: segment.departure,
-        arrival: segment.arrival,
-        airline: segment.carrierCode,
-        flightNumber: `${segment.carrierCode}${segment.number}`,
-        duration: segment.duration,
-        aircraft: segment.aircraft.code,
-      })),
-      bookableSeats: offer.numberOfBookableSeats,
-      instantTicketing: offer.instantTicketingRequired,
-      lastTicketingDate: offer.lastTicketingDate,
-    }));
+    const transformedOffers = flightData.data.map(offer => {
+      const basePrice = parseFloat(offer.price.total);
+      const fee = calculateFlightServiceFee(basePrice);
+
+      return {
+        id: offer.id,
+        price: {
+          basePrice: basePrice,
+          total: basePrice + fee,
+          currency: offer.price.currency,
+          formattedTotal: `${offer.price.total} ${offer.price.currency}`,
+          displayTotal: `${(basePrice + fee).toFixed(2)} ${offer.price.currency}`,
+        },
+        duration: offer.itineraries[0]?.duration,
+        stops: offer.itineraries[0]?.segments.length - 1,
+        isNonStop: (offer.itineraries[0]?.segments.length || 0) === 1,
+        departure: {
+          airport: offer.itineraries[0]?.segments[0]?.departure.iataCode,
+          time: offer.itineraries[0]?.segments[0]?.departure.at,
+        },
+        arrival: {
+          airport: offer.itineraries[0]?.segments[offer.itineraries[0]?.segments.length - 1]?.arrival.iataCode,
+          time: offer.itineraries[0]?.segments[offer.itineraries[0]?.segments.length - 1]?.arrival.at,
+        },
+        airline: offer.validatingAirlineCodes[0],
+        segments: offer.itineraries[0]?.segments.map(segment => ({
+          departure: segment.departure,
+          arrival: segment.arrival,
+          airline: segment.carrierCode,
+          flightNumber: `${segment.carrierCode}${segment.number}`,
+          duration: segment.duration,
+          aircraft: segment.aircraft.code,
+        })),
+        bookableSeats: offer.numberOfBookableSeats,
+        instantTicketing: offer.instantTicketingRequired,
+      };
+    });
 
     // Sort by price (cheapest first)
     transformedOffers.sort((a, b) => a.price.total - b.price.total);

@@ -17,7 +17,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ChevronDownIcon, Facebook } from "lucide-react";
-import { StructuredData } from "@/components/StructuredData";
 import dynamic from 'next/dynamic';
 
 // Dynamically import the LocationMap component to avoid SSR issues
@@ -391,9 +390,6 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
         </a>
       </div>
-
-      {/* Structured Data for SEO */}
-      <StructuredData />
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />

@@ -1,4 +1,14 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pouantou Revolution Travel
+
+Welcome to the Pouantou Revolution Travel platform - a cutting-edge travel booking application built with Next.js and modern web technologies.
+
+## Features
+
+- Seamless travel booking experience
+- Real-time availability checking
+- Secure payment processing
+- Responsive design for all devices
+- Optimized performance with Next.js 14
 
 ## Getting Started
 
@@ -19,6 +29,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Technology Stack
+
+- Next.js 14 with App Router
+- TypeScript
+- Tailwind CSS
+- Prisma ORM
+- PostgreSQL
+- React Email for notifications
 
 ## Learn More
 

@@ -64,6 +64,94 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+
+  /* New travel-themed CSS variables */
+  --travel-primary: #14b8a6;
+  --travel-secondary: #0d9488;
+  --travel-accent: #f97316;
+  --travel-light: #f0fdfa;
+  --travel-dark: #0f766e;
+
+  /* Sunset colors */
+  --sunset-primary: #f97316;
+  --sunset-secondary: #ea580c;
+  --sunset-light: #fff7ed;
+  --sunset-dark: #c2410c;
+
+  /* Ocean colors */
+  --ocean-primary: #3b82f6;
+  --ocean-secondary: #2563eb;
+  --ocean-light: #eff6ff;
+  --ocean-dark: #1d4ed8;
+
+  /* Forest colors */
+  --forest-primary: #22c55e;
+  --forest-secondary: #16a34a;
+  --forest-light: #f0fdf4;
+  --forest-dark: #15803d;
+
+  /* Additional spacing variables */
+  --spacing-xs: 0.125rem;
+  --spacing-sm: 0.25rem;
+  --spacing-md: 0.5rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --spacing-2xl: 2rem;
+  --spacing-3xl: 3rem;
+
+  /* Border radius variations */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --radius-full: 9999px;
+
+  /* Transition variables */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+  --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-index variables */
+  --z-modal: 1000;
+  --z-dropdown: 100;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-overlay: 1040;
+  --z-popover: 1050;
+  --z-tooltip: 1060;
+  --z-toast: 1070;
+
+  /* Typography variables */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* Opacity variables */
+  --opacity-0: 0;
+  --opacity-5: 0.05;
+  --opacity-10: 0.1;
+  --opacity-20: 0.2;
+  --opacity-25: 0.25;
+  --opacity-30: 0.3;
+  --opacity-40: 0.4;
+  --opacity-50: 0.5;
+  --opacity-60: 0.6;
+  --opacity-70: 0.7;
+  --opacity-75: 0.75;
+  --opacity-80: 0.8;
+  --opacity-90: 0.9;
+  --opacity-95: 0.95;
+  --opacity-100: 1;
 }
 
 .dark {

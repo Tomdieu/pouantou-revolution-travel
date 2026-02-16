@@ -65,6 +65,7 @@ interface FlightOffer {
     currency: string;
     formattedTotal: string;
     displayTotal: string; // Price with hidden fee added
+    basePrice?: number;
   };
   duration?: string;
   stops: number;
@@ -223,16 +224,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
       const searchData = initialSearchData;
 
       if (searchData.success && searchData.data.offers) {
-        // Add 68.60 EUR to each price before displaying
-        const offersWithFee = searchData.data.offers.map((offer: any) => ({
-          ...offer,
-          price: {
-            ...offer.price,
-            displayTotal: `${(offer.price.total + 68.60).toFixed(2)} ${offer.price.currency}`,
-          },
-        }));
-
-        setResults(offersWithFee);
+        setResults(searchData.data.offers);
         setShowResults(true);
       } else {
         setError(searchData.error || 'Aucun vol trouvé pour cette recherche');
@@ -276,7 +268,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
             returnDate: searchData.returnDate ? format(searchData.returnDate, 'yyyy-MM-dd') : undefined,
             selectedFlight: offer,
           },
-          price: offer.price.total + 68.60,
+          price: offer.price.total,
           currency: offer.price.currency,
           contactName: searchData.email?.split('@')[0] || 'Guest',
           contactEmail: searchData.email || '',
@@ -549,7 +541,7 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                       </div>
 
                       {/* Passengers (Small summary here or in step 3? Let's move them to Step 2) */}
-                      <div className="bg-blue-50/50 rounded-xl p-6 border border-blue-100/50">
+                      <div className="">
                         <p className="text-sm font-bold text-blue-900 mb-4 ml-1">Passagers</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <FormField

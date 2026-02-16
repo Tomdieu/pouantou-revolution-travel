@@ -16,6 +16,7 @@ export interface SelectedOffer {
     total: number;
     currency: string;
     displayTotal: string;
+    basePrice?: number;
   };
   departure: {
     airport: string;
@@ -51,4 +52,5 @@ export interface FlightSearchRequestEmailProps {
   selectedOffer: SelectedOffer;
   contactInfo: ContactInfo;
   searchError?: string;
+  isAdmin?: boolean;
 }

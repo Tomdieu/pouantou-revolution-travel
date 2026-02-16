@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       - Nombre d'adultes: ${searchData.adults || 'Non spécifié'}
       - Rayon de recherche: ${searchData.radius ? `${searchData.radius} km` : 'Non spécifié'}
       
-      ${searchData.searchError 
+      ${searchData.searchError
         ? `⚠️ ERREUR DE RECHERCHE: ${searchData.searchError}
 
         Action requise: Contactez le client au ${searchData.phone} pour l'aider dans sa recherche.`
@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Send email
     await sendEmail({
+      // to: ['ivan.tomdieu@gmail.com'],
       to: ['ivan.tomdieu@gmail.com', 'p.revolutiontravel@yahoo.com', 'tsilieuj@gmail.com'],
       subject: `🏨 Nouvelle recherche d'hôtel - ${searchData.city}, ${searchData.country}`,
       html: emailHtml,

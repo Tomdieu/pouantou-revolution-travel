@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     }));
 
     await sendEmail({
+      // to: ['ivan.tomdieu@gmail.com'],
       to: ['ivan.tomdieu@gmail.com', 'p.revolutiontravel@yahoo.com', 'tsilieuj@gmail.com'],
       subject: `🛫 Nouvelle demande de vol - ${searchData.originLocationCode} → ${searchData.destinationLocationCode}`,
       html: teamEmailHtml,

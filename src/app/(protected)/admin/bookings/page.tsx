@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookingActions } from "@/components/admin/BookingActions";
+import { BookingPriceCell } from "@/components/admin/BookingPriceCell";
 
 async function getBookings() {
     const bookings = await prisma.booking.findMany({
@@ -51,6 +52,7 @@ export default async function BookingsPage() {
                             <TableHead>Client</TableHead>
                             <TableHead>Contact</TableHead>
                             <TableHead>Statut</TableHead>
+                            <TableHead>Prix</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -58,7 +60,7 @@ export default async function BookingsPage() {
                     <TableBody>
                         {bookings.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={7} className="h-24 text-center">
                                     Aucune réservation trouvée.
                                 </TableCell>
                             </TableRow>
@@ -93,6 +95,13 @@ export default async function BookingsPage() {
                                         <Badge className={getStatusColor(booking.status)}>
                                             {booking.status}
                                         </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <BookingPriceCell
+                                            bookingId={booking.id}
+                                            initialPrice={booking.price}
+                                            currency={booking.currency}
+                                        />
                                     </TableCell>
                                     <TableCell>{new Date(booking.createdAt).toLocaleDateString('fr-FR')}</TableCell>
                                     <TableCell className="text-right">

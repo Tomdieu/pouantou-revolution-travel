@@ -4,19 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CityCombobox } from "@/components/ui/city-combobox";
-import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ChevronDownIcon, Facebook } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 // Dynamically import the LocationMap component to avoid SSR issues
@@ -31,34 +21,15 @@ const LocationMap = dynamic(() => import('@/components/LocationMap'), {
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { toast } from "sonner";
 import {
-  Menu,
   Send,
-  FileText,
-  Loader2,
-  Home,
-  Briefcase,
   MapPin,
-  Mail,
-  Phone,
-  Download,
-  CheckCircle,
-  Clock,
-  Star,
-  Plane,
-  Globe,
-  Shield,
-  Award,
-  Users,
-  ArrowDown
-} from "lucide-react";
-import Image from "next/image";
+  Phone} from "lucide-react";
 import { DestinationsSection } from "@/components/homepage/DestinationsSection";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/homepage/Hero";
 import HowItWorks from "@/components/homepage/HowItWorks";
 import StatsSection from "@/components/homepage/StatsSection";
-import TestimonialsSection from "@/components/homepage/TestimonialsSection";
 import DevisForm from "@/components/DevisForm";
 import ServicesSection from "@/components/ServicesSection";
 import { ReviewsSection } from "@/components/homepage/ReviewsSection";

@@ -56,24 +56,21 @@ export default function HowItWorks() {
                     {steps.map((step, idx) => (
                         <div
                             key={idx}
-                            className="group card-modern p-10 space-y-8 bg-white"
+                            className="group p-8 space-y-6 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition-all duration-300"
                         >
-                            <div className={`w-20 h-20 rounded-[24px] ${step.light} ${step.text} flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
+                            <div className={`w-16 h-16 rounded-lg ${step.light} ${step.text} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
                                 {step.icon}
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4">
-                                    <span className="text-4xl font-black text-slate-100 group-hover:text-blue-50 transition-colors">{idx + 1}</span>
-                                    <h4 className="text-xl font-bold text-slate-900">{step.title}</h4>
+                            <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <span className="text-3xl font-black text-gray-200 group-hover:text-gray-300 transition-colors">{idx + 1}</span>
+                                    <h4 className="text-lg font-bold text-slate-900">{step.title}</h4>
                                 </div>
-                                <p className="text-slate-600 leading-relaxed font-medium">
+                                <p className="text-slate-600 text-sm leading-relaxed">
                                     {step.desc}
                                 </p>
                             </div>
-
-                            {/* Animation bar */}
-                            <div className="h-1 w-0 bg-gradient-to-r from-blue-500 to-indigo-500 group-hover:w-full transition-all duration-700 rounded-full" />
                         </div>
                     ))}
                 </div>

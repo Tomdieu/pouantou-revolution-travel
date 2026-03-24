@@ -39,12 +39,13 @@ type CarRentalFormData = z.infer<typeof carRentalSchema>;
 
 interface CarRentalFormProps {
   userId?: string;
+  onDialogClose?: (open: boolean) => void;
+  onStepChange?: (step: number) => void;
 }
 
-export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
+export default function CarRentalForm({ userId, onDialogClose, onStepChange }: CarRentalFormProps = {}) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [isStartDateOpen, setIsStartDateOpen] = useState(false);
@@ -54,6 +55,7 @@ export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
   const [brandButtonWidth, setBrandButtonWidth] = useState<number>(0);
   const [modelButtonWidth, setModelButtonWidth] = useState<number>(0);
   const [step, setStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const brandButtonRef = useRef<HTMLButtonElement>(null);
   const modelButtonRef = useRef<HTMLButtonElement>(null);
@@ -89,14 +91,113 @@ export default function CarRentalForm({ userId }: CarRentalFormProps = {}) {
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      setStep(prev => Math.min(prev + 1, 3));
+      if (step === 2) {
+        // Move to step 3 and execute request
+        const data = form.getValues();
+        await performRequest(data);
+      } else {
+        const newStep = Math.min(step + 1, 3);
+        setStep(newStep);
+        onStepChange?.(newStep);
+      }
     } else {
       toast.error("Veuillez remplir les champs obligatoires");
     }
   };
 
   const prevStep = () => {
-    setStep(prev => Math.max(prev - 1, 1));
+    const newStep = Math.max(step - 1, 1);
+    setStep(newStep);
+    onStepChange?.(newStep);
+  };
+
+  const performRequest = async (data: CarRentalFormData) => {
+    setIsLoading(true);
+    setError(null);
+
+    // Analytics logging
+    fetch('/api/search-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'CAR_RENTAL',
+        searchDetails: {
+          ...data,
+          startDate: format(data.startDate, 'yyyy-MM-dd'),
+          endDate: format(data.endDate, 'yyyy-MM-dd'),
+        }
+      }),
+    }).catch(err => console.error('Failed to log car rental search:', err));
+
+    try {
+      // Send car rental request to team
+      const response = await fetch('/api/car-rental-team', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          carRentalData: {
+            brand: data.brand,
+            model: data.model,
+            budgetPerDay: data.budgetPerDay,
+            phone: data.phone,
+            location: data.location,
+            startDate: format(data.startDate, 'yyyy-MM-dd'),
+            endDate: format(data.endDate, 'yyyy-MM-dd'),
+            driverAge: data.driverAge,
+          },
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.error || 'Erreur lors de l\'envoi de la demande');
+        toast.error(errorData.error || 'Erreur lors de l\'envoi de la demande');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur de connexion');
+      toast.error(err instanceof Error ? err.message : 'Erreur de connexion');
+    }
+
+    // Create a booking in the database
+    try {
+      const bookingResponse = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId || undefined,
+          type: 'CAR_RENTAL',
+          searchDetails: {
+            ...data,
+            startDate: format(data.startDate, 'yyyy-MM-dd'),
+            endDate: format(data.endDate, 'yyyy-MM-dd'),
+          },
+          price: data.budgetPerDay,
+          currency: 'XAF',
+          contactName: 'Guest',
+          contactEmail: '',
+          contactPhone: data.phone,
+        }),
+      });
+
+      if (bookingResponse.ok) {
+        console.log('Car rental booking saved successfully');
+        if (userId) {
+          toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
+        }
+      }
+    } catch (err) {
+      console.error('Error creating booking:', err);
+    }
+
+    const newStep = 3;
+    setStep(newStep);
+    onStepChange?.(newStep);
+    setIsLoading(false);
   };
 
   // Get unique brands from cars data

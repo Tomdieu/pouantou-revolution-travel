@@ -9,14 +9,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CityCombobox } from "@/components/ui/city-combobox";
+import { MobileLocationSelector } from "@/components/MobileLocationSelector";
 import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ChevronDownIcon, Loader2 } from "lucide-react";
+import { ChevronDownIcon, Loader2, AlertCircle, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { InputPhone } from "@/components/ui/input-phone";
+import { useMediaQuery } from 'usehooks-ts';
+import airports from '@/constants/airports.json';
 
 // Zod schema for form validation - Updated to match Amadeus API
 const formSchema = z.object({
@@ -84,15 +87,33 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+interface Airport {
+  code: string;
+  name: string;
+  city: string;
+  state: string;
+  country: string;
+  lat: string;
+  lon: string;
+}
+
 interface DevisFormProps {
   className?: string;
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: string) => void;
 }
 
+// Helper function to get airport code from airport name
+function getAirportCodeFromName(airportName: string): string {
+  const airportList = airports as Airport[];
+  const airport = airportList.find(a => a.name === airportName);
+  return airport?.code || airportName;
+}
+
 export default function DevisForm({ className = "", onSubmitSuccess, onSubmitError }: DevisFormProps) {
   // Add hydration state to prevent SSR/client mismatch
   const [isHydrated, setIsHydrated] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     setIsHydrated(true);
@@ -136,7 +157,10 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetchingResults, setIsFetchingResults] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
+  const [flightResults, setFlightResults] = useState<any[]>([]);
+  const [selectedFlight, setSelectedFlight] = useState<any>(null);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof FormData)[] = [];
@@ -148,17 +172,75 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      setStep(prev => Math.min(prev + 1, 3));
+      // After step 2, fetch flight results before moving to step 3
+      if (step === 2) {
+        await fetchFlightResults();
+      } else {
+        setStep(prev => Math.min(prev + 1, 4));
+      }
     } else {
       toast.error("Veuillez corriger les erreurs avant de continuer");
     }
   };
 
+  // Fetch flight results from Amadeus API
+  const fetchFlightResults = async () => {
+    setIsFetchingResults(true);
+    try {
+      // Get airport codes from airport names
+      const originCode = getAirportCodeFromName(form.getValues('departureCity'));
+      const destinationCode = getAirportCodeFromName(form.getValues('destination'));
+
+      const formDataForAPI = {
+        originLocationCode: originCode,
+        destinationLocationCode: destinationCode,
+        departureDate: form.getValues('departureDate').toISOString().split('T')[0],
+        returnDate: form.getValues('returnDate')?.toISOString().split('T')[0] || '',
+        adults: form.getValues('adults'),
+        children: form.getValues('children') || 0,
+        infants: form.getValues('infants') || 0,
+        travelClass: form.getValues('travelClass'),
+        nonStop: form.getValues('nonStop'),
+        currencyCode: form.getValues('currencyCode'),
+        maxPrice: form.getValues('maxPrice'),
+      };
+
+      console.log('Fetching flights with params:', formDataForAPI);
+
+      const response = await fetch('/api/amadeus/flight-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formDataForAPI),
+      });
+
+      const result = await response.json();
+      console.log('Flight search response:', result);
+
+      if (response.ok && result.success && result.data?.offers) {
+        setFlightResults(result.data.offers || []);
+        setStep(3);
+        toast.success(`${result.data.offers.length} vol(s) trouvé(s)! Sélectionnez un vol.`);
+      } else {
+        toast.error(result.error || 'Erreur lors de la recherche. Veuillez réessayer.');
+      }
+    } catch (error) {
+      console.error('Flight search error:', error);
+      toast.error('Erreur de connexion. Veuillez vérifier votre connexion internet.');
+    } finally {
+      setIsFetchingResults(false);
+    }
+  };
+
   const prevStep = () => {
+    // If coming back from results, clear flight selection
+    if (step === 3) {
+      setFlightResults([]);
+      setSelectedFlight(null);
+    }
     setStep(prev => Math.max(prev - 1, 1));
   };
 
-  // Handle form submission
+  // Handle form submission - only on step 4 (after flight selection)
   const onSubmit = async (data: FormData) => {
     console.log('Form submission started', data);
     setIsSubmitting(true);
@@ -170,7 +252,8 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'FLIGHT',
-        searchDetails: data
+        searchDetails: data,
+        selectedFlight: selectedFlight
       }),
     }).catch(err => console.error('Failed to log devis search:', err));
 
@@ -182,7 +265,8 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
         passengersTotal: data.adults + data.children + data.infants,
         adultsCount: data.adults,
         childrenCount: data.children,
-        infantsCount: data.infants
+        infantsCount: data.infants,
+        selectedFlightId: selectedFlight?.id
       };
 
       const response = await fetch('/api/send-quote', {
@@ -197,6 +281,8 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
         setSubmitStatus({ type: 'success', message: 'Demande envoyée avec succès!' });
         form.reset();
         setStep(1);
+        setFlightResults([]);
+        setSelectedFlight(null);
         onSubmitSuccess?.();
       } else {
         const errorMessage = result.error || 'Erreur lors de l\'envoi. Veuillez réessayer.';
@@ -217,7 +303,8 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
   const steps = [
     { id: 1, title: 'Itinéraire', icon: '✈️' },
     { id: 2, title: 'Passagers', icon: '👥' },
-    { id: 3, title: 'Contact', icon: '👤' }
+    { id: 3, title: 'Résultats', icon: '🔍' },
+    { id: 4, title: 'Contact', icon: '👤' }
   ];
 
   return (
@@ -225,7 +312,7 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
       {/* Header Section */}
       <div className="text-center mb-10">
         <h2 className="text-3xl sm:text-4xl font-black mb-4">
-          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Demande de Devis</span>
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Reservation de billet d'avion</span>
         </h2>
         <p className="text-gray-600 font-medium">
           Recevez votre offre personnalisée en moins de 60 minutes.
@@ -280,12 +367,21 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                         <FormItem>
                           <FormLabel className="text-sm font-bold text-gray-700">Ville de Départ <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
-                            <CityCombobox
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              placeholder="D'où partez-vous ?"
-                              className="h-12 border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50 backdrop-blur-sm"
-                            />
+                            {isMobile ? (
+                              <MobileLocationSelector
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="D'où partez-vous ?"
+                                label="Ville de Départ"
+                              />
+                            ) : (
+                              <CityCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="D'où partez-vous ?"
+                                className="h-12 border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50 backdrop-blur-sm"
+                              />
+                            )}
                           </FormControl>
                           <FormMessage className="font-bold text-xs" />
                         </FormItem>
@@ -298,12 +394,21 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                         <FormItem>
                           <FormLabel className="text-sm font-bold text-gray-700">Destination <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
-                            <CityCombobox
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              placeholder="Où allez-vous ?"
-                              className="h-12 border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50 backdrop-blur-sm"
-                            />
+                            {isMobile ? (
+                              <MobileLocationSelector
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="Où allez-vous ?"
+                                label="Destination"
+                              />
+                            ) : (
+                              <CityCombobox
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder="Où allez-vous ?"
+                                className="h-12 border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white/50 backdrop-blur-sm"
+                              />
+                            )}
                           </FormControl>
                           <FormMessage className="font-bold text-xs" />
                         </FormItem>
@@ -315,82 +420,117 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                     <FormField
                       control={form.control}
                       name="departureDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-bold text-gray-700">Date de Départ <span className="text-red-500">*</span></FormLabel>
-                          <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="w-full h-12 justify-between font-semibold border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm hover:border-blue-500 transition-all"
-                                >
-                                  {field.value ? field.value.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Sélectionner une date"}
-                                  <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="start">
-                                <Calendar
-                                  mode="single"
-                                  captionLayout="dropdown"
-                                  selected={field.value}
-                                  onSelect={(date) => date && field.onChange(date)}
-                                  disabled={(date) => {
-                                    const today = new Date();
-                                    today.setHours(0, 0, 0, 0);
-                                    const maxDate = new Date();
-                                    maxDate.setMonth(today.getMonth() + 12);
-                                    return date < today || date > maxDate;
-                                  }}
-                                  initialFocus
-                                  className="rounded-2xl"
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                          <FormMessage className="font-bold text-xs" />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+                        return (
+                          <FormItem>
+                            <FormLabel className="text-sm font-bold text-gray-700">Date de Départ <span className="text-red-500">*</span></FormLabel>
+                            <FormControl>
+                              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full h-12 justify-between font-semibold border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm hover:border-blue-500 transition-all"
+                                  >
+                                    {field.value ? field.value.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Sélectionner une date"}
+                                    <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    captionLayout="dropdown"
+                                    selected={field.value}
+                                    onSelect={(date) => {
+                                      if (date) {
+                                        field.onChange(date);
+                                        setDatePopoverOpen(false);
+                                      }
+                                    }}
+                                    disabled={(date) => {
+                                      const today = new Date();
+                                      today.setHours(0, 0, 0, 0);
+                                      const maxDate = new Date();
+                                      maxDate.setMonth(today.getMonth() + 12);
+                                      return date < today || date > maxDate;
+                                    }}
+                                    defaultMonth={field.value || new Date()}
+                                    initialFocus
+                                    className="rounded-2xl"
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </FormControl>
+                            <FormMessage className="font-bold text-xs" />
+                          </FormItem>
+                        );
+                      }}
                     />
                     <FormField
                       control={form.control}
                       name="returnDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-bold text-gray-700">Date de Retour <span className="text-gray-400 font-normal">(Optionnel)</span></FormLabel>
-                          <FormControl>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="w-full h-12 justify-between font-semibold border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm hover:border-blue-500 transition-all"
-                                >
-                                  {field.value ? field.value.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Aller simple ?"}
-                                  <ChevronDownIcon className="h-4 w-4 opacity-50" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  captionLayout="dropdown"
-                                  onSelect={(date) => field.onChange(date)}
-                                  disabled={(date) => {
-                                    const departureDate = form.watch("departureDate");
-                                    const minDate = departureDate || new Date();
-                                    const maxDate = new Date();
-                                    maxDate.setMonth(new Date().getMonth() + 12);
-                                    return date < minDate || date > maxDate;
-                                  }}
-                                  initialFocus
-                                  className="rounded-2xl"
-                                />
-                              </PopoverContent>
-                            </Popover>
-                          </FormControl>
-                          <FormMessage className="font-bold text-xs" />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const [returnPopoverOpen, setReturnPopoverOpen] = useState(false);
+                        const departureDate = form.watch("departureDate");
+                        return (
+                          <FormItem>
+                            <FormLabel className="text-sm font-bold text-gray-700">Date de Retour <span className="text-gray-400 font-normal">(Optionnel)</span></FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Popover open={returnPopoverOpen} onOpenChange={setReturnPopoverOpen}>
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      className={`w-full h-12 justify-between font-semibold border-gray-200 rounded-xl bg-white/50 backdrop-blur-sm hover:border-blue-500 transition-all ${field.value ? 'pr-14' : 'pr-10'}`}
+                                    >
+                                      {field.value ? field.value.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "Aller simple ?"}
+                                      <ChevronDownIcon className="h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0 rounded-2xl border-none shadow-2xl" align="start">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      captionLayout="dropdown"
+                                      onSelect={(date) => {
+                                        if (date) {
+                                          field.onChange(date);
+                                          setReturnPopoverOpen(false);
+                                        }
+                                      }}
+                                      disabled={(date) => {
+                                        const minDate = departureDate || new Date();
+                                        const maxDate = new Date();
+                                        maxDate.setMonth(new Date().getMonth() + 12);
+                                        return date < minDate || date > maxDate;
+                                      }}
+                                      defaultMonth={departureDate || new Date()}
+                                      initialFocus
+                                      className="rounded-2xl"
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                {field.value && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      field.onChange(undefined);
+                                      setReturnPopoverOpen(false);
+                                    }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors p-1.5 z-100 hover:bg-red-50 rounded-lg"
+                                    aria-label="Supprimer la date de retour"
+                                  >
+                                    <X className="h-5 w-5" />
+                                  </button>
+                                )}
+                              </div>
+                            </FormControl>
+                            <FormMessage className="font-bold text-xs" />
+                          </FormItem>
+                        );
+                      }}
                     />
                   </div>
 
@@ -595,8 +735,89 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                 </div>
               )}
 
-              {/* STEP 3: CONTACT INFO */}
+              {/* STEP 3: FLIGHT RESULTS */}
               {step === 3 && (
+                <div className="animate-fade-in-up space-y-6">
+                  {isFetchingResults ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
+                        <p className="text-gray-600 font-semibold">Recherche des meilleurs vols...</p>
+                      </div>
+                    </div>
+                  ) : flightResults.length > 0 ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-gray-600 font-medium mb-4">
+                        Sélectionnez le vol qui vous intéresse parmi les {flightResults.length} résultats trouvés.
+                      </p>
+                      {flightResults.map((flight, index) => (
+                        <button
+                          key={flight.id || index}
+                          onClick={() => {
+                            setSelectedFlight(flight);
+                            setStep(4);
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                            selectedFlight?.id === flight.id
+                              ? 'border-blue-600 bg-blue-50'
+                              : 'border-gray-200 bg-white hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <p className="font-bold text-gray-900">{flight.airline || 'Vol'}</p>
+                              <p className="text-sm text-gray-600">
+                                {flight.isNonStop ? '✈️ Vol direct' : `${flight.stops} escale(s)`}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold text-lg text-blue-600">
+                                {flight.price?.displayTotal || `${flight.price?.total} ${flight.price?.currency || 'XAF'}`}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                ⚠️ Le prix peut changer
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 mt-3 pt-3 border-t border-gray-200">
+                            <div>
+                              <p className="text-xs text-gray-500">Départ</p>
+                              <p className="font-semibold text-gray-900">{flight.departure?.airport}</p>
+                              <p className="text-xs text-gray-500">{new Date(flight.departure?.time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                            <div className="flex flex-col items-center justify-center">
+                              <p className="text-xs text-gray-500">Durée</p>
+                              <p className="font-semibold text-gray-700 text-sm">{flight.duration}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-gray-500">Arrivée</p>
+                              <p className="font-semibold text-gray-900">{flight.arrival?.airport}</p>
+                              <p className="text-xs text-gray-500">{new Date(flight.arrival?.time).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                          </div>
+                          {selectedFlight?.id === flight.id && (
+                            <div className="flex items-center gap-2 mt-3 text-green-600">
+                              <Check className="h-4 w-4" />
+                              <span className="text-sm font-semibold">Sélectionné</span>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center py-12 bg-red-50 rounded-xl border border-red-200">
+                      <div className="text-center">
+                        <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-3" />
+                        <p className="text-red-700 font-semibold">Aucun vol trouvé</p>
+                        <p className="text-red-600 text-sm mt-1">Veuillez modifier vos critères de recherche</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 4: CONTACT INFO (Previously STEP 3) */}
+              {step === 4 && (
                 <div className="animate-fade-in-up space-y-6">
                   <FormField
                     control={form.control}
@@ -687,25 +908,35 @@ export default function DevisForm({ className = "", onSubmitSuccess, onSubmitErr
                     type="button"
                     variant="outline"
                     onClick={prevStep}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isFetchingResults}
                     className="flex-1 h-14 rounded-2xl border-2 border-gray-100 font-bold hover:bg-gray-50 transition-all"
                   >
                     Précédent
                   </Button>
                 )}
-                {step < 3 ? (
+                {step < 4 ? (
                   <Button
                     type="button"
                     onClick={nextStep}
-                    className="flex-[2] h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95"
+                    disabled={isFetchingResults}
+                    className="flex-[2] h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black rounded-2xl shadow-xl shadow-blue-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                   >
-                    Continuer
+                    {isFetchingResults ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Recherche...
+                      </>
+                    ) : step === 3 ? (
+                      'Continuer vers Contact'
+                    ) : (
+                      'Continuer'
+                    )}
                   </Button>
                 ) : (
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-[2] h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-green-200 transition-all hover:-translate-y-1 active:scale-95 disabled:grayscale"
+                    className="flex-[2] h-14 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-green-200 transition-all hover:-translate-y-1 active:scale-95 disabled:grayscale disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <>

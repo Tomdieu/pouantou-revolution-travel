@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { CalendarIcon, Loader2, Search, Plane } from 'lucide-react';
+import { CalendarIcon, Loader2, Search, Plane, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { InputPhone } from './ui/input-phone';
 import { CityCombobox } from './ui/city-combobox';
@@ -87,9 +87,11 @@ interface FlightOffer {
 
 interface FlightSearchFormProps {
   userId?: string;
+  onDialogClose?: (open: boolean) => void;
+  onStepChange?: (step: number) => void;
 }
 
-export default function FlightSearchForm({ userId }: FlightSearchFormProps = {}) {
+export default function FlightSearchForm({ userId, onDialogClose, onStepChange }: FlightSearchFormProps = {}) {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<FlightOffer[]>([]);
@@ -133,21 +135,35 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
   const nextStep = async () => {
     let fieldsToValidate: (keyof FlightSearchFormData)[] = [];
     if (step === 1) {
-      fieldsToValidate = ['originLocationCode', 'destinationLocationCode', 'departureDate', 'returnDate'];
+      fieldsToValidate = ['originLocationCode', 'destinationLocationCode', 'departureDate'];
     } else if (step === 2) {
-      fieldsToValidate = ['adults', 'children', 'infants', 'travelClass', 'nonStop'];
+      fieldsToValidate = ['adults', 'travelClass'];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      setStep(prev => Math.min(prev + 1, 3));
+      if (step === 2) {
+        // When moving from step 2 to 3, perform the search
+        const data = form.getValues();
+        setSearchData(data);
+        await performSearch(data);
+        const newStep = 3;
+        setStep(newStep);
+        onStepChange?.(newStep);
+      } else {
+        const newStep = Math.min(step + 1, 4);
+        setStep(newStep);
+        onStepChange?.(newStep);
+      }
     } else {
       toast.error("Veuillez corriger les erreurs avant de continuer");
     }
   };
 
   const prevStep = () => {
-    setStep(prev => Math.max(prev - 1, 1));
+    const newStep = Math.max(step - 1, 1);
+    setStep(newStep);
+    onStepChange?.(newStep);
   };
 
   const onSubmit = async (data: FlightSearchFormData) => {
@@ -223,16 +239,19 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
 
       const searchData = initialSearchData;
 
-      if (searchData.success && searchData.data.offers) {
+      if (searchData.success && searchData.data.offers && searchData.data.offers.length > 0) {
         setResults(searchData.data.offers);
-        setShowResults(true);
+        // Stay at step 3 to show results
       } else {
+        // No results found - move to step 4 to show contact form
+        setResults([]);
         setError(searchData.error || 'Aucun vol trouvé pour cette recherche');
-        setShowResults(true);
+        setStep(4);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur de recherche de vols');
-      setShowResults(true);
+      setResults([]);
+      setStep(4);
     } finally {
       setIsLoading(false);
     }
@@ -246,10 +265,25 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
     });
   };
 
-  const handleSelectOffer = async (offer: FlightOffer) => {
-    setSelectedOffer(offer);
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-    if (!searchData) return;
+  // Step 3: User clicks "Réserver ce vol" - just save offer and move to Step 4
+  const handleSelectOfferPreview = (offer: FlightOffer) => {
+    setSelectedOffer(offer);
+    const newStep = 4;
+    setStep(newStep);
+    onStepChange?.(newStep);
+  };
+
+  // Step 4: User submits contact form - now actually book with email/phone
+  const handleSelectOffer = async (offer: FlightOffer, contactData?: FlightSearchFormData) => {
+    const dataToUse = contactData || searchData;
+    if (!dataToUse) return;
 
     try {
       // If userId is provided, create a booking in the database
@@ -263,16 +297,16 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
           userId: userId || undefined,
           type: 'FLIGHT',
           searchDetails: {
-            ...searchData,
-            departureDate: format(searchData.departureDate, 'yyyy-MM-dd'),
-            returnDate: searchData.returnDate ? format(searchData.returnDate, 'yyyy-MM-dd') : undefined,
+            ...dataToUse,
+            departureDate: format(dataToUse.departureDate, 'yyyy-MM-dd'),
+            returnDate: dataToUse.returnDate ? format(dataToUse.returnDate, 'yyyy-MM-dd') : undefined,
             selectedFlight: offer,
           },
           price: offer.price.total,
           currency: offer.price.currency,
-          contactName: searchData.email?.split('@')[0] || 'Guest',
-          contactEmail: searchData.email || '',
-          contactPhone: searchData.phone || '',
+          contactName: dataToUse.email?.split('@')[0] || 'Guest',
+          contactEmail: dataToUse.email || '',
+          contactPhone: dataToUse.phone || '',
         }),
       });
 
@@ -283,13 +317,15 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...searchData,
+          ...dataToUse,
           selectedFlight: offer,
         }),
       });
 
       if (bookingResponse.ok) {
         toast.success('Votre réservation a été enregistrée! Notre équipe vous contactera bientôt.');
+        // Close the dialog
+        onDialogClose?.(false);
         // Refresh the page or redirect
         if (userId) {
           window.location.reload();
@@ -299,6 +335,8 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
         // For now, let's treat it as success if at least one works, but ideally we want the booking.
         console.error('Failed to create booking', await bookingResponse.text());
         toast.success('Votre demande a été envoyée à notre équipe. Nous vous contacterons bientôt!');
+        // Close the dialog
+        onDialogClose?.(false);
       }
     } catch (err) {
       toast.error('Erreur lors de l\'envoi de la demande. Veuillez réessayer.');
@@ -306,51 +344,13 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
     }
   };
 
-  const steps = [
-    { id: 1, title: 'Itinéraire', icon: <Plane className="w-5 h-5" /> },
-    { id: 2, title: 'Expérience', icon: <Search className="w-5 h-5" /> },
-    { id: 3, title: 'Passagers', icon: <Plane className="w-5 h-5 rotate-45" /> }
-  ];
-
   return (
     <>
-      {/* Step 1: Search Form */}
-      {!showResults && (
+      {/* STEPS 1 & 2: INPUT FORM */}
+      {step <= 2 && (
         <div className="max-w-4xl mx-auto">
-          {/* Step Indicator */}
-          <div className="mb-4 relative">
-            <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-100 z-0" />
-            <div
-              className="absolute top-5 left-0 h-0.5 bg-blue-600 z-0 transition-all duration-500"
-              style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
-            />
-            <div className="flex justify-between relative z-10">
-              {steps.map((s) => (
-                <div key={s.id} className="flex flex-col items-center">
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 border-2 ${step >= s.id
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200 scale-110'
-                      : 'bg-white border-gray-200 text-gray-400'
-                      }`}
-                  >
-                    {step > s.id ? '✓' : s.id}
-                  </div>
-                  <span className={`mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= s.id ? 'text-blue-600' : 'text-gray-400'
-                    }`}>
-                    {s.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl px-2 p-2 sm:p-4 border border-white/40 relative overflow-hidden group">
-            {/* Decorative Icon Background */}
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
-              {steps[step - 1].icon}
-            </div>
-
-            <div className='flex flex-col relative z-10'>
+          <div className="rounded-3xl px-2 p-2 sm:p-4 border border-white/40">
+            <div className='flex flex-col'>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
@@ -676,33 +676,44 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                         Précédent
                       </Button>
                     )}
-                    {step < 3 ? (
+                    {step === 1 || step === 2 ? (
                       <Button
                         type="button"
                         onClick={nextStep}
+                        disabled={isLoading}
                         className="flex-[2] h-14 bg-blue-600 text-white font-black transition-all hover:-translate-y-1 active:scale-95"
                       >
-                        Continuer
+                        {isLoading ? (
+                          <span className="flex items-center justify-center">
+                            <Loader2 className="animate-spin -ml-1 mr-3 h-6 w-6" />
+                            Recherche...
+                          </span>
+                        ) : (
+                          <span className="flex items-center justify-center">
+                            <Search className="mr-3 h-5 w-5" />
+                            Continuer
+                          </span>
+                        )}
                       </Button>
-                    ) : (
+                    ) : step === 4 ? (
                       <Button
                         type="submit"
                         disabled={isLoading}
                         className="flex-[2] h-14 bg-blue-600 text-white font-black transition-all hover:-translate-y-1 active:scale-95"
                       >
                         {isLoading ? (
-                          <span className="flex items-center justify-center text-white">
+                          <span className="flex items-center justify-center">
                             <Loader2 className="animate-spin -ml-1 mr-3 h-6 w-6" />
-                            Recherche...
+                            Envoi...
                           </span>
                         ) : (
-                          <span className="flex items-center justify-center text-white">
+                          <span className="flex items-center justify-center">
                             <Search className="mr-3 h-5 w-5" />
-                            Rechercher des vols
+                            Envoyer la demande
                           </span>
                         )}
                       </Button>
-                    )}
+                    ) : null}
                   </div>
                 </form>
               </Form>
@@ -711,8 +722,8 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
         </div>
       )}
 
-      {/* Results View */}
-      {showResults && (
+      {/* STEP 3: RESULTS */}
+      {step === 3 && (
         <div className="max-w-4xl mx-auto space-y-4">
           <div className='flex flex-col gap-5'>
             <div className="flex px-4 items-center justify-between">
@@ -724,8 +735,9 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                 variant="outline"
                 className="rounded-md border-gray-200 hover:bg-gray-50"
                 onClick={() => {
-                  setShowResults(false);
-                  setStep(1);
+                  const newStep = 2;
+                  setStep(newStep);
+                  onStepChange?.(newStep);
                 }}
               >
                 Nouvelle recherche
@@ -743,13 +755,6 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
             {results.length > 0 && (
               <div className="grid grid-cols-1 gap-4">
                 {results.map((offer) => {
-                  const formatTime = (dateString: string) => {
-                    return new Date(dateString).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    });
-                  };
-
                   const formatDuration = (duration: string) => {
                     const match = duration.match(/PT(\d+H)?(\d+M)?/);
                     if (!match) return duration;
@@ -858,14 +863,12 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                       </div>
 
                       <Button
-                        onClick={() => handleSelectOffer(offer)}
+                        onClick={() => handleSelectOfferPreview(offer)}
                         disabled={selectedOffer?.id === offer.id}
                         className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-md shadow-lg shadow-blue-200 transition-all"
                       >
                         {selectedOffer?.id === offer.id ? (
-                          <span className="flex items-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin" /> Transmis...
-                          </span>
+                          "Sélectionné"
                         ) : "Réserver ce vol"}
                       </Button>
                     </div>
@@ -880,6 +883,140 @@ export default function FlightSearchForm({ userId }: FlightSearchFormProps = {})
                 <p className="font-bold text-gray-500 animate-pulse">Recherche des meilleurs tarifs...</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* STEP 4: CONTACT FORM (for flight confirmation OR no results) */}
+      {step === 4 && (selectedOffer || error) && (
+        <div className="max-w-4xl mx-auto">
+          {error && (
+            <div className="mb-6">
+              <div className="glass-premium border-orange-100 bg-orange-50/50 p-6 rounded-2xl">
+                <p className="text-orange-600 font-semibold mb-2">Aucun vol trouvé</p>
+                <p className="text-gray-700">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-3xl px-2 p-2 sm:p-4 border border-white/40">
+            <div className='flex flex-col'>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(async (data) => {
+                  if (selectedOffer) {
+                    // Merge form data with existing search data (preserving origin, destination, dates, etc.)
+                    const completeData = { ...searchData, ...data };
+                    await handleSelectOffer(selectedOffer, completeData);
+                  } else {
+                    // No flight selected, just send contact request
+                    await onSubmit(data);
+                  }
+                })} className="space-y-4">
+                  <div className="animate-fade-in-up space-y-4">
+                    {selectedOffer ? (
+                      <div>
+                        <p className="text-sm font-bold text-blue-900 mb-4">Confirmez vos coordonnées pour finaliser votre réservation.</p>
+                        <div className="bg-blue-50/50 border border-blue-200 rounded-xl p-4 mb-6">
+                          <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2">Vol sélectionné</p>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Plane className="w-5 h-5 text-blue-600" />
+                              <div className="flex-1">
+                                <p className="font-semibold text-gray-800">{selectedOffer.departure.airport} → {selectedOffer.arrival.airport}</p>
+                                <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                                  <span>{formatDate(selectedOffer.departure.time)} {formatTime(selectedOffer.departure.time)}</span>
+                                  <span>→</span>
+                                  <span>{formatDate(selectedOffer.arrival.time)} {formatTime(selectedOffer.arrival.time)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <p className="font-bold text-blue-600">{selectedOffer.price.displayTotal}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm font-bold text-blue-900 mb-4">Laissez-nous vos coordonnées et notre équipe vous contactera pour vous proposer d'autres alternatives.</p>
+                    )}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-bold text-gray-700 ml-1">Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="email"
+                              placeholder="votre@email.com"
+                              {...field}
+                              className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-md transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-bold text-gray-700 ml-1">Téléphone</FormLabel>
+                          <FormControl className='border border-stone-300'>
+                            <InputPhone
+                              defaultCountry='CM'
+                              placeholder="+237 6XX XXX XXX"
+                              {...field}
+                              className="h-12 bg-white/50 backdrop-blur-sm border focus:border-blue-500 rounded-md transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex gap-4 pt-6 border-t border-gray-100">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={prevStep}
+                      disabled={isLoading}
+                      className="flex-1 h-14 rounded-2xl border-2 border-gray-100 font-bold hover:bg-gray-50 transition-all"
+                    >
+                      Retourner
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isLoading || (!form.getValues('email') && !form.getValues('phone'))}
+                      className="flex-[2] h-14 bg-blue-600 text-white font-black transition-all hover:-translate-y-1 active:scale-95"
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center justify-center">
+                          <Loader2 className="animate-spin -ml-1 mr-3 h-6 w-6" />
+                          Traitement...
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center">
+                          {selectedOffer ? (
+                            <>
+                              <Plane className="mr-3 h-5 w-5" />
+                              Confirmer la réservation
+                            </>
+                          ) : (
+                            <>
+                              <Send className="mr-3 h-5 w-5" />
+                              Envoyer la demande
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           </div>
         </div>
       )}

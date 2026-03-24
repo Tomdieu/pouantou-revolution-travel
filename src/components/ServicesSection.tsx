@@ -12,9 +12,9 @@ import {
   MessageSquare,
   Sparkles
 } from 'lucide-react';
-import FlightSearchForm from '@/components/FlightSearchForm';
-import HotelSearchForm from '@/components/HotelSearchForm';
-import CarRentalForm from '@/components/CarRentalForm';
+import FlightSearchDialog from '@/components/FlightSearchDialog';
+import HotelSearchDialog from '@/components/HotelSearchDialog';
+import CarRentalDialog from '@/components/CarRentalDialog';
 import DevisForm from '@/components/DevisForm';
 import {
   Credenza,
@@ -89,7 +89,7 @@ export default function ServicesSection({ isDashboard = false, userId }: Service
       title: 'Recherche de Billets',
       description: 'Comparez les meilleurs tarifs aériens parmi plus de 500 compagnies.',
       icon: Plane,
-      form: <FlightSearchForm userId={userId} />,
+      component: FlightSearchDialog,
       gradient: 'from-sky-500/10 to-blue-500/10',
       iconColor: 'text-sky-600'
     },
@@ -98,7 +98,7 @@ export default function ServicesSection({ isDashboard = false, userId }: Service
       title: 'Réservation Hôtel',
       description: 'Dénichez le séjour parfait parmi une sélection d\'établissements premium.',
       icon: Building,
-      form: <HotelSearchForm userId={userId} />,
+      component: HotelSearchDialog,
       gradient: 'from-emerald-500/10 to-teal-500/10',
       iconColor: 'text-emerald-600'
     },
@@ -107,7 +107,7 @@ export default function ServicesSection({ isDashboard = false, userId }: Service
       title: 'Location de Voitures',
       description: 'Large choix de véhicules récents pour vos déplacements en toute liberté.',
       icon: Car,
-      form: <CarRentalForm userId={userId} />,
+      component: CarRentalDialog,
       gradient: 'from-orange-500/10 to-amber-500/10',
       iconColor: 'text-orange-600'
     },
@@ -151,63 +151,45 @@ export default function ServicesSection({ isDashboard = false, userId }: Service
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => {
             const Icon = service.icon;
+            const Component = service.component;
             const isOpen = openModal === service.id;
 
             return (
-              <Credenza
-                key={service.id}
-                open={isOpen}
-                onOpenChange={(open) => setOpenModal(open ? service.id : null)}
-              >
-                <CredenzaTrigger asChild>
-                  <Card className="group relative overflow-hidden cursor-pointer border-stone-200 bg-white hover:bg-stone-50 transition-all duration-300 hover:-translate-y-1 rounded-xl">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <div key={service.id}>
+                <Card 
+                  className="group relative overflow-hidden cursor-pointer border-stone-200 bg-white hover:bg-stone-50 transition-all duration-300 hover:-translate-y-1 rounded-xl h-full"
+                  onClick={() => setOpenModal(service.id)}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
-                    <CardHeader className="pb-4 relative z-10">
-                      <div className={`w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 ${service.iconColor}`}>
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <CardTitle className="text-xl font-black text-stone-900 mb-2 italic tracking-tight">
-                        {service.title}
-                      </CardTitle>
-                      <CardDescription className="text-sm font-medium text-stone-500 leading-relaxed">
-                        {service.description}
-                      </CardDescription>
-                    </CardHeader>
+                  <CardHeader className="pb-4 relative z-10">
+                    <div className={`w-12 h-12 rounded-lg bg-stone-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 ${service.iconColor}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <CardTitle className="text-xl font-black text-stone-900 mb-2 italic tracking-tight">
+                      {service.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm font-medium text-stone-500 leading-relaxed">
+                      {service.description}
+                    </CardDescription>
+                  </CardHeader>
 
-                    <CardContent className="pt-0 relative z-10">
-                      <div className="flex items-center gap-2 text-stone-900 font-black text-sm uppercase tracking-widest mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0">
-                        Explorer
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CredenzaTrigger>
+                  <CardContent className="pt-0 relative z-10">
+                    <div className="flex items-center gap-2 text-stone-900 font-black text-sm uppercase tracking-widest mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-[-10px] group-hover:translate-x-0">
+                      Explorer
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                <CredenzaContent className="sm:max-w-3xl overflow-hidden rounded-xl border-stone-200 bg-white p-0">
-                  <div className={`h-2 bg-gradient-to-r ${service.gradient.replace('/10', '/50')}`} />
-                  <div className="p-6 md:p-10">
-                    <CredenzaHeader className="mb-8 p-0">
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className={`w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center ${service.iconColor}`}>
-                          <Icon className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <CredenzaTitle className="text-2xl md:text-3xl font-black text-stone-900 italic tracking-tight">
-                            {service.title}
-                          </CredenzaTitle>
-                          <CredenzaDescription className="text-stone-500 font-medium mt-1">
-                            {service.description}
-                          </CredenzaDescription>
-                        </div>
-                      </div>
-                    </CredenzaHeader>
-                    <CredenzaBody className="max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar p-0">
-                      {service.form}
-                    </CredenzaBody>
-                  </div>
-                </CredenzaContent>
-              </Credenza>
+                {isOpen && (
+                  <Component 
+                    isOpen={isOpen}
+                    onOpenChange={(open) => setOpenModal(open ? service.id : null)}
+                    userId={userId}
+                  />
+                )}
+              </div>
             );
           })}
         </div>

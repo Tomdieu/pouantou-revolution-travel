@@ -75,12 +75,8 @@ export const ReviewForm = () => {
     };
 
     return (
-        <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                <MessageSquare className="w-40 h-40 text-blue-600 rotate-12" />
-            </div>
-
-            <div className="relative z-10 space-y-8">
+        <div className="bg-white p-8 rounded-xl border border-gray-100 relative overflow-hidden">
+            <div className="space-y-8">
                 {hasSubmitted ? (
                     <div className="text-center py-12 space-y-4 animate-in fade-in zoom-in duration-500">
                         <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -114,7 +110,7 @@ export const ReviewForm = () => {
                                                 className={cn(
                                                     "w-10 h-10 transition-all",
                                                     (hoveredStar || form.watch('stars')) >= star
-                                                        ? "fill-yellow-400 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]"
+                                                        ? "fill-yellow-400 text-yellow-400"
                                                         : "text-gray-200"
                                                 )}
                                             />
@@ -130,14 +126,14 @@ export const ReviewForm = () => {
                                                 name="name"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Votre Nom</FormLabel>
+                                                        <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Nom</FormLabel>
                                                         <FormControl>
                                                             <div className="relative group/input">
                                                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-blue-600 transition-colors" />
                                                                 <Input
                                                                     {...field}
                                                                     placeholder="Ex: Ivan Tom"
-                                                                    className="pl-12 h-14 bg-gray-50/50 border-2 border-gray-100 focus:border-blue-500 rounded-2xl transition-all font-medium"
+                                                                    className="pl-12 h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all font-medium text-sm"
                                                                 />
                                                             </div>
                                                         </FormControl>
@@ -150,14 +146,14 @@ export const ReviewForm = () => {
                                                 name="phone"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Téléphone (Privé)</FormLabel>
+                                                        <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Téléphone (Privé)</FormLabel>
                                                         <FormControl>
-                                                            <div className="relative group/input flex items-center bg-gray-50/50 border-2 border-gray-100 focus-within:border-blue-500 rounded-2xl transition-all overflow-hidden">
+                                                            <div className="relative group/input flex items-center bg-white border border-gray-200 focus-within:border-blue-500 rounded-lg transition-all overflow-hidden">
                                                                 <InputPhone
                                                                     {...field}
                                                                     defaultCountry="CM"
                                                                     placeholder="Ex: 677 ..."
-                                                                    className="h-14 font-medium"
+                                                                    className="h-12 font-medium"
                                                                 />
                                                             </div>
                                                         </FormControl>
@@ -170,14 +166,14 @@ export const ReviewForm = () => {
                                                 name="jobTitle"
                                                 render={({ field }) => (
                                                     <FormItem className="sm:col-span-2">
-                                                        <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Titre / Profession</FormLabel>
+                                                        <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Titre / Profession</FormLabel>
                                                         <FormControl>
                                                             <div className="relative group/input">
                                                                 <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-blue-600 transition-colors" />
                                                                 <Input
                                                                     {...field}
                                                                     placeholder="Ex: Voyageur Passionné / CEO"
-                                                                    className="pl-12 h-14 bg-gray-50/50 border-2 border-gray-100 focus:border-blue-500 rounded-2xl transition-all font-medium"
+                                                                    className="pl-12 h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all font-medium"
                                                                 />
                                                             </div>
                                                         </FormControl>
@@ -193,14 +189,14 @@ export const ReviewForm = () => {
                                                 name="jobTitle"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Titre / Profession</FormLabel>
+                                                        <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Titre / Profession</FormLabel>
                                                         <FormControl>
                                                             <div className="relative group/input">
                                                                 <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-blue-600 transition-colors" />
                                                                 <Input
                                                                     {...field}
                                                                     placeholder="Ex: Voyageur Passionné / CEO"
-                                                                    className="pl-12 h-14 bg-gray-50/50 border-2 border-gray-100 focus:border-blue-500 rounded-2xl transition-all font-medium"
+                                                                    className="pl-12 h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all font-medium"
                                                                 />
                                                             </div>
                                                         </FormControl>
@@ -213,14 +209,14 @@ export const ReviewForm = () => {
                                                 name="phone"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Téléphone (Privé)</FormLabel>
+                                                        <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Téléphone (Privé)</FormLabel>
                                                         <FormControl>
-                                                            <div className="relative group/input flex items-center bg-gray-50/50 border-2 border-gray-100 focus-within:border-blue-500 rounded-2xl transition-all overflow-hidden">
+                                                            <div className="relative group/input flex items-center bg-white border border-gray-200 focus-within:border-blue-500 rounded-lg transition-all overflow-hidden">
                                                                 <InputPhone
                                                                     {...field}
                                                                     defaultCountry="CM"
                                                                     placeholder="Ex: 677 ..."
-                                                                    className="h-14 font-medium"
+                                                                    className="h-12 font-medium"
                                                                 />
                                                             </div>
                                                         </FormControl>
@@ -237,13 +233,13 @@ export const ReviewForm = () => {
                                     name="description"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-widest">Votre Message</FormLabel>
+                                            <FormLabel className="text-xs font-semibold text-gray-600 ml-1">Message</FormLabel>
                                             <FormControl>
                                                 <Textarea
                                                     {...field}
                                                     rows={4}
                                                     placeholder="Comment s'est passé votre voyage avec nous ?"
-                                                    className="bg-gray-50/50 border-2 border-gray-100 focus:border-blue-500 rounded-2xl transition-all p-4 font-medium resize-none"
+                                                    className="bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all p-3 font-medium resize-none text-sm max-h-32"
                                                 />
                                             </FormControl>
                                             <FormMessage className="text-[10px] font-bold" />
@@ -254,14 +250,14 @@ export const ReviewForm = () => {
                                 <Button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full h-16 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1 active:scale-[0.98] group flex items-center justify-center gap-3 overflow-hidden"
+                                    className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     {isSubmitting ? (
                                         <Loader2 className="w-6 h-6 animate-spin" />
                                     ) : (
                                         <>
-                                            <span className="text-lg">Publier mon avis</span>
-                                            <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            <span>Publier mon avis</span>
+                                            <Send className="w-4 h-4" />
                                         </>
                                     )}
                                 </Button>

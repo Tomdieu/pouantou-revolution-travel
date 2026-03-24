@@ -25,6 +25,7 @@
     "dev": "next dev --turbopack",
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
+    "start:prod": "node .next/standalone/server.js",
     "lint": "eslint .",
     "push": "prisma db push",
     "studio": "prisma studio",

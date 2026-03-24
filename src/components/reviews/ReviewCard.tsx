@@ -21,7 +21,7 @@ export const ReviewCard = ({
 }: ReviewCardProps) => {
     return (
         <div className={cn(
-            "p-6 rounded-3xl bg-white border border-gray-100 shadow-xl shadow-gray-200/50 flex flex-col h-full transition-all hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/10",
+            "p-6 rounded-xl bg-white border border-gray-100 flex flex-col h-full transition-all hover:border-blue-200",
             className
         )}>
             <div className="flex gap-1 mb-4">
@@ -36,12 +36,12 @@ export const ReviewCard = ({
                 ))}
             </div>
 
-            <p className="text-gray-600 leading-relaxed italic mb-6 flex-1">
+            <p className="text-gray-600 leading-relaxed text-sm mb-6 flex-1">
                 "{description}"
             </p>
 
-            <div className="flex items-center gap-4 mt-auto">
-                <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-blue-50 ring-2 ring-blue-500/10">
+            <div className="flex items-center gap-3 mt-auto">
+                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                     {image ? (
                         <Image
                             src={image}
@@ -50,14 +50,14 @@ export const ReviewCard = ({
                             className="object-cover"
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-blue-600 font-bold text-lg">
+                        <div className="w-full h-full flex items-center justify-center text-blue-600 font-bold text-sm">
                             {name.charAt(0)}
                         </div>
                     )}
                 </div>
                 <div>
-                    <h4 className="font-black text-gray-900 leading-tight">{name}</h4>
-                    <p className="text-sm text-blue-600 font-bold uppercase tracking-wider">{jobTitle}</p>
+                    <h4 className="font-bold text-gray-900 text-sm leading-tight">{name}</h4>
+                    <p className="text-xs text-gray-500 font-medium">{jobTitle}</p>
                 </div>
             </div>
         </div>

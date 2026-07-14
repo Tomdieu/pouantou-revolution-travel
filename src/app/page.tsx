@@ -20,10 +20,6 @@ const LocationMap = dynamic(() => import('@/components/LocationMap'), {
 });
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { toast } from "sonner";
-import {
-  Send,
-  MapPin,
-  Phone} from "lucide-react";
 import { DestinationsSection } from "@/components/homepage/DestinationsSection";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -249,12 +245,12 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen scroll-smooth bg-white selection:bg-blue-100 selection:text-blue-600">
+    <div className="min-h-screen scroll-smooth bg-white selection:bg-slate-900 selection:text-white overflow-x-hidden">
       <Header />
       <Hero scrollToSection={scrollToSection} />
 
       {/* Quote Request Form */}
-      <section id="quote-form" className="py-16 bg-white">
+      <section id="quote-form" className="py-16 bg-slate-50">
         <DevisForm
         />
       </section>
@@ -263,26 +259,17 @@ export default function LandingPage() {
       <ServicesSection />
 
       {/* Location Map Section */}
-      <section className="section-padding bg-white">
+      <section className="section-padding bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black mb-4">Notre Localisation</h2>
-            <p className="text-xl text-black max-w-2xl mx-auto">
+          <div className="mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              Notre localisation
+            </h2>
+            <p className="mt-3 text-lg text-slate-500 max-w-xl">
               Retrouvez notre agence à Yaoundé pour un service personnalisé
             </p>
           </div>
-          <div className="max-w-4xl mx-auto">
-            <LocationMap />
-            <div className="mt-8 text-center">
-              <p className="text-lg text-gray-600">
-                <MapPin className="inline-block w-5 h-5 mr-2 text-blue-500" />
-                Revolution Travel & Services - Yaoundé, Cameroun
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                Horaires d&apos;ouverture: Lundi - Samedi, 8h00 - 18h00
-              </p>
-            </div>
-          </div>
+          <LocationMap />
         </div>
       </section>
 
@@ -295,39 +282,33 @@ export default function LandingPage() {
       <ReviewsSection />
 
       {/* Final CTA Section */}
-      <section className="py-24 bg-blue-600 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-sky-500/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/20 rounded-full blur-[120px]" />
+      <section className="py-24 bg-slate-950 relative overflow-hidden">
 
-        <div className="max-w-4xl mx-auto text-center px-4 relative z-10 space-y-10">
-          <h2 className="text-4xl sm:text-6xl font-black text-white leading-tight">
-            Prêt à Décoller vers votre <span className="text-sky-300 italic">Prochaine Aventure</span>?
+        <div className="max-w-4xl mx-auto text-center px-4 relative z-10 space-y-8">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+            Prêt à partir?
           </h2>
           <p className="text-lg sm:text-xl text-blue-50 max-w-2xl mx-auto leading-relaxed font-semibold">
-            Rejoignez des milliers de clients satisfaits et profitez d'une expérience de voyage premium et sans stress.
+            Rejoignez des milliers de clients satisfaits.
+            Un devis personnalisé en moins d&apos;une heure.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
             <Button
               size="lg"
-              className="h-16 px-12 text-lg font-bold bg-white text-blue-600 hover:bg-slate-50 rounded-2xl shadow-2xl transition-all hover:-translate-y-1"
+              className="h-14 px-8 text-base font-semibold bg-white text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-200"
               onClick={() => scrollToSection('quote-form')}
             >
-              <Send className="mr-3 w-6 h-6" />
-              Obtenir un Devis Gratuit
+              Obtenir un devis
             </Button>
             <a
               href="tel:677916832"
-              className="h-16 px-12 text-lg font-bold border-2 border-white/30 text-white hover:bg-white/10 rounded-2xl transition-all hover:-translate-y-1 flex items-center justify-center"
+              className="h-14 px-8 text-base font-semibold border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-xl transition-all duration-200 flex items-center justify-center"
             >
-              <Phone className="mr-3 w-6 h-6" />
-              Parler à un Expert
+              Parler à un expert
             </a>
           </div>
 
-          <p className="text-blue-100/60 text-sm font-bold uppercase tracking-[0.2em]">
-            ✈️ Plus de 500 compagnies aériennes partenaires
-          </p>
         </div>
       </section>
 
@@ -339,7 +320,7 @@ export default function LandingPage() {
           href="https://wa.me/237697281827"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center group"
+          className="relative bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
           title="Contactez-nous sur WhatsApp"
         >
           <svg
@@ -352,13 +333,13 @@ export default function LandingPage() {
           </svg>
 
           {/* Tooltip */}
-          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
             Contactez-nous sur WhatsApp
             <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-800"></div>
           </div>
 
           {/* Pulse animation */}
-          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20 overflow-hidden"></div>
         </a>
       </div>
 

@@ -53,18 +53,11 @@ export const metadata: Metadata = {
     "agence voyage yaoundé",
     "vol pas cher cameroun",
     "réservation billet avion",
-    "TOMDIEU TCHADIEUKO IVAN GOTTFRIED",
-    "Tomdieu Ivan",
-    "Ivan Tomdieu",
-    "Tchadieuko Ivan",
-    "Ivan Gottfried",
-    "Tomdieu Tchadieuko",
-    "Ivan Tchadieuko",
-    "Gottfried Ivan",
-    "développeur web cameroun",
-    "developer cameroon",
-    "web developer douala",
-    "next.js developer"
+    "location voiture cameroun",
+    "réservation hôtel cameroun",
+    "voyage afrique centrale",
+    "billets avion pas cher",
+    "agence de voyage yaoundé",
   ],
   authors: [
     { name: "Revolution Travel & Services" },
@@ -111,6 +104,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: 'https://puantou-revolution-travel.vercel.app',
+    languages: {
+      'fr-CM': 'https://puantou-revolution-travel.vercel.app',
+    },
   },
   category: 'Travel Agency',
 };

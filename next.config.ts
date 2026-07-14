@@ -44,10 +44,14 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
   output: 'standalone',
   images: {
-    unoptimized: true
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'utfs.io' },
+      { protocol: 'https', hostname: '*.utfs.io' },
+    ],
   },
   turbopack: {}
 };

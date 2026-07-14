@@ -12,7 +12,7 @@ import { InputPhone } from '@/components/ui/input-phone';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Search, Building, CalendarIcon, X } from 'lucide-react';
+import { Loader2, Search, Building, CalendarIcon, X, CheckCircle2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -200,8 +200,8 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
           },
           price: data.budget,
           currency: 'EUR',
-          contactName: 'Guest',
-          contactEmail: '',
+          contactName: session?.user?.name || 'Guest',
+          contactEmail: session?.user?.email || '',
           contactPhone: data.phone,
         }),
       });
@@ -214,66 +214,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
     }
 
     try {
-      // Find the selected city
-      const selectedCity = cities.find(
-        city => city.city === data.city && city.country === data.country
-      );
-
-      if (!selectedCity) {
-        setError('Ville sélectionnée non trouvée');
-        const newStep = 3;
-        setStep(newStep);
-        onStepChange?.(newStep);
-        setIsLoading(false);
-        return;
-      }
-
-      // Try to find IATA code for the city
-      const cityIataCode = cityToIataCode[selectedCity.city.toLowerCase()] ||
-        cityToIataCode[selectedCity.city_ascii.toLowerCase()];
-
-      if (!cityIataCode) {
-        // Send email to admin without searching
-        await fetch('/api/hotel-search-request', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...data,
-            checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
-            checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
-            searchError: 'Code IATA non trouvé pour cette ville. Recherche manuelle requise.',
-          }),
-        });
-
-        setError('Aucun hôtel trouvé pour cette région');
-        const newStep = 3;
-        setStep(newStep);
-        onStepChange?.(newStep);
-        setIsLoading(false);
-        return;
-      }
-
-      // Search hotels with Amadeus
-      const searchResponse = await fetch('/api/amadeus/hotel-search', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cityCode: cityIataCode,
-          budget: data.budget,
-          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
-          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
-          adults: data.adults,
-          radius: data.radius,
-        }),
-      });
-
-      const searchDataResponse = await searchResponse.json();
-
-      // Send email to admin with results
+      // Send email notification to admin (Amadeus disabled - manual search)
       await fetch('/api/hotel-search-request', {
         method: 'POST',
         headers: {
@@ -283,35 +224,14 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
           ...data,
           checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
           checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
-          foundHotels: searchDataResponse.success ? searchDataResponse.data.hotels : undefined,
-          searchError: !searchDataResponse.success ? (searchDataResponse.error || 'Aucun hôtel trouvé') : undefined,
+          searchError: 'Recherche manuelle requise - API Amadeus désactivée',
         }),
-      });
-
-      if (searchDataResponse.success && searchDataResponse.data.hotels) {
-        setResults(searchDataResponse.data.hotels);
-      } else {
-        setError(searchDataResponse.error || 'Aucun hôtel trouvé pour cette recherche');
-      }
+      }).catch(() => {});
 
       const newStep = 3;
       setStep(newStep);
       onStepChange?.(newStep);
     } catch (err) {
-      // Send email to admin with error
-      await fetch('/api/hotel-search-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          checkInDate: format(data.checkInDate, 'yyyy-MM-dd'),
-          checkOutDate: format(data.checkOutDate, 'yyyy-MM-dd'),
-          searchError: err instanceof Error ? err.message : 'Erreur de recherche d\'hôtels',
-        }),
-      });
-
       setError(err instanceof Error ? err.message : 'Erreur de recherche d\'hôtels');
       const newStep = 3;
       setStep(newStep);
@@ -358,7 +278,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                                 setIsCountryDialogOpen(true);
                                 setCountrySearchTerm(field.value || '');
                               }}
-                              className="h-12 w-full px-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
+                              className="h-11 w-full px-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
                             >
                               {field.value ? (
                                 <span className="text-gray-900">{field.value}</span>
@@ -377,7 +297,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                                 />
 
                                 {/* Bottom Sheet */}
-                                <div className="relative w-full bg-white rounded-t-2xl shadow-2xl h-[60vh] flex flex-col animate-in slide-in-from-bottom-10">
+                                <div className="relative w-full bg-white rounded-t-2xl shadow-lg h-[60vh] flex flex-col animate-in slide-in-from-bottom-10">
                                   {/* Header */}
                                   <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between rounded-t-2xl z-10">
                                     <h3 className="text-lg font-bold text-gray-900">Sélectionner un pays</h3>
@@ -446,7 +366,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                             }}
                             placeholder="Rechercher un pays..."
                             options={countries.map(country => ({ value: country.name, label: country.name }))}
-                            className="h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
+                            className="h-11 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
                           />
                         )}
                       </FormControl>
@@ -471,7 +391,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                             label: city.city
                           }))}
                           className={cn(
-                            "h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
+                            "h-11 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
                             !selectedCountry && "opacity-50 cursor-not-allowed"
                           )}
                         />
@@ -488,7 +408,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
               <Button
                 type="button"
                 onClick={nextStep}
-                className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
+                className="flex-1 h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors"
               >
                 Continuer
               </Button>
@@ -515,7 +435,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                             <Button
                               variant="outline"
                               className={cn(
-                                "h-12 w-full pl-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
+                                "h-11 w-full pl-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -560,7 +480,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                             <Button
                               variant="outline"
                               className={cn(
-                                "h-12 w-full pl-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
+                                "h-11 w-full pl-3 text-left font-normal bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -607,7 +527,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                         <FormLabel className="text-xs font-semibold text-gray-700 ml-1">Nombre d'adultes</FormLabel>
                         <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                           <FormControl>
-                            <SelectTrigger className="h-12 bg-white border border-gray-200 rounded-lg">
+                            <SelectTrigger className="h-11 bg-white border border-gray-200 rounded-lg">
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
@@ -630,7 +550,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                         <FormLabel className="text-xs font-semibold text-gray-700 ml-1">Rayon (km)</FormLabel>
                         <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value?.toString()}>
                           <FormControl>
-                            <SelectTrigger className="h-12 bg-white border border-gray-200 rounded-lg">
+                            <SelectTrigger className="h-11 bg-white border border-gray-200 rounded-lg">
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
@@ -657,7 +577,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                 variant="outline"
                 onClick={prevStep}
                 disabled={isLoading}
-                className="flex-1 h-12 rounded-lg border border-gray-200 font-bold hover:bg-gray-50"
+                className="flex-1 h-11 rounded-lg border border-slate-200 font-medium hover:bg-slate-50 transition-colors"
               >
                 Précédent
               </Button>
@@ -665,7 +585,7 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
                 type="button"
                 onClick={nextStep}
                 disabled={isLoading}
-                className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
+                className="flex-1 h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
@@ -681,113 +601,26 @@ export default function HotelSearchForm({ userId, onDialogClose, onStepChange }:
         </Form>
       )}
 
-      {/* STEP 3: RESULTS & BUDGET & CONTACT */}
+      {/* STEP 3: CONFIRMATION */}
       {step === 3 && (
-        <Form {...form}>
-          <form className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-100 rounded-lg p-6 flex items-start gap-4">
-                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-600 font-bold">!</span>
-                </div>
-                <p className="text-red-800 font-semibold">{error}</p>
-              </div>
-            )}
-
-            {results.length > 0 && (
-              <div className="bg-white border border-gray-100 rounded-lg p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Building className="w-5 h-5 text-blue-600" />
-                  Hôtels disponibles ({results.length})
-                </h3>
-                <div className="grid grid-cols-1 gap-4 max-h-64 overflow-y-auto">
-                  {results.map((hotel) => (
-                    <div key={hotel.id} className="border border-gray-100 rounded-lg p-4 hover:border-blue-200 transition-colors">
-                      <h4 className="font-bold text-gray-900 mb-1">{hotel.name}</h4>
-                      <p className="text-sm text-gray-500 mb-2">📍 {hotel.address}</p>
-                      {hotel.rating && (
-                        <p className="text-sm font-semibold text-amber-600">⭐ {hotel.rating}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!error && !results.length && (
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 text-center">
-                <p className="text-blue-800 font-semibold">Aucun hôtel trouvé.</p>
-                <p className="text-blue-600 text-sm mt-1">Notre équipe vous contactera avec les meilleures recommandations.</p>
-              </div>
-            )}
-
-            <div className="space-y-6 border-t border-gray-100 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="budget"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700 ml-1">Budget par nuit (EUR) *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="ex: 150"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          className="h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700 ml-1">Téléphone *</FormLabel>
-                      <FormControl>
-                        <InputPhone
-                          defaultCountry="CM"
-                          value={field.value}
-                          onChange={(value) => field.onChange(value || '')}
-                          className="h-12 bg-white border border-gray-200 focus:border-blue-500 rounded-lg transition-all"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex gap-4 pt-6 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={prevStep}
-                disabled={isLoading}
-                className="flex-1 h-12 rounded-lg border border-gray-200 font-bold hover:bg-gray-50"
-              >
-                Précédent
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  onDialogClose?.(false);
-                  toast.success('Demande de réservation envoyée!');
-                }}
-                className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
-              >
-                Finaliser
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-slate-900 mb-3">
+            Demande enregistrée!
+          </h3>
+          <p className="text-slate-500 mb-8 max-w-md mx-auto">
+            Votre demande de réservation hôtelière a été enregistrée. Notre équipe va rechercher
+            les meilleurs établissements et vous contactera sous 24 heures.
+          </p>
+          <Button
+            onClick={() => onDialogClose?.(false)}
+            className="h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
+          >
+            Fermer
+          </Button>
+        </div>
       )}
     </>
   );

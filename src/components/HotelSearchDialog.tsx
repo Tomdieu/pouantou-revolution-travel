@@ -19,9 +19,9 @@ interface HotelSearchDialogProps {
 }
 
 const steps = [
-  { id: 1, title: 'Destination', icon: <Building className="w-5 h-5" /> },
-  { id: 2, title: 'Détails', icon: <Search className="w-5 h-5" /> },
-  { id: 3, title: 'Budget & Contact', icon: <Building className="w-5 h-5" /> }
+  { id: 1, title: 'Destination' },
+  { id: 2, title: 'Détails' },
+  { id: 3, title: 'Contact' },
 ];
 
 export default function HotelSearchDialog({
@@ -33,53 +33,44 @@ export default function HotelSearchDialog({
 
   return (
     <Credenza open={isOpen} onOpenChange={onOpenChange}>
-      <CredenzaContent className="sm:max-w-3xl overflow-hidden rounded-xl border-stone-200 bg-white p-0 h-[85vh] sm:h-[80vh] flex flex-col">
-        {/* Colored accent bar */}
-        {/* <div className="h-2 bg-gradient-to-r from-emerald-500/50 to-teal-500/50" /> */}
-        
-        {/* Fixed Header */}
-        <CredenzaHeader className="flex-shrink-0 border-b border-stone-100 bg-white p-6 md:p-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
-              <Building className="w-6 h-6" />
+      <CredenzaContent className="sm:max-w-3xl overflow-hidden rounded-xl border-slate-200 bg-white p-0 h-[85vh] sm:h-[80vh] flex flex-col">
+        <CredenzaHeader className="flex-shrink-0 border-b border-slate-100 p-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+              <Building className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <CredenzaTitle className="text-2xl md:text-3xl font-black text-stone-900 italic tracking-tight">
-                Réservation Hôtel
+              <CredenzaTitle className="text-lg font-semibold text-slate-900">
+                Réservation hôtel
               </CredenzaTitle>
-              <CredenzaDescription className="text-stone-500 font-medium mt-1">
-                Dénichez le séjour parfait parmi une sélection d'établissements premium.
+              <CredenzaDescription className="text-sm text-slate-500 mt-0.5">
+                Trouvez l&apos;établissement parfait pour votre séjour.
               </CredenzaDescription>
             </div>
           </div>
         </CredenzaHeader>
 
-        {/* Fixed Step Indicator */}
         {step <= 3 && (
-          <div className="flex-shrink-0 border-b border-stone-100 bg-white px-6 md:px-10 py-6">
+          <div className="flex-shrink-0 border-b border-slate-100 px-6 py-4">
             <div className="relative">
-              <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-100 z-0" />
+              <div className="absolute top-3 left-0 w-full h-px bg-slate-200" />
               <div
-                className="absolute top-5 left-0 h-0.5 bg-emerald-600 z-0 transition-all duration-500"
+                className="absolute top-3 left-0 h-px bg-slate-900 transition-all duration-500"
                 style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
               />
               <div className="flex justify-between relative z-10">
                 {steps.map((s) => (
                   <div key={s.id} className="flex flex-col items-center">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 border-2 ${
+                      className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
                         step >= s.id
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'bg-white border-gray-200 text-gray-400'
+                          ? 'bg-slate-900 text-white'
+                          : 'bg-white text-slate-400 border border-slate-200'
                       }`}
                     >
                       {step > s.id ? '✓' : s.id}
                     </div>
-                    <span
-                      className={`mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${
-                        step >= s.id ? 'text-emerald-600' : 'text-gray-400'
-                      }`}
-                    >
+                    <span className={`mt-2 text-[11px] font-medium transition-colors ${step >= s.id ? 'text-slate-900' : 'text-slate-400'}`}>
                       {s.title}
                     </span>
                   </div>
@@ -88,9 +79,8 @@ export default function HotelSearchDialog({
             </div>
           </div>
         )}
-        
-        {/* Scrollable Content */}
-        <CredenzaBody className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10">
+
+        <CredenzaBody className="flex-1 overflow-y-auto p-6">
           <HotelSearchForm userId={userId} onDialogClose={onOpenChange} onStepChange={setStep} />
         </CredenzaBody>
       </CredenzaContent>

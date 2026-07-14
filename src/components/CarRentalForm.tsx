@@ -178,8 +178,8 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
           },
           price: data.budgetPerDay,
           currency: 'XAF',
-          contactName: 'Guest',
-          contactEmail: '',
+          contactName: session?.user?.name || 'Guest',
+          contactEmail: session?.user?.email || '',
           contactPhone: data.phone,
         }),
       });
@@ -295,8 +295,8 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
           },
           price: data.budgetPerDay,
           currency: 'XAF',
-          contactName: 'Guest',
-          contactEmail: '',
+          contactName: session?.user?.name || 'Guest',
+          contactEmail: session?.user?.email || '',
           contactPhone: data.phone,
         }),
       });
@@ -335,14 +335,14 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
               {steps.map((s) => (
                 <div key={s.id} className="flex flex-col items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 border-2 ${step >= s.id
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200 scale-110'
-                      : 'bg-white border-gray-200 text-gray-400'
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${step >= s.id
+                      ? 'bg-slate-900 border-slate-900 text-white'
+                      : 'bg-white border-slate-200 text-slate-400'
                       }`}
                   >
                     {step > s.id ? '✓' : s.id}
                   </div>
-                  <span className={`mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= s.id ? 'text-blue-600' : 'text-gray-400'
+                  <span className={`mt-2 text-[11px] font-medium transition-colors ${step >= s.id ? 'text-slate-900' : 'text-slate-400'
                     }`}>
                     {s.title}
                   </span>
@@ -351,7 +351,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
             </div>
           </div>
 
-          <div className="glass-premium rounded-3xl p-8 sm:p-10 relative overflow-hidden group">
+          <div className="bg-white rounded-3xl p-8 sm:p-10 relative overflow-hidden group border border-gray-200">
             {/* Decorative Icon Background */}
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
               {steps[step - 1].icon}
@@ -370,7 +370,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="brand"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Marque *</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Marque *</FormLabel>
                               <Popover open={brandOpen} onOpenChange={setBrandOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
@@ -379,7 +379,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                       variant="outline"
                                       role="combobox"
                                       className={cn(
-                                        "h-12 w-full justify-between bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        "h-11 w-full justify-between bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all",
                                         !field.value && "text-muted-foreground font-normal"
                                       )}
                                     >
@@ -391,12 +391,12 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
-                                  className="p-0 bg-white rounded-xl shadow-2xl border-gray-100 overflow-hidden"
+                                  className="p-0 bg-white rounded-lg shadow-md border-gray-100 overflow-hidden"
                                   align='end'
                                   style={{ width: brandButtonWidth > 0 ? `${brandButtonWidth}px` : undefined }}
                                 >
                                   <Command className='relative max-h-56'>
-                                    <CommandInput className='border-none focus:ring-0 uppercase text-xs font-bold tracking-widest' placeholder="Rechercher..." />
+                                    <CommandInput className='border-none focus:ring-0 text-sm' placeholder="Rechercher..." />
                                     <CommandEmpty className='p-4 text-sm text-gray-500'>Aucune marque trouvée.</CommandEmpty>
                                     <CommandGroup className='overflow-auto p-1'>
                                       {brands.map((brand) => (
@@ -412,7 +412,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                         >
                                           <Check
                                             className={cn(
-                                              "mr-2 h-4 w-4 text-blue-600",
+                                              "mr-2 h-4 w-4 text-slate-600",
                                               brand === field.value ? "opacity-100" : "opacity-0"
                                             )}
                                           />
@@ -433,7 +433,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="model"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Modèle *</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Modèle *</FormLabel>
                               <Popover open={modelOpen} onOpenChange={setModelOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
@@ -443,7 +443,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                       role="combobox"
                                       disabled={!selectedBrand}
                                       className={cn(
-                                        "h-12 w-full justify-between bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        "h-11 w-full justify-between bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all",
                                         !field.value && "text-muted-foreground font-normal"
                                       )}
                                     >
@@ -455,11 +455,11 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                   </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent
-                                  className="p-0 bg-white rounded-xl shadow-2xl border-gray-100 overflow-hidden"
+                                  className="p-0 bg-white rounded-lg shadow-md border-gray-100 overflow-hidden"
                                   style={{ width: modelButtonWidth > 0 ? `${modelButtonWidth}px` : undefined }}
                                 >
                                   <Command className='relative max-h-56'>
-                                    <CommandInput className='border-none focus:ring-0 uppercase text-xs font-bold tracking-widest' placeholder="Rechercher..." />
+                                    <CommandInput className='border-none focus:ring-0 text-sm' placeholder="Rechercher..." />
                                     <CommandEmpty className='p-4 text-sm text-gray-500'>Aucun modèle trouvé.</CommandEmpty>
                                     <CommandGroup className='overflow-auto p-1'>
                                       {availableModels.map((model) => (
@@ -473,7 +473,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                                         >
                                           <Check
                                             className={cn(
-                                              "mr-2 h-4 w-4 text-blue-600",
+                                              "mr-2 h-4 w-4 text-slate-600",
                                               model === field.value ? "opacity-100" : "opacity-0"
                                             )}
                                           />
@@ -500,12 +500,12 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                         name="location"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-sm font-bold text-gray-700 ml-1">Lieu de prise en charge</FormLabel>
+                            <FormLabel className="text-sm font-medium text-slate-700">Lieu de prise en charge</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="ex: Aéroport de Douala"
                                 {...field}
-                                className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
+                                className="h-11 bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all"
                               />
                             </FormControl>
                             <FormMessage />
@@ -519,14 +519,14 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="startDate"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de début</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Date de début</FormLabel>
                               <Popover open={isStartDateOpen} onOpenChange={setIsStartDateOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
                                       variant={"outline"}
                                       className={cn(
-                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        "h-11 w-full pl-3 text-left font-normal bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >
@@ -564,14 +564,14 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="endDate"
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Date de fin</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Date de fin</FormLabel>
                               <Popover open={isEndDateOpen} onOpenChange={setIsEndDateOpen}>
                                 <PopoverTrigger asChild>
                                   <FormControl>
                                     <Button
                                       variant={"outline"}
                                       className={cn(
-                                        "h-12 w-full pl-3 text-left font-normal bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all",
+                                        "h-11 w-full pl-3 text-left font-normal bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all",
                                         !field.value && "text-muted-foreground"
                                       )}
                                     >
@@ -608,20 +608,20 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                         />
                       </div>
 
-                      <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100/50">
+                      <div className="bg-blue-50/50 rounded-lg p-6 border border-blue-100/50">
                         <FormField
                           control={form.control}
                           name="driverAge"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Âge du conducteur</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Âge du conducteur</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
                                   placeholder="ex: 35"
                                   {...field}
                                   onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                                  className="h-11 bg-white/70 border-gray-200 rounded-xl focus:border-blue-500 transition-all font-semibold"
+                                  className="h-11 bg-white/70 border-gray-200 rounded-lg focus:border-slate-400 transition-all font-semibold"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -641,14 +641,14 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="budgetPerDay"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Budget par jour (XAF) *</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Budget par jour (XAF) *</FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
                                   placeholder="ex: 75"
                                   {...field}
                                   onChange={(e) => field.onChange(Number(e.target.value))}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
+                                  className="h-11 bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -661,13 +661,13 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                           name="phone"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-sm font-bold text-gray-700 ml-1">Numéro de téléphone *</FormLabel>
+                              <FormLabel className="text-sm font-medium text-slate-700">Numéro de téléphone *</FormLabel>
                               <FormControl>
                                 <InputPhone
                                   defaultCountry="CM"
                                   value={field.value}
                                   onChange={(value) => field.onChange(value || '')}
-                                  className="h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
+                                  className="h-11 bg-white border-gray-200 focus:border-slate-400 rounded-lg transition-all"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -686,7 +686,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                         variant="outline"
                         onClick={prevStep}
                         disabled={isLoading}
-                        className="flex-1 h-14 rounded-2xl border-2 border-gray-100 font-bold hover:bg-gray-50 transition-all"
+                        className="flex-1 h-11 rounded-lg border border-slate-200 font-medium hover:bg-slate-50 transition-colors"
                       >
                         Précédent
                       </Button>
@@ -695,7 +695,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                       <Button
                         type="button"
                         onClick={nextStep}
-                        className="flex-[2] h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg text-white font-black rounded-2xl transition-all hover:-translate-y-1 active:scale-95"
+                        className="flex-[2] h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors"
                       >
                         Continuer
                       </Button>
@@ -703,7 +703,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="flex-[2] h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-lg hover:shadow-blue-500/40 text-lg font-bold rounded-2xl transition-all duration-300 transform active:scale-[0.98]"
+                        className="flex-[2] h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors"
                       >
                         {isLoading ? (
                           <span className="flex items-center justify-center text-white">
@@ -729,7 +729,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
       {/* Success Message */}
       {isSubmitted && (
         <div className="max-w-4xl mx-auto w-full animate-fade-in-up">
-          <div className="glass-premium rounded-[2rem] p-12 text-center border border-white/40 shadow-2xl">
+          <div className="bg-white rounded-[2rem] p-12 text-center border border-gray-200 shadow-lg">
             <div className="w-20 h-20 bg-green-100 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100">
               <Check className="w-10 h-10 text-green-600" />
             </div>
@@ -743,7 +743,7 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
                 setStep(1);
                 form.reset();
               }}
-              className="px-8 h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-all shadow-xl shadow-blue-200"
+              className="px-8 h-11 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium transition-colors"
             >
               Faire une autre demande
             </Button>
@@ -754,11 +754,11 @@ export default function CarRentalForm({ userId, onDialogClose, onStepChange }: C
       {/* Error Message */}
       {error && (
         <div className="max-w-4xl mx-auto w-full animate-fade-in">
-          <div className="bg-red-50 border border-red-100 rounded-2xl p-6 flex items-start gap-4 shadow-sm">
-            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
-              <span className="text-red-600 font-bold text-xl">!</span>
+          <div className="bg-red-50 border border-red-100 rounded-lg p-6 flex items-start gap-4 shadow-sm">
+            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+              <span className="text-red-600 font-medium text-lg">!</span>
             </div>
-            <p className="text-red-800 font-bold py-2">{error}</p>
+            <p className="text-red-800 font-medium py-2">{error}</p>
           </div>
         </div>
       )}

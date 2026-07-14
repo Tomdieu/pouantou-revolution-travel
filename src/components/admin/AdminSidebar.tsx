@@ -126,7 +126,7 @@ export function AdminSidebar({ className }: SidebarProps) {
                                 className="object-contain"
                             />
                         </div>
-                        <span className="font-bold text-xl tracking-wide text-white">Revolution<span className="text-slate-400">Admin</span></span>
+                        <span className="font-bold text-xl tracking-wide text-white"><span className="text-slate-400">Admin</span></span>
                     </Link>
                 </div>
 

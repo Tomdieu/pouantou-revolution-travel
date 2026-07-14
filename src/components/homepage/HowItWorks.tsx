@@ -5,81 +5,65 @@ import { Smartphone, ShieldCheck, Zap, Heart } from 'lucide-react';
 
 const steps = [
     {
-        icon: <Smartphone className="w-8 h-8" />,
+        icon: Smartphone,
         title: "Soumettez votre demande",
         desc: "Remplissez notre formulaire simple avec vos préférences de voyage.",
-        color: "bg-blue-500",
-        light: "bg-blue-50",
-        text: "text-blue-600"
     },
     {
-        icon: <Zap className="w-8 h-8" />,
+        icon: Zap,
         title: "Recherche instantanée",
         desc: "Notre équipe compare les meilleurs tarifs parmi 500+ compagnies.",
-        color: "bg-indigo-500",
-        light: "bg-indigo-50",
-        text: "text-indigo-600"
     },
     {
-        icon: <ShieldCheck className="w-8 h-8" />,
+        icon: ShieldCheck,
         title: "Recevez votre devis",
         desc: "Obtenez une proposition détaillée sous 1 heure maximum.",
-        color: "bg-purple-500",
-        light: "bg-purple-50",
-        text: "text-purple-600"
     },
     {
-        icon: <Heart className="w-8 h-8" />,
+        icon: Heart,
         title: "Voyagez sereinement",
         desc: "Confirmation sécurisée et support 24/7 pendant votre séjour.",
-        color: "bg-pink-500",
-        light: "bg-pink-50",
-        text: "text-pink-600"
     }
 ];
 
 export default function HowItWorks() {
     return (
-        <section className="section-padding bg-slate-50 relative overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="text-center space-y-4 mb-20">
-                    <h2 className="text-blue-600 font-bold uppercase tracking-widest text-sm">Simplifiez vos voyages</h2>
-                    <h3 className="text-4xl sm:text-5xl font-black text-slate-900 leading-tight">
-                        Comment Ça <span className="text-gradient">Marche</span> ?
-                    </h3>
-                    <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                        Un processus fluide et transparent pour transformer vos rêves de voyage en réalité en quelques clics.
+        <section className="section-padding bg-slate-50 relative">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+                        Comment ça marche
+                    </h2>
+                    <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
+                        Un processus fluide et transparent pour transformer vos rêves de voyage en réalité.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {steps.map((step, idx) => (
-                        <div
-                            key={idx}
-                            className="group p-8 space-y-6 bg-white border border-gray-100 rounded-xl hover:border-blue-200 transition-all duration-300"
-                        >
-                            <div className={`w-16 h-16 rounded-lg ${step.light} ${step.text} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
-                                {step.icon}
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <span className="text-3xl font-black text-gray-200 group-hover:text-gray-300 transition-colors">{idx + 1}</span>
-                                    <h4 className="text-lg font-bold text-slate-900">{step.title}</h4>
+                    {steps.map((step, idx) => {
+                        const Icon = step.icon;
+                        return (
+                            <div
+                                key={idx}
+                                className="relative p-6 bg-white border border-slate-100 rounded-xl transition-all duration-300 hover:border-slate-200 hover:shadow-sm"
+                            >
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="text-sm font-semibold text-slate-400 tabular-nums">
+                                        {String(idx + 1).padStart(2, '0')}
+                                    </span>
+                                    <div className="w-px h-4 bg-slate-200" />
+                                    <Icon className="w-5 h-5 text-slate-600" />
                                 </div>
-                                <p className="text-slate-600 text-sm leading-relaxed">
+                                <h3 className="text-base font-semibold text-slate-900 mb-2">
+                                    {step.title}
+                                </h3>
+                                <p className="text-sm text-slate-500 leading-relaxed">
                                     {step.desc}
                                 </p>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
-            </div>
-
-            {/* Background Decor */}
-            <div className="absolute top-0 left-0 w-full h-full opacity-50 pointer-events-none">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-200/20 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-200/20 rounded-full blur-[100px]" />
             </div>
         </section>
     );

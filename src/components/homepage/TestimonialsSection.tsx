@@ -36,7 +36,7 @@ export default function TestimonialsSection() {
                         <h2 className="text-blue-600 font-bold uppercase tracking-widest text-sm">Avis de nos clients</h2>
                         <h3 className="text-4xl sm:text-5xl font-black text-slate-900 leading-tight">
                             Ce Que Disent <br className="hidden lg:block" />
-                            Nos <span className="text-gradient">Voyageurs</span>
+                            Nos <span className="text-blue-600">Voyageurs</span>
                         </h3>
                     </div>
                     <p className="text-lg text-slate-600 max-w-xl font-medium">
@@ -48,7 +48,7 @@ export default function TestimonialsSection() {
                     {testimonials.map((t, idx) => (
                         <div
                             key={idx}
-                            className="group card-modern p-10 bg-slate-50 border-none shadow-none hover:bg-white hover:shadow-2xl transition-all duration-500"
+                            className="group p-10 bg-slate-50 border-none shadow-none hover:bg-white hover:shadow-2xl transition-all duration-500"
                         >
                             <div className="flex gap-1 mb-8">
                                 {[...Array(t.rating)].map((_, i) => (

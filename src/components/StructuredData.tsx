@@ -7,7 +7,7 @@ export function StructuredData() {
     "name": "Revolution Travel & Services",
     "alternateName": "Revolution Travel",
     "url": "https://puantou-revolution-travel.vercel.app",
-    "logo": "https://puantou-revolution-travel.vercel.app/logo.png",
+    "logo": "https://puantou-revolution-travel.vercel.app/logo-image.png",
     // "image": "https://puantou-revolution-travel.vercel.app/logo-image.png",
     "description": "Agence de voyage professionnelle basée au Cameroun, spécialisée dans la réservation de billets d'avion vers toutes les destinations internationales. Votre partenaire de confiance pour tous vos voyages.",
     "address": {
@@ -305,19 +305,19 @@ export function StructuredData() {
         "@type": "ListItem",
         "position": 2,
         "name": "Services",
-        "item": "https://puantou-revolution-travel.vercel.app#services"
+        "item": "https://puantou-revolution-travel.vercel.app/services"
       },
       {
         "@type": "ListItem",
         "position": 3,
-        "name": "Destinations",
-        "item": "https://puantou-revolution-travel.vercel.app#destinations"
+        "name": "Billets d'Avion",
+        "item": "https://puantou-revolution-travel.vercel.app/services/flights"
       },
       {
         "@type": "ListItem",
         "position": 4,
-        "name": "Contact",
-        "item": "https://puantou-revolution-travel.vercel.app#contact"
+        "name": "Hôtels",
+        "item": "https://puantou-revolution-travel.vercel.app/services/hotels"
       }
     ]
   };

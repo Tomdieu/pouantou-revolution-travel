@@ -50,10 +50,10 @@ export function DestinationsSection() {
 
     if (isLoading) {
         return (
-            <section className="section-padding bg-gradient-to-br from-blue-50 via-white to-blue-50">
+            <section className="section-padding bg-white">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-center items-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
                     </div>
                 </div>
             </section>
@@ -65,101 +65,81 @@ export function DestinationsSection() {
     }
 
     return (
-        <section id="destinations" className="section-padding bg-gradient-to-br from-blue-50 via-white to-blue-50 relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 opacity-5">
-                <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
-            </div>
-
-            <div className="container mx-auto px-4 relative z-10">
-                {/* Section Header */}
+        <section id="destinations" className="section-padding bg-white">
+            <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-4">
-                        <Plane className="w-4 h-4" />
-                        <span className="text-sm font-semibold">Voyagez avec nous</span>
-                    </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-                        Destinations <span className="text-gradient bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Populaires</span>
+                    <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+                        Destinations populaires
                     </h2>
-                    <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                    <p className="mt-4 text-lg text-slate-500 max-w-2xl mx-auto">
                         Découvrez nos destinations les plus prisées avec des tarifs exceptionnels
                     </p>
                 </div>
 
-                {/* Destinations Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {destinations.map((destination, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {destinations.map((destination) => (
                         <Card
                             key={destination.id}
-                            className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white"
-                            style={{
-                                animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
-                            }}
+                            className="group overflow-hidden border-slate-200 hover:border-slate-300 transition-all duration-300 rounded-xl"
                         >
-                            {/* Image Section */}
-                            <div className="relative h-56 overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100">
+                            <div className="relative h-52 overflow-hidden bg-slate-100">
                                 {destination.imageUrl ? (
                                     <Image
                                         src={destination.imageUrl}
                                         alt={destination.name}
                                         fill
-                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <span className="text-8xl group-hover:scale-110 transition-transform duration-500">
+                                        <span className="text-6xl">
                                             {destination.emoji || '🌍'}
                                         </span>
                                     </div>
                                 )}
 
-                                {/* Overlay gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-                                {/* Badge */}
                                 {destination.badge && (
-                                    <div className="absolute top-4 right-4">
-                                        <Badge className="bg-red-500 text-white border-0 shadow-lg">
+                                    <div className="absolute top-3 right-3">
+                                        <Badge className="bg-slate-900 text-white border-0 text-xs font-medium">
                                             {destination.badge}
                                         </Badge>
                                     </div>
                                 )}
 
-                                {/* Location indicator */}
-                                <div className="absolute bottom-4 left-4 flex items-center gap-2 text-white">
-                                    <MapPin className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{destination.country}</span>
+                                <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-white">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                    <span className="text-xs font-medium">{destination.country}</span>
                                 </div>
                             </div>
 
-                            {/* Content Section */}
-                            <CardContent className="p-6">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                            <CardContent className="p-5">
+                                <h3 className="text-lg font-semibold text-slate-900 mb-1">
                                     {destination.name}
                                 </h3>
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                <p className="text-sm text-slate-500 mb-4 line-clamp-2">
                                     {destination.description}
                                 </p>
 
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs text-gray-500 mb-1">À partir de</p>
-                                        <p className="text-2xl font-bold text-blue-600">
-                                            {destination.price.toLocaleString('fr-FR')} <span className="text-sm font-normal">{destination.currency}</span>
+                                        <p className="text-xs text-slate-400 mb-0.5">À partir de</p>
+                                        <p className="text-lg font-semibold text-slate-900">
+                                            {destination.price.toLocaleString('fr-FR')}{' '}
+                                            <span className="text-xs font-normal text-slate-500">{destination.currency}</span>
                                         </p>
                                     </div>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="group-hover:bg-blue-600 group-hover:text-white transition-all"
+                                        className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                                         onClick={() => {
-                                            // Scroll to quote form
                                             document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' });
                                         }}
                                     >
                                         Réserver
-                                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight className="w-4 h-4 ml-1" />
                                     </Button>
                                 </div>
                             </CardContent>
@@ -167,36 +147,20 @@ export function DestinationsSection() {
                     ))}
                 </div>
 
-                {/* Call to Action */}
                 <div className="text-center mt-12">
-                    {/* <p className="text-gray-600 mb-6">
-                        🌟 Plus de 50 destinations disponibles !
-                    </p> */}
                     <Button
+                        variant="outline"
                         size="lg"
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+                        className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300"
                         onClick={() => {
                             document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' });
                         }}
                     >
-                        <Plane className="w-5 h-5 mr-2" />
-                        Voir Toutes les Destinations
+                        <Plane className="w-4 h-4 mr-2" />
+                        Voir toutes les destinations
                     </Button>
                 </div>
             </div>
-
-            <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
         </section>
     );
 }

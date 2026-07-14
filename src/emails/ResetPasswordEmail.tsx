@@ -92,11 +92,10 @@ const container = {
     marginBottom: '64px',
     maxWidth: '600px',
     borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
 };
 
 const header = {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0f172a',
     padding: '30px',
     borderRadius: '8px 8px 0 0',
     textAlign: 'center' as const,
@@ -105,7 +104,7 @@ const header = {
 const headerText = {
     color: '#ffffff',
     fontSize: '24px',
-    fontWeight: '900',
+    fontWeight: '700',
     margin: '0',
     letterSpacing: '-0.02em',
 };
@@ -134,8 +133,8 @@ const buttonContainer = {
 };
 
 const button = {
-    backgroundColor: '#2563eb',
-    borderRadius: '12px',
+    backgroundColor: '#0f172a',
+    borderRadius: '8px',
     color: '#ffffff',
     fontSize: '16px',
     fontWeight: 'bold',
@@ -146,7 +145,7 @@ const button = {
 };
 
 const link = {
-    color: '#2563eb',
+    color: '#0f172a',
     textDecoration: 'underline',
     fontSize: '14px',
     wordBreak: 'break-all' as const,
@@ -168,7 +167,7 @@ const footer = {
     textAlign: 'center' as const,
     padding: '20px 30px',
     borderTop: '1px solid #e5e7eb',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f8fafc',
     borderRadius: '0 0 8px 8px',
 };
 

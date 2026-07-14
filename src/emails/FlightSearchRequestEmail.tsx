@@ -287,9 +287,9 @@ const container = {
 };
 
 const header = {
-  backgroundColor: '#2563eb',
+  backgroundColor: '#0f172a',
   padding: '25px 30px',
-  borderRadius: '10px 10px 0 0',
+  borderRadius: '8px 8px 0 0',
   textAlign: 'center' as const,
 };
 
@@ -318,15 +318,15 @@ const greeting = {
 };
 
 const summarySection = {
-  backgroundColor: '#eff6ff',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #bfdbfe',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
 const summaryTitle = {
-  color: '#1d4ed8',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -343,15 +343,15 @@ const summaryItem = {
 };
 
 const resultsSection = {
-  backgroundColor: '#f0fdf4',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #bbf7d0',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
 const resultsTitle = {
-  color: '#065f46',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -360,9 +360,8 @@ const resultsTitle = {
 const flightCard = {
   padding: '24px',
   backgroundColor: '#ffffff',
-  borderRadius: '16px',
+  borderRadius: '8px',
   border: '1px solid #e5e7eb',
-  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
 };
 
 const airlineName = {
@@ -382,8 +381,8 @@ const flightType = {
 
 const flightPrice = {
   fontSize: '24px',
-  fontWeight: '900',
-  color: '#2563eb',
+  fontWeight: '700',
+  color: '#0f172a',
   margin: '0',
 };
 
@@ -395,15 +394,15 @@ const priceBreakdown = {
 };
 
 const timelineContainer = {
-  backgroundColor: '#f9fafb',
+  backgroundColor: '#f8fafc',
   padding: '16px',
-  borderRadius: '12px',
+  borderRadius: '8px',
   margin: '16px 0',
 };
 
 const timeText = {
   fontSize: '20px',
-  fontWeight: '900',
+  fontWeight: '700',
   color: '#111827',
   margin: '0',
 };
@@ -445,7 +444,7 @@ const flightDetail = {
 
 const warningText = {
   fontSize: '13px',
-  color: '#f97316',
+  color: '#92400e',
   fontWeight: 'bold',
   margin: '12px 0 0 0',
 };
@@ -454,7 +453,7 @@ const feeNotice = {
   fontSize: '13px',
   color: '#1e40af',
   fontWeight: 'bold',
-  backgroundColor: '#eff6ff',
+  backgroundColor: '#f8fafc',
   padding: '10px',
   borderRadius: '8px',
   marginTop: '16px',
@@ -466,7 +465,7 @@ const errorSection = {
   padding: '16px 20px',
   borderRadius: '8px',
   border: '1px solid #fecaca',
-  borderLeft: '4px solid #dc2626',
+  
   margin: '20px 0',
 };
 
@@ -491,10 +490,10 @@ const actionText = {
 };
 
 const noResultsSection = {
-  backgroundColor: '#fff7ed',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #fed7aa',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
@@ -511,16 +510,16 @@ const divider = {
 };
 
 const actionSection = {
-  backgroundColor: '#fff7ed',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #fed7aa',
-  borderLeft: '4px solid #f97316',
+  border: '1px solid #e2e8f0',
+  
   margin: '20px 0',
 };
 
 const actionTitle = {
-  color: '#c2410c',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -536,7 +535,7 @@ const footer = {
   textAlign: 'center' as const,
   padding: '20px 30px',
   borderTop: '1px solid #e5e7eb',
-  backgroundColor: '#f9fafb',
+  backgroundColor: '#f8fafc',
 };
 
 const footerText = {

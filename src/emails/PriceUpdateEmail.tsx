@@ -179,13 +179,12 @@ const container = {
     padding: '0 0 48px',
     marginBottom: '64px',
     maxWidth: '600px',
-    borderRadius: '12px',
+    borderRadius: '8px',
     overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
 };
 
 const header = {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0f172a',
     padding: '40px 30px',
     textAlign: 'center' as const,
 };
@@ -224,7 +223,7 @@ const paragraph = {
 const priceHighlightSection = {
     backgroundColor: '#f8fafc',
     padding: '30px',
-    borderRadius: '12px',
+    borderRadius: '8px',
     textAlign: 'center' as const,
     margin: '30px 0',
     border: '1px solid #e2e8f0',
@@ -299,7 +298,7 @@ const supportText = {
 };
 
 const supportLink = {
-    color: '#2563eb',
+    color: '#0f172a',
     fontSize: '14px',
     fontWeight: '600',
     textDecoration: 'none',
@@ -309,7 +308,7 @@ const supportLink = {
 const footer = {
     textAlign: 'center' as const,
     padding: '32px 30px',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f8fafc',
     borderTop: '1px solid #e5e7eb',
 };
 

@@ -400,9 +400,9 @@ const container = {
 };
 
 const header = {
-  backgroundColor: '#2563eb',
+  backgroundColor: '#0f172a',
   padding: '25px 30px',
-  borderRadius: '10px 10px 0 0',
+  borderRadius: '8px 8px 0 0',
   textAlign: 'center' as const,
 };
 
@@ -427,7 +427,7 @@ const section = {
 };
 
 const sectionTitle = {
-  color: '#1d4ed8',
+  color: '#334155',
   fontSize: '18px',
   fontWeight: 'bold',
   margin: '0 0 16px 0',
@@ -449,7 +449,7 @@ const valueColumn = {
 };
 
 const label = {
-  color: '#1d4ed8',
+  color: '#334155',
   fontSize: '14px',
   fontWeight: '600',
   margin: '0',
@@ -462,7 +462,7 @@ const value = {
   backgroundColor: '#f8fafc',
   padding: '8px 12px',
   borderRadius: '6px',
-  borderLeft: '4px solid #2563eb',
+  border: '1px solid #e2e8f0',
   wordBreak: 'break-word' as const,
   minWidth: '100px',
 };
@@ -473,15 +473,15 @@ const divider = {
 };
 
 const actionSection = {
-  backgroundColor: '#eff6ff',
+  backgroundColor: '#f8fafc',
   padding: '20px 30px',
   borderRadius: '8px',
-  border: '1px solid #bfdbfe',
+  border: '1px solid #e2e8f0',
   margin: '20px 30px',
 };
 
 const actionTitle = {
-  color: '#1d4ed8',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -500,15 +500,15 @@ const contactInfo = {
 };
 
 const clientContactSection = {
-  backgroundColor: '#f0fdf4',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #bbf7d0',
+  border: '1px solid #e2e8f0',
   margin: '16px 0',
 };
 
 const clientContactTitle = {
-  color: '#065f46',
+  color: '#334155',
   fontSize: '15px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -529,7 +529,7 @@ const footer = {
   textAlign: 'center' as const,
   padding: '20px 30px',
   borderTop: '1px solid #e5e7eb',
-  backgroundColor: '#f9fafb',
+  backgroundColor: '#f8fafc',
 };
 
 const footerText = {

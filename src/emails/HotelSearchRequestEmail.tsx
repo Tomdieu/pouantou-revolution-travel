@@ -189,9 +189,9 @@ const container = {
 };
 
 const header = {
-  backgroundColor: '#2563eb',
+  backgroundColor: '#0f172a',
   padding: '25px 30px',
-  borderRadius: '10px 10px 0 0',
+  borderRadius: '8px 8px 0 0',
   textAlign: 'center' as const,
 };
 
@@ -220,15 +220,15 @@ const greeting = {
 };
 
 const summarySection = {
-  backgroundColor: '#eff6ff',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #bfdbfe',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
 const summaryTitle = {
-  color: '#1d4ed8',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -245,15 +245,15 @@ const summaryItem = {
 };
 
 const resultsSection = {
-  backgroundColor: '#f0fdf4',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #bbf7d0',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
 const resultsTitle = {
-  color: '#065f46',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -266,7 +266,7 @@ const hotelCard = {
 const hotelName = {
   fontSize: '16px',
   fontWeight: 'bold',
-  color: '#065f46',
+  color: '#334155',
   margin: '0 0 8px 0',
 };
 
@@ -277,7 +277,7 @@ const hotelDetail = {
 };
 
 const hotelDivider = {
-  borderColor: '#bbf7d0',
+  borderColor: '#e2e8f0',
   margin: '12px 0',
 };
 
@@ -286,7 +286,7 @@ const errorSection = {
   padding: '16px 20px',
   borderRadius: '8px',
   border: '1px solid #fecaca',
-  borderLeft: '4px solid #dc2626',
+  
   margin: '20px 0',
 };
 
@@ -311,10 +311,10 @@ const actionText = {
 };
 
 const noResultsSection = {
-  backgroundColor: '#fff7ed',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #fed7aa',
+  border: '1px solid #e2e8f0',
   margin: '20px 0',
 };
 
@@ -331,16 +331,16 @@ const divider = {
 };
 
 const actionSection = {
-  backgroundColor: '#fff7ed',
+  backgroundColor: '#f8fafc',
   padding: '16px 20px',
   borderRadius: '8px',
-  border: '1px solid #fed7aa',
-  borderLeft: '4px solid #f97316',
+  border: '1px solid #e2e8f0',
+  
   margin: '20px 0',
 };
 
 const actionTitle = {
-  color: '#c2410c',
+  color: '#334155',
   fontSize: '16px',
   fontWeight: 'bold',
   margin: '0 0 12px 0',
@@ -356,7 +356,7 @@ const footer = {
   textAlign: 'center' as const,
   padding: '20px 30px',
   borderTop: '1px solid #e5e7eb',
-  backgroundColor: '#f9fafb',
+  backgroundColor: '#f8fafc',
 };
 
 const footerText = {

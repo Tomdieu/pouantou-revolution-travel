@@ -9,10 +9,8 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, User, Mail, Lock, Plane, Phone, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { toast } from 'sonner';
 import { InputPhone } from '@/components/ui/input-phone';
 
@@ -97,236 +95,187 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
-            <div className="w-full max-w-xl animate-fade-in-up">
-                <div className="rounded-md p-8 md:p-10 border border-white/40 shadow relative overflow-hidden group bg-white/10 backdrop-blur-md">
-                    {/* Decorative Background Icon */}
-                    <div className="absolute top-[-20px] left-[-20px] p-8 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-700 pointer-events-none -rotate-12">
-                        <User className="w-40 h-40" />
+        <div className="flex-1 flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md">
+                <div className="space-y-8">
+                    <div className="space-y-2 text-center">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+                            Créer un compte
+                        </h1>
+                        <p className="text-sm text-slate-500">
+                            Rejoignez l&apos;aventure Revolution Travel
+                        </p>
                     </div>
 
-                    <div className="relative z-10 space-y-8">
-                        <div className="space-y-2 text-center">
-                            <h1 className="text-3xl font-black tracking-tight text-gray-900">
-                                Créer un Compte
-                            </h1>
-                            <p className="text-gray-500 font-medium">
-                                Rejoignez l'aventure Pouantou Revolution Travel
-                            </p>
+                    <div className="space-y-4">
+                        {/* Google Sign In */}
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full h-11 rounded-lg border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-200"
+                            onClick={handleGoogleSignIn}
+                            disabled={isGoogleLoading}
+                        >
+                            {isGoogleLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : (
+                                <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                                </svg>
+                            )}
+                            S&apos;inscrire avec Google
+                        </Button>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-slate-200" />
+                            </div>
+                            <div className="relative flex justify-center text-xs text-slate-400">
+                                <span className="bg-slate-50 px-3">ou par formulaire</span>
+                            </div>
                         </div>
 
-                        <div className="space-y-6">
-                            {/* Google Sign In */}
-                            <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full h-14 rounded-2xl border-2 border-gray-100 bg-white/50 backdrop-blur-sm hover:bg-gray-50 hover:border-blue-200 transition-all duration-300 font-bold text-gray-700 flex items-center justify-center gap-3 active:scale-[0.98]"
-                                onClick={handleGoogleSignIn}
-                                disabled={isGoogleLoading}
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-medium text-slate-700">Nom complet</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    placeholder="Jean Dupont"
+                                                    className="h-11 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                                                />
+                                            </FormControl>
+                                            <FormMessage className="text-xs" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-medium text-slate-700">Email</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    type="email"
+                                                    placeholder="votre@email.com"
+                                                    className="h-11 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                                                />
+                                            </FormControl>
+                                            <FormMessage className="text-xs" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-medium text-slate-700">Téléphone</FormLabel>
+                                            <FormControl>
+                                                <InputPhone
+                                                    {...field}
+                                                    defaultCountry="CM"
+                                                    placeholder="+237 6XX XXX XXX"
+                                                    popoverFontSize="text-lg"
+                                                    className="h-11"
+                                                />
+                                            </FormControl>
+                                            <FormMessage className="text-xs" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-medium text-slate-700">Mot de passe</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input
+                                                        {...field}
+                                                        type={showPassword ? "text" : "password"}
+                                                        placeholder="••••••••"
+                                                        className="h-11 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 pr-10"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                                    >
+                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-sm font-medium text-slate-700">Confirmer le mot de passe</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input
+                                                        {...field}
+                                                        type={showConfirmPassword ? "text" : "password"}
+                                                        placeholder="••••••••"
+                                                        className="h-11 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 pr-10"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                                    >
+                                                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage className="text-xs" />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <Button
+                                    type="submit"
+                                    className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition-colors duration-200"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    ) : null}
+                                    Créer mon compte
+                                </Button>
+                            </form>
+                        </Form>
+
+                        <p className="text-center text-sm text-slate-500 pt-2">
+                            Vous avez déjà un compte ?{' '}
+                            <Link
+                                href="/login"
+                                className="text-slate-900 font-medium hover:underline"
                             >
-                                {isGoogleLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <svg className="h-5 w-5" viewBox="0 0 24 24">
-                                        <path
-                                            fill="#4285F4"
-                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                        />
-                                        <path
-                                            fill="#34A853"
-                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                        />
-                                        <path
-                                            fill="#FBBC05"
-                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                        />
-                                        <path
-                                            fill="#EA4335"
-                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                                        />
-                                    </svg>
-                                )}
-                                <span className="text-sm">S'inscrire avec Google</span>
-                            </Button>
-
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t border-gray-100" />
-                                </div>
-                                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-gray-400">
-                                    <span className="bg-white/10 px-4">Ou par formulaire</span>
-                                </div>
-                            </div>
-
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                                    <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Nom complet</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 group-focus-within:text-blue-600 z-10">
-                                                            <User className="h-5 w-5" />
-                                                        </div>
-                                                        <Input
-                                                            {...field}
-                                                            type="text"
-                                                            placeholder="Jean Dupont"
-                                                            className="pl-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
-                                                        />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Email</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 group-focus-within:text-blue-600 z-10">
-                                                            <Mail className="h-5 w-5" />
-                                                        </div>
-                                                        <Input
-                                                            {...field}
-                                                            type="email"
-                                                            placeholder="votre@email.com"
-                                                            className="pl-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
-                                                        />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="phone"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Téléphone</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 group-focus-within:text-blue-600 z-10">
-                                                            <Phone className="h-5 w-5" />
-                                                        </div>
-                                                        <InputPhone
-                                                            {...field}
-                                                            defaultCountry="CM"
-                                                            placeholder="+237 6XX XXX XXX"
-                                                            popoverFontSize="text-lg"
-                                                            className="pl-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
-                                                        />
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="password"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Mot de passe</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 group-focus-within:text-blue-600 z-10">
-                                                            <Lock className="h-5 w-5" />
-                                                        </div>
-                                                        <Input
-                                                            {...field}
-                                                            type={showPassword ? "text" : "password"}
-                                                            placeholder="••••••••"
-                                                            className="pl-12 pr-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors duration-300 z-10"
-                                                        >
-                                                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                                        </button>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="confirmPassword"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs font-bold text-gray-500 ml-1 uppercase tracking-wider">Confirmer le mot de passe</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative group">
-                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 group-focus-within:text-blue-600 z-10">
-                                                            <Lock className="h-5 w-5" />
-                                                        </div>
-                                                        <Input
-                                                            {...field}
-                                                            type={showConfirmPassword ? "text" : "password"}
-                                                            placeholder="••••••••"
-                                                            className="pl-12 pr-12 h-14 bg-white/50 backdrop-blur-sm border-2 border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-2xl transition-all duration-300 font-medium"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors duration-300 z-10"
-                                                        >
-                                                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                                        </button>
-                                                    </div>
-                                                </FormControl>
-                                                <FormMessage className="text-[11px] font-bold mt-1.5 ml-1" />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <Button
-                                        type="submit"
-                                        className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all duration-300 transform active:scale-[0.98] group flex items-center justify-center gap-3 overflow-hidden mt-6"
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? (
-                                            <div className="flex items-center gap-2">
-                                                <Loader2 className="h-6 w-6 animate-spin" />
-                                                <span className="text-lg">Création...</span>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <span className="text-lg">Créer mon compte</span>
-                                                <Plane className="h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </Button>
-                                </form>
-                            </Form>
-
-                            <div className="text-center pt-4">
-                                <p className="text-gray-500 font-medium text-sm">
-                                    Vous avez déjà un compte ?{' '}
-                                    <Link
-                                        href="/login"
-                                        className="text-blue-600 hover:text-blue-700 font-black transition-colors"
-                                    >
-                                        Se connecter
-                                    </Link>
-                                </p>
-                            </div>
-                        </div>
+                                Se connecter
+                            </Link>
+                        </p>
                     </div>
                 </div>
             </div>

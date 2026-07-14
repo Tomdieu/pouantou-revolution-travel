@@ -80,12 +80,12 @@ export function AdminSidebar({ className }: SidebarProps) {
             icon: Plane,
             active: pathname.startsWith('/admin/destinations'),
         },
-        {
-            href: '/admin/settings',
-            label: 'Paramètres',
-            icon: Settings,
-            active: pathname.startsWith('/admin/settings'),
-        },
+        // {
+        //     href: '/admin/settings',
+        //     label: 'Paramètres',
+        //     icon: Settings,
+        //     active: pathname.startsWith('/admin/settings'),
+        // },
     ];
 
     return (

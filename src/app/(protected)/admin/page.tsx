@@ -1,9 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VisitorChart } from "@/components/admin/VisitorChart";
 import { prisma } from "@/lib/prisma";
-import { CalendarDays, Users, Star, TrendingUp, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import Link from "next/link";
+import {
+    Users,
+    CalendarDays,
+    TrendingUp,
+    Eye,
+    Star,
+    ArrowRight,
+    Plane,
+    MapPin,
+} from "lucide-react";
 
 async function getDashboardStats() {
     const today = new Date();
@@ -16,55 +25,36 @@ async function getDashboardStats() {
         bookings,
         recentBookings,
         recentReviews,
-        dailyVisitors
+        destinationCount,
     ] = await Promise.all([
         prisma.user.count(),
         prisma.booking.count(),
         prisma.review.count({ where: { isModerated: false } }),
         prisma.booking.findMany({
-            select: { price: true, status: true }
+            select: { price: true, status: true },
         }),
         prisma.booking.findMany({
             take: 5,
-            orderBy: { createdAt: 'desc' },
-            include: { user: true }
+            orderBy: { createdAt: "desc" },
+            include: { user: true },
         }),
         prisma.review.findMany({
             take: 5,
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: "desc" },
         }),
-        prisma.visitor.groupBy({
-            by: ['visitedAt'],
-            _count: {
-                ip: true
-            },
-            take: 7,
-            orderBy: {
-                visitedAt: 'desc'
-            }
-        })
+        prisma.destination.count(),
     ]);
 
-    // Calculate revenue (excluding cancelled)
     const revenue = bookings
-        .filter(b => b.status !== 'CANCELLED' && b.price)
+        .filter((b) => b.status !== "CANCELLED" && b.price)
         .reduce((acc, curr) => acc + (curr.price || 0), 0);
 
-    // Process visitor data for chart (group by day) - Simplified for now since groupBy date part in Prisma is tricky without raw query
-    // We will do a raw query for better date grouping or just use the last 7 days count
-    // Switching to findMany for visitors in last 7 days and grouping manually in JS for accuracy
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const rawVisitors = await prisma.visitor.findMany({
-        where: {
-            visitedAt: {
-                gte: sevenDaysAgo
-            }
-        },
-        orderBy: {
-            visitedAt: 'asc'
-        }
+        where: { visitedAt: { gte: sevenDaysAgo } },
+        orderBy: { visitedAt: "asc" },
     });
 
     const visitorsByDay: Record<string, number> = {};
@@ -73,24 +63,30 @@ async function getDashboardStats() {
     for (let i = 0; i < 7; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = d.toISOString().split("T")[0];
         visitorsByDay[dateStr] = 0;
         last7Days.unshift(dateStr);
     }
 
-    rawVisitors.forEach(v => {
-        const dateStr = v.visitedAt.toISOString().split('T')[0];
+    rawVisitors.forEach((v) => {
+        const dateStr = v.visitedAt.toISOString().split("T")[0];
         if (visitorsByDay[dateStr] !== undefined) {
             visitorsByDay[dateStr]++;
         }
     });
 
-    const visitorChartData = last7Days.map(date => ({
-        date: new Date(date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' }),
-        count: visitorsByDay[date]
+    const visitorChartData = last7Days.map((date) => ({
+        date: new Date(date).toLocaleDateString("fr-FR", {
+            weekday: "short",
+            day: "numeric",
+        }),
+        count: visitorsByDay[date],
     }));
 
-    const totalVisitors = Object.values(visitorsByDay).reduce((a, b) => a + b, 0);
+    const totalVisitors = Object.values(visitorsByDay).reduce(
+        (a, b) => a + b,
+        0
+    );
 
     return {
         userCount,
@@ -99,22 +95,25 @@ async function getDashboardStats() {
         revenue,
         visitorChartData,
         totalVisitors,
+        destinationCount,
         recentActivity: [
-            ...recentBookings.map(b => ({
+            ...recentBookings.map((b) => ({
                 id: b.id,
-                type: 'BOOKING',
-                title: `${b.contactName || 'Client'} a réservé ${b.type}`,
+                type: "BOOKING" as const,
+                title: `${b.contactName || "Client"} — ${b.type === "FLIGHT" ? "Vol" : b.type === "HOTEL" ? "Hôtel" : "Voiture"}`,
                 subtitle: b.status,
-                date: b.createdAt
+                date: b.createdAt,
             })),
-            ...recentReviews.map(r => ({
+            ...recentReviews.map((r) => ({
                 id: r.id,
-                type: 'REVIEW',
-                title: `${r.name} a laissé un avis`,
-                subtitle: `${r.stars} étoiles`,
-                date: r.createdAt
-            }))
-        ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 7)
+                type: "REVIEW" as const,
+                title: `${r.name} — ${r.stars} étoile${r.stars > 1 ? "s" : ""}`,
+                subtitle: r.description?.slice(0, 60) || "",
+                date: r.createdAt,
+            })),
+        ]
+            .sort((a, b) => b.date.getTime() - a.date.getTime())
+            .slice(0, 6),
     };
 }
 
@@ -130,80 +129,189 @@ export default async function AdminDashboardPage() {
         }).format(amountInXaf);
     };
 
+    const statItems = [
+        {
+            label: "Réservations",
+            value: stats.bookingCount,
+            icon: CalendarDays,
+            color: "text-blue-600",
+            bg: "bg-blue-50",
+        },
+        {
+            label: "Revenus",
+            value: formatCurrency(stats.revenue),
+            icon: TrendingUp,
+            color: "text-emerald-600",
+            bg: "bg-emerald-50",
+        },
+        {
+            label: "Utilisateurs",
+            value: stats.userCount,
+            icon: Users,
+            color: "text-violet-600",
+            bg: "bg-violet-50",
+        },
+        {
+            label: "Visiteurs (7j)",
+            value: stats.totalVisitors,
+            icon: Eye,
+            color: "text-amber-600",
+            bg: "bg-amber-50",
+        },
+    ];
+
+    const statusColor: Record<string, string> = {
+        PENDING: "bg-amber-50 text-amber-700",
+        CONFIRMED: "bg-emerald-50 text-emerald-700",
+        CANCELLED: "bg-red-50 text-red-600",
+        COMPLETED: "bg-slate-100 text-slate-500",
+    };
+
     return (
         <div className="space-y-8">
+            {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Tableau de bord</h1>
-                <p className="text-slate-500 mt-2">Vue d&apos;ensemble de votre activité en temps réel.</p>
+                <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+                    Tableau de bord
+                </h1>
+                <p className="text-sm text-slate-500 mt-1">
+                    Vue d&apos;ensemble de votre activité
+                </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.userCount}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Réservations</CardTitle>
-                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.bookingCount}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Revenus (Est. XAF)</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(stats.revenue)}</div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Visiteurs (7j)</CardTitle>
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{stats.totalVisitors}</div>
-                        <p className="text-xs text-muted-foreground">Uniques par jour</p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <VisitorChart data={stats.visitorChartData} />
-
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Activités Récentes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-8">
-                            {stats.recentActivity.length === 0 ? (
-                                <p className="text-sm text-slate-500">Aucune activité récente.</p>
-                            ) : (
-                                stats.recentActivity.map((activity, i) => (
-                                    <div key={i} className="flex items-center">
-                                        <div className="ml-4 space-y-1">
-                                            <p className="text-sm font-medium leading-none">{activity.title}</p>
-                                            <p className="text-sm text-muted-foreground">{activity.subtitle}</p>
-                                        </div>
-                                        <div className="ml-auto font-medium text-xs text-slate-400">
-                                            {formatDistanceToNow(activity.date, { addSuffix: true, locale: fr })}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
+            {/* Stats Row */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {statItems.map((stat) => (
+                    <div
+                        key={stat.label}
+                        className="flex items-center gap-4 p-4 rounded-lg bg-white border border-slate-200"
+                    >
+                        <div
+                            className={`flex-shrink-0 w-10 h-10 rounded-lg ${stat.bg} flex items-center justify-center`}
+                        >
+                            <stat.icon className={`w-5 h-5 ${stat.color}`} />
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="min-w-0">
+                            <p className="text-xs font-medium text-slate-500 truncate">
+                                {stat.label}
+                            </p>
+                            <p className="text-lg font-semibold text-slate-900 tabular-nums">
+                                {stat.value}
+                            </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Chart + Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                {/* Chart */}
+                <div className="lg:col-span-3 bg-white border border-slate-200 rounded-lg p-5">
+                    <h2 className="text-sm font-semibold text-slate-900 mb-4">
+                        Visiteurs
+                    </h2>
+                    <VisitorChart data={stats.visitorChartData} />
+                </div>
+
+                {/* Recent Activity */}
+                <div className="lg:col-span-2 bg-white border border-slate-200 rounded-lg p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-sm font-semibold text-slate-900">
+                            Activité récente
+                        </h2>
+                    </div>
+                    <div className="space-y-0">
+                        {stats.recentActivity.length === 0 ? (
+                            <p className="text-sm text-slate-400 py-8 text-center">
+                                Aucune activité
+                            </p>
+                        ) : (
+                            stats.recentActivity.map((activity, i) => (
+                                <div
+                                    key={activity.id}
+                                    className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0"
+                                >
+                                    <div
+                                        className={`mt-0.5 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+                                            activity.type === "BOOKING"
+                                                ? "bg-blue-50"
+                                                : "bg-amber-50"
+                                        }`}
+                                    >
+                                        {activity.type === "BOOKING" ? (
+                                            <Plane
+                                                className={`w-3.5 h-3.5 ${
+                                                    activity.type === "BOOKING"
+                                                        ? "text-blue-600"
+                                                        : "text-amber-600"
+                                                }`}
+                                            />
+                                        ) : (
+                                            <Star className="w-3.5 h-3.5 text-amber-600" />
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-slate-900 truncate">
+                                            {activity.title}
+                                        </p>
+                                        <p className="text-xs text-slate-400 truncate mt-0.5">
+                                            {activity.subtitle}
+                                        </p>
+                                    </div>
+                                    <span className="text-xs text-slate-400 whitespace-nowrap flex-shrink-0">
+                                        {formatDistanceToNow(activity.date, {
+                                            addSuffix: true,
+                                            locale: fr,
+                                        })}
+                                    </span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                    {
+                        label: "Réservations",
+                        href: "/admin/bookings",
+                        icon: CalendarDays,
+                        count: stats.bookingCount,
+                    },
+                    {
+                        label: "Destinations",
+                        href: "/admin/destinations",
+                        icon: MapPin,
+                        count: stats.destinationCount,
+                    },
+                    {
+                        label: "Avis en attente",
+                        href: "/admin/reviews",
+                        icon: Star,
+                        count: stats.reviewCount,
+                    },
+                ].map((link) => (
+                    <Link
+                        key={link.href}
+                        href={link.href}
+                        className="group flex items-center justify-between p-4 rounded-lg bg-white border border-slate-200 hover:border-slate-300 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <link.icon className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                            <span className="text-sm font-medium text-slate-700">
+                                {link.label}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-slate-900">
+                                {link.count}
+                            </span>
+                            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                        </div>
+                    </Link>
+                ))}
             </div>
         </div>
     );

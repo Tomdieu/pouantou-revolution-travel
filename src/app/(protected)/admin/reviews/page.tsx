@@ -1,6 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { ReviewActions } from "@/components/admin/ReviewActions";
-import { ReviewsFilter } from "@/components/admin/ReviewsFilter";
 import {
     Pagination,
     PaginationContent,
@@ -11,6 +9,7 @@ import {
 } from "@/components/ui/pagination";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
+import { ReviewsFilter } from "@/components/admin/ReviewsFilter";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -18,16 +17,16 @@ async function getReviews(page: number, status: string) {
     const skip = (page - 1) * ITEMS_PER_PAGE;
 
     let where: any = {};
-    if (status === 'APPROVED') {
+    if (status === "APPROVED") {
         where.isModerated = true;
-    } else if (status === 'PENDING') {
+    } else if (status === "PENDING") {
         where.isModerated = false;
     }
 
     const [reviews, totalCount] = await Promise.all([
         prisma.review.findMany({
             where,
-            orderBy: { createdAt: 'desc' },
+            orderBy: { createdAt: "desc" },
             take: ITEMS_PER_PAGE,
             skip,
         }),
@@ -43,61 +42,99 @@ interface ReviewsPageProps {
 
 export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
     const params = await searchParams;
-    const page = typeof params.page === 'string' ? parseInt(params.page) : 1;
-    const status = typeof params.status === 'string' ? params.status : 'ALL';
+    const page =
+        typeof params.page === "string" ? parseInt(params.page) : 1;
+    const status =
+        typeof params.status === "string" ? params.status : "ALL";
 
     const { reviews, totalCount } = await getReviews(page, status);
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
-    // Generate pagination URL
     const createPageURL = (pageNumber: number) => {
-        const newParams = new URLSearchParams(params as Record<string, string>);
-        newParams.set('page', pageNumber.toString());
+        const newParams = new URLSearchParams(
+            params as Record<string, string>
+        );
+        newParams.set("page", pageNumber.toString());
         return `/admin/reviews?${newParams.toString()}`;
     };
 
+    const pending = await prisma.review.count({
+        where: { isModerated: false },
+    });
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Avis & Témoignages</h1>
-                    <p className="text-slate-500 mt-2">Modérez les avis ({totalCount} total).</p>
+                    <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+                        Avis
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-1">
+                        {totalCount} avis · {pending} en attente
+                    </p>
                 </div>
                 <ReviewsFilter />
             </div>
 
-            <DataTable columns={columns} data={reviews} />
+            {/* Table */}
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                <DataTable columns={columns} data={reviews} />
+            </div>
 
-            {/* Pagination Controls */}
+            {/* Pagination */}
             {totalPages > 1 && (
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                href={page > 1 ? createPageURL(page - 1) : '#'}
-                                aria-disabled={page <= 1}
-                                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-                            />
-                        </PaginationItem>
-
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                            // Simple pagination logic: show all for now, or improve if many pages needed
-                            <PaginationItem key={p}>
-                                <PaginationLink href={createPageURL(p)} isActive={p === page}>
-                                    {p}
-                                </PaginationLink>
+                <div className="flex justify-center">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href={
+                                        page > 1
+                                            ? createPageURL(page - 1)
+                                            : "#"
+                                    }
+                                    aria-disabled={page <= 1}
+                                    className={
+                                        page <= 1
+                                            ? "pointer-events-none opacity-50"
+                                            : ""
+                                    }
+                                />
                             </PaginationItem>
-                        ))}
 
-                        <PaginationItem>
-                            <PaginationNext
-                                href={page < totalPages ? createPageURL(page + 1) : '#'}
-                                aria-disabled={page >= totalPages}
-                                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                            {Array.from(
+                                { length: totalPages },
+                                (_, i) => i + 1
+                            ).map((p) => (
+                                <PaginationItem key={p}>
+                                    <PaginationLink
+                                        href={createPageURL(p)}
+                                        isActive={p === page}
+                                    >
+                                        {p}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    href={
+                                        page < totalPages
+                                            ? createPageURL(page + 1)
+                                            : "#"
+                                    }
+                                    aria-disabled={page >= totalPages}
+                                    className={
+                                        page >= totalPages
+                                            ? "pointer-events-none opacity-50"
+                                            : ""
+                                    }
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
             )}
         </div>
     );

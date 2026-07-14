@@ -21,10 +21,14 @@ export default async function AdminProfilePage() {
     const isOAuth = !user.password;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Mon Profil</h1>
-                <p className="text-slate-500 mt-2">Gérez vos informations personnelles et vos paramètres de sécurité.</p>
+                <h1 className="text-xl font-semibold text-slate-900 tracking-tight">
+                    Mon profil
+                </h1>
+                <p className="text-sm text-slate-500 mt-1">
+                    Informations personnelles et sécurité
+                </p>
             </div>
 
             <div className="max-w-2xl">

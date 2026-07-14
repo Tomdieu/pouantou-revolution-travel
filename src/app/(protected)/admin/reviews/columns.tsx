@@ -7,8 +7,6 @@ import { ReviewActions } from "@/components/admin/ReviewActions"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 export type Review = {
     id: string
     name: string
@@ -23,37 +21,42 @@ export const columns: ColumnDef<Review>[] = [
     {
         accessorKey: "name",
         header: "Client",
-        cell: ({ row }) => {
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{row.getValue("name")}</span>
-                    <span className="text-xs text-muted-foreground">{row.original.jobTitle}</span>
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <div>
+                <p className="text-sm font-medium text-slate-900">
+                    {row.getValue("name")}
+                </p>
+                {row.original.jobTitle && (
+                    <p className="text-xs text-slate-400">
+                        {row.original.jobTitle}
+                    </p>
+                )}
+            </div>
+        ),
     },
     {
         accessorKey: "stars",
         header: "Note",
-        cell: ({ row }) => {
-            return (
-                <div className="flex items-center text-yellow-500">
-                    <span className="font-bold mr-1">{row.getValue("stars")}</span>
-                    <Star className="h-4 w-4 fill-current" />
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <div className="flex items-center gap-1">
+                <span className="text-sm font-semibold text-slate-700 tabular-nums">
+                    {row.getValue("stars")}
+                </span>
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+            </div>
+        ),
     },
     {
         accessorKey: "description",
         header: "Message",
-        cell: ({ row }) => {
-            return (
-                <div className="truncate py-4 max-w-[400px]">
-                    <span title={row.getValue("description")}>{row.getValue("description")}</span>
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <p
+                className="text-sm text-slate-600 truncate max-w-[360px]"
+                title={row.getValue("description")}
+            >
+                {row.getValue("description")}
+            </p>
+        ),
     },
     {
         accessorKey: "isModerated",
@@ -61,30 +64,40 @@ export const columns: ColumnDef<Review>[] = [
         cell: ({ row }) => {
             const isModerated = row.getValue("isModerated")
             return (
-                <div className="flex w-[100px] items-center">
-                    <Badge variant={isModerated ? 'default' : 'destructive'}>
-                        {isModerated ? 'Approuvé' : 'En attente'}
-                    </Badge>
-                </div>
+                <Badge
+                    variant="outline"
+                    className={`text-xs font-medium ${
+                        isModerated
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}
+                >
+                    {isModerated ? "Approuvé" : "En attente"}
+                </Badge>
             )
         },
     },
     {
         accessorKey: "createdAt",
         header: "Date",
-        cell: ({ row }) => {
-            return (
-                <div>
-                    {format(new Date(row.getValue("createdAt")), "dd MMM yyyy", { locale: fr })}
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <span className="text-sm text-slate-500">
+                {format(new Date(row.getValue("createdAt")), "dd MMM yyyy", {
+                    locale: fr,
+                })}
+            </span>
+        ),
     },
     {
         id: "actions",
         cell: ({ row }) => {
             const review = row.original
-            return <ReviewActions id={review.id} isModerated={review.isModerated} />
+            return (
+                <ReviewActions
+                    id={review.id}
+                    isModerated={review.isModerated}
+                />
+            )
         },
     },
 ]

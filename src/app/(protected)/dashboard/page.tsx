@@ -2,11 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { BookingList } from '@/components/dashboard/BookingList';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Plane, Clock, CheckCircle2, PartyPopper, ShieldCheck } from 'lucide-react';
-import { DashboardHeader } from './_components/DashboardHeader';
+import { Plane, Clock, CheckCircle2, PartyPopper } from 'lucide-react';
 import ServicesSection from '@/components/ServicesSection';
 
 export default async function DashboardPage() {
@@ -16,17 +12,11 @@ export default async function DashboardPage() {
         redirect('/login');
     }
 
-    // Fetch user's bookings
     const bookings = await prisma.booking.findMany({
-        where: {
-            userId: session.user.id,
-        },
-        orderBy: {
-            createdAt: 'desc',
-        },
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
     });
 
-    // Parse searchDetails JSON
     type Booking = typeof bookings[number];
     const bookingsWithParsedDetails = bookings.map((booking: Booking) => ({
         ...booking,
@@ -35,80 +25,60 @@ export default async function DashboardPage() {
 
     const stats = [
         {
-            label: 'Total Réservations',
+            label: 'Total',
             value: bookings.length,
             icon: Plane,
-            color: 'text-blue-600',
         },
         {
             label: 'En attente',
             value: bookings.filter((b) => b.status === 'PENDING').length,
             icon: Clock,
-            color: 'text-yellow-600',
         },
         {
             label: 'Confirmées',
             value: bookings.filter((b) => b.status === 'CONFIRMED').length,
             icon: CheckCircle2,
-            color: 'text-green-600',
         },
         {
             label: 'Terminées',
             value: bookings.filter((b) => b.status === 'COMPLETED').length,
             icon: PartyPopper,
-            color: 'text-indigo-600',
         },
     ];
-
-    const userForHeader = {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        image: session.user.image,
-        role: session.user.role,
-    };
 
     return (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="space-y-8">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Stats */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((stat, idx) => (
-                        <Card key={idx}>
-                            <CardContent className="p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-                                        <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-                                    </div>
-                                    <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div key={idx} className="bg-white border border-slate-200 rounded-xl p-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <stat.icon className="h-4 w-4 text-slate-400" />
+                                <span className="text-2xl font-bold text-slate-900 tabular-nums">{stat.value}</span>
+                            </div>
+                            <p className="text-sm text-slate-500">{stat.label}</p>
+                        </div>
                     ))}
                 </div>
 
-                {/* Services Hub (New Request Section) */}
+                {/* Services */}
                 <div id="services-hub">
                     <ServicesSection isDashboard userId={session.user.id} />
                 </div>
 
-                {/* Booking List Container */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2">
-                                <Plane className="h-5 w-5 text-blue-600" />
-                                Mes Réservations
-                            </CardTitle>
-                            <Badge variant="secondary">
-                                {bookings.length} Demandes
-                            </Badge>
-                        </div>
-                    </CardHeader>
-                    <Separator />
+                {/* Bookings */}
+                <div>
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                            Mes réservations
+                        </h2>
+                        <span className="text-sm text-slate-400">
+                            {bookings.length} demande{bookings.length !== 1 ? 's' : ''}
+                        </span>
+                    </div>
                     <BookingList bookings={bookingsWithParsedDetails} />
-                </Card>
+                </div>
             </div>
         </main>
     );

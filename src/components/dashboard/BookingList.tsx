@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plane, Building2, Car, Clock, CheckCircle2, XCircle, PartyPopper, Filter, Inbox } from "lucide-react";
+import { Plane, Building2, Car, Filter, Inbox } from "lucide-react";
 import { BookingCard } from './BookingCard';
 import { Button } from '@/components/ui/button';
 import { BookingType, BookingStatus } from '@prisma/client';
@@ -33,11 +33,11 @@ const typeConfig = {
 };
 
 const statusConfig = {
-    ALL: { label: 'Tous', color: 'bg-stone-100 text-stone-700' },
-    PENDING: { label: 'En attente', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-    CONFIRMED: { label: 'Confirmée', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-    CANCELLED: { label: 'Annulée', color: 'bg-red-50 text-red-700 border-red-200' },
-    COMPLETED: { label: 'Terminée', color: 'bg-green-50 text-green-700 border-green-200' },
+    ALL: { label: 'Tous' },
+    PENDING: { label: 'En attente' },
+    CONFIRMED: { label: 'Confirmée' },
+    CANCELLED: { label: 'Annulée' },
+    COMPLETED: { label: 'Terminée' },
 };
 
 export function BookingList({ bookings }: BookingListProps) {
@@ -53,105 +53,85 @@ export function BookingList({ bookings }: BookingListProps) {
     if (bookings.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center mb-6 border border-blue-100">
-                    <Inbox className="w-8 h-8 text-blue-400" />
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <Inbox className="w-6 h-6 text-slate-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-base font-semibold text-slate-900 mb-1">
                     Aucune réservation
                 </h3>
-                <p className="text-sm text-gray-600 max-w-sm leading-relaxed">
-                    Vous n'avez pas encore de demandes en cours. Commencez votre voyage dès aujourd'hui.
+                <p className="text-sm text-slate-500 max-w-sm">
+                    Vous n&apos;avez pas encore de demandes. Commencez votre voyage dès aujourd&apos;hui.
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             {/* Filters */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-5">
-                {/* Type Filter */}
-                <div>
-                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-3">
-                        Type de réservation
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                        {Object.entries(typeConfig).map(([key, config]) => {
-                            const Icon = config.icon;
-                            const isActive = filterType === key;
-                            return (
-                                <Button
-                                    key={key}
-                                    variant={isActive ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => setFilterType(key)}
-                                    className={`h-9 gap-2 text-xs font-medium transition-all ${
-                                        isActive
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700'
-                                    }`}
-                                >
-                                    <Icon className="w-4 h-4" />
-                                    {config.label}
-                                </Button>
-                            );
-                        })}
-                    </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(typeConfig).map(([key, config]) => {
+                        const Icon = config.icon;
+                        const isActive = filterType === key;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => setFilterType(key)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                    isActive
+                                        ? 'bg-slate-900 text-white'
+                                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                }`}
+                            >
+                                <Icon className="w-3.5 h-3.5" />
+                                {config.label}
+                            </button>
+                        );
+                    })}
                 </div>
-
-                {/* Status Filter */}
-                <div>
-                    <span className="text-xs font-semibold text-gray-700 uppercase tracking-wider block mb-3">
-                        Statut
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                        {Object.entries(statusConfig).map(([key, config]) => {
-                            const isActive = filterStatus === key;
-                            return (
-                                <Button
-                                    key={key}
-                                    variant={isActive ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => setFilterStatus(key)}
-                                    className={`h-9 text-xs font-medium transition-all ${
-                                        isActive
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-                                            : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700'
-                                    }`}
-                                >
-                                    {config.label}
-                                </Button>
-                            );
-                        })}
-                    </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(statusConfig).map(([key, config]) => {
+                        const isActive = filterStatus === key;
+                        return (
+                            <button
+                                key={key}
+                                onClick={() => setFilterStatus(key)}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                    isActive
+                                        ? 'bg-slate-900 text-white'
+                                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                                }`}
+                            >
+                                {config.label}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Results Count */}
+            {/* Results */}
             <div className="flex items-center justify-between">
-                <div className="text-sm px-4">
-                    <span className="font-semibold text-gray-900">{filteredBookings.length}</span>
-                    <span className="text-gray-600 ml-1">réservation{filteredBookings.length > 1 ? 's' : ''}</span>
-                </div>
+                <span className="text-sm text-slate-500">
+                    {filteredBookings.length} résultat{filteredBookings.length !== 1 ? 's' : ''}
+                </span>
                 {(filterType !== 'ALL' || filterStatus !== 'ALL') && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
+                    <button
                         onClick={() => { setFilterType('ALL'); setFilterStatus('ALL'); }}
-                        className="text-xs text-gray-500 hover:text-gray-900 h-8"
+                        className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
                     >
-                        Réinitialiser les filtres
-                    </Button>
+                        Réinitialiser
+                    </button>
                 )}
             </div>
 
             {/* List */}
             {filteredBookings.length === 0 ? (
-                <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                    <p className="text-sm text-gray-500">Aucun résultat correspondant à vos critères</p>
+                <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="text-sm text-slate-500">Aucun résultat correspondant à vos critères</p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {filteredBookings.map((booking) => (
                         <BookingCard key={booking.id} booking={booking} />
                     ))}

@@ -8,10 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { InputPhone } from '@/components/ui/input-phone';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
-import { Loader2, Save, User, Mail, Shield, Key, Phone } from 'lucide-react';
+import { Loader2, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ChangePasswordModal } from './ChangePasswordModal';
@@ -54,9 +51,7 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
         try {
             const response = await fetch('/api/user/profile', {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values),
             });
 
@@ -79,169 +74,138 @@ export function ProfileForm({ user, isOAuth }: ProfileFormProps) {
         <div className="space-y-6">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div>
-                                <CardTitle>Détails du Compte</CardTitle>
-                                <CardDescription>Informations de votre compte Revolution Travel</CardDescription>
-                            </div>
+                    <div className="bg-white border border-slate-200 rounded-xl">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                            <h3 className="text-sm font-semibold text-slate-900">Détails du compte</h3>
                             {!isEditing ? (
-                                <Button
+                                <button
                                     type="button"
-                                    variant="outline"
                                     onClick={() => setIsEditing(true)}
-                                    className="rounded-xl"
+                                    className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                                 >
                                     Modifier
-                                </Button>
+                                </button>
                             ) : (
                                 <div className="flex gap-2">
-                                    <Button
+                                    <button
                                         type="button"
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setIsEditing(false);
-                                            form.reset();
-                                        }}
+                                        onClick={() => { setIsEditing(false); form.reset(); }}
                                         disabled={isLoading}
-                                        className="rounded-xl"
+                                        className="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
                                     >
                                         Annuler
-                                    </Button>
+                                    </button>
                                     <Button
                                         type="submit"
+                                        size="sm"
                                         disabled={isLoading}
-                                        className="bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-2"
+                                        className="h-8 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm"
                                     >
-                                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                        {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
                                         Enregistrer
                                     </Button>
                                 </div>
                             )}
-                        </CardHeader>
-                        <Separator />
-                        <CardContent className="pt-6">
-                            <div className="space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-sm font-bold text-gray-700 ml-1">Nom Complet</FormLabel>
-                                            <FormControl>
-                                                <div className="relative group">
-                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
-                                                        <User className="h-4 w-4" />
-                                                    </div>
-                                                    <Input
-                                                        {...field}
-                                                        disabled={!isEditing || isLoading}
-                                                        className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
-                                                    />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        </div>
 
-                                <FormField
-                                    control={form.control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-sm font-bold text-gray-700 ml-1">Téléphone</FormLabel>
-                                            <FormControl>
-                                                <div className="relative group">
-                                                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10">
-                                                        <Phone className="h-4 w-4" />
-                                                    </div>
-                                                    <InputPhone
-                                                        defaultCountry="CM"
-                                                        {...field}
-                                                        placeholder="+237 6 12 34 56 78"
-                                                        disabled={!isEditing || isLoading}
-                                                        className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all"
-                                                    />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        <div className="p-6 space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-medium text-slate-700">Nom complet</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                disabled={!isEditing || isLoading}
+                                                className="h-10 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="text-xs" />
+                                    </FormItem>
+                                )}
+                            />
 
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-sm font-bold text-gray-700 ml-1">
-                                                Adresse Email {isOAuth && <span className="text-xs font-normal text-gray-400 ml-1">(Géré via Google)</span>}
-                                            </FormLabel>
-                                            <FormControl>
-                                                <div className="relative group">
-                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                        <Mail className="h-4 w-4" />
-                                                    </div>
-                                                    <Input
-                                                        {...field}
-                                                        type="email"
-                                                        disabled={!isEditing || isLoading || isOAuth}
-                                                        className="pl-10 h-12 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-blue-500 rounded-xl transition-all disabled:opacity-70"
-                                                    />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                            <FormField
+                                control={form.control}
+                                name="phone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-medium text-slate-700">Téléphone</FormLabel>
+                                        <FormControl>
+                                            <InputPhone
+                                                defaultCountry="CM"
+                                                {...field}
+                                                placeholder="+237 6XX XXX XXX"
+                                                disabled={!isEditing || isLoading}
+                                                className="h-10"
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="text-xs" />
+                                    </FormItem>
+                                )}
+                            />
 
-                            </div>
-                        </CardContent>
-                    </Card>
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-medium text-slate-700">
+                                            Email {isOAuth && <span className="text-xs font-normal text-slate-400">(Google)</span>}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                type="email"
+                                                disabled={!isEditing || isLoading || isOAuth}
+                                                className="h-10 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 disabled:opacity-60"
+                                            />
+                                        </FormControl>
+                                        <FormMessage className="text-xs" />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
                 </form>
             </Form>
 
-            {/* Account Settings */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Paramètres du Compte</CardTitle>
-                    <CardDescription>Gérez vos préférences et paramètres de sécurité</CardDescription>
-                </CardHeader>
-                <Separator />
-                <CardContent className="pt-6">
-                    <div className="space-y-4">
-                        {!isOAuth && (
-                            <div className="flex items-center justify-between p-4 border rounded-2xl bg-white/50 backdrop-blur-sm">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                                        <Key className="h-5 w-5 text-indigo-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">Mot de passe</h3>
-                                        <p className="text-sm text-gray-500">Mettez à jour votre mot de passe de sécurité</p>
-                                    </div>
-                                </div>
-                                <ChangePasswordModal />
+            {/* Settings */}
+            <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+                <div className="px-6 py-4">
+                    <h3 className="text-sm font-semibold text-slate-900">Paramètres</h3>
+                </div>
+
+                {!isOAuth && (
+                    <div className="px-6 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center">
+                                <Key className="w-4 h-4 text-slate-600" />
                             </div>
-                        )}
-                        <div className="flex items-center justify-between p-4 border rounded-2xl bg-white/50 backdrop-blur-sm">
-                            <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                                    <Shield className="h-5 w-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">Notifications</h3>
-                                    <p className="text-sm text-gray-500">Gérez vos préférences de notification</p>
-                                </div>
+                            <div>
+                                <p className="text-sm font-medium text-slate-900">Mot de passe</p>
+                                <p className="text-xs text-slate-500">Mettez à jour votre mot de passe</p>
                             </div>
-                            <Button variant="outline" className="rounded-xl" disabled>
-                                Configurer
-                            </Button>
                         </div>
+                        <ChangePasswordModal />
                     </div>
-                </CardContent>
-            </Card>
+                )}
+
+                <div className="px-6 py-4 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-slate-900">Notifications</p>
+                        <p className="text-xs text-slate-500">Préférences de notification</p>
+                    </div>
+                    <button
+                        disabled
+                        className="text-sm font-medium text-slate-400 cursor-not-allowed"
+                    >
+                        Bientôt disponible
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

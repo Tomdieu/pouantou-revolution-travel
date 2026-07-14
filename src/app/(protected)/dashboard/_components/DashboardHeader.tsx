@@ -45,41 +45,36 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
     return (
         <header
-            className={`sticky top-0 w-full z-50 transition-all duration-300 ${isScrolled
-                ? 'glass-premium shadow-glow bg-white/80 backdrop-blur-md border-b border-white/20 py-2'
-                : 'bg-white border-b border-gray-100 py-3'
-                }`}
+            className={`sticky top-0 w-full z-50 transition-all duration-200 ${
+                isScrolled
+                    ? 'bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm'
+                    : 'bg-white border-b border-slate-100'
+            }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-14">
-                    {/* Logo - Identical to Landing Page */}
-                    <Link href="/dashboard" className="flex items-center group transition-all duration-300">
-                        <div className="relative">
-                            <Image
-                                src="/logo-image.png"
-                                alt="Revolution Travel Logo"
-                                width={32}
-                                height={32}
-                                className="mr-2 rounded-lg w-8 h-8 shadow-sm group-hover:shadow-blue-500/30 transition-all duration-300 group-hover:scale-105"
-                                priority
-                            />
-                        </div>
-                        <h1 className="text-lg font-bold tracking-tight hidden sm:block">
-                            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                Revolution
-                            </span>
-                            <span className="text-gray-900 ml-1">Travel</span>
-                        </h1>
+                    <Link href="/dashboard" className="flex items-center gap-2.5">
+                        <Image
+                            src="/logo-image.png"
+                            alt="Revolution Travel"
+                            width={32}
+                            height={32}
+                            className="w-8 h-8 rounded-lg"
+                            priority
+                        />
+                        <span className="text-lg font-bold tracking-tight text-slate-900 hidden sm:block">
+                            Revolution{' '}
+                            <span className="font-normal text-slate-500">Travel</span>
+                        </span>
                     </Link>
 
-                    {/* Right Side Actions */}
                     <div className="flex items-center gap-2 sm:gap-3">
                         {user.role === 'ADMIN' && (
                             <Button
                                 variant="outline"
                                 size="sm"
                                 asChild
-                                className="hidden md:flex rounded-lg border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors h-9"
+                                className="hidden md:flex rounded-lg border-slate-200 text-slate-600 hover:bg-slate-50 h-9"
                             >
                                 <Link href="/admin">Administration</Link>
                             </Button>
@@ -89,16 +84,15 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                             <NewDemandButton userId={user.id} />
                         </div>
 
-                        {/* User Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    className="relative h-9 w-9 rounded-full p-0 hover:bg-gray-100 transition-colors ml-1"
+                                    className="relative h-9 w-9 rounded-full p-0 hover:bg-slate-100 transition-colors ml-1"
                                 >
-                                    <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
+                                    <Avatar className="h-9 w-9">
                                         <AvatarImage src={user.image || undefined} />
-                                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-medium">
+                                        <AvatarFallback className="bg-slate-900 text-white text-sm font-medium">
                                             {userInitials}
                                         </AvatarFallback>
                                     </Avatar>
@@ -106,40 +100,40 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                                 align="end"
-                                className="w-64 glass-premium rounded-2xl border border-white/40 shadow-2xl mt-2 p-2"
+                                className="w-64 rounded-xl border-slate-200 shadow-lg mt-2 p-2"
                             >
                                 <DropdownMenuLabel className="font-normal px-3 py-2.5">
-                                    <div className="flex flex-col space-y-1.5">
-                                        <p className="text-sm font-semibold text-gray-900 truncate">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-semibold text-slate-900 truncate">
                                             {user.name || 'Utilisateur'}
                                         </p>
-                                        <p className="text-xs text-gray-500 truncate">
+                                        <p className="text-xs text-slate-500 truncate">
                                             {user.email}
                                         </p>
                                         {user.role === 'ADMIN' && (
-                                            <Badge className="w-fit mt-1 bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-50 font-medium text-xs rounded-md px-2 py-0.5">
+                                            <Badge className="w-fit mt-1 bg-slate-100 text-slate-700 hover:bg-slate-100 font-medium text-xs rounded-md px-2 py-0.5 border-0">
                                                 Administrateur
                                             </Badge>
                                         )}
                                     </div>
                                 </DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-gray-100 my-2" />
-                                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
+                                <DropdownMenuSeparator className="bg-slate-100 my-2" />
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
                                     <Link href="/dashboard/profile" className="flex items-center">
-                                        <User className="mr-3 h-4 w-4 text-gray-500" />
+                                        <User className="mr-3 h-4 w-4 text-slate-400" />
                                         Profil
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer focus:bg-slate-50 px-3 py-2.5 text-sm text-slate-600">
                                     <Link href="/" className="flex items-center">
-                                        <Home className="mr-3 h-4 w-4 text-gray-500" />
+                                        <Home className="mr-3 h-4 w-4 text-slate-400" />
                                         Accueil
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-gray-100 my-2" />
+                                <DropdownMenuSeparator className="bg-slate-100 my-2" />
                                 <DropdownMenuItem
                                     onClick={() => signOut({ redirectTo: "/" })}
-                                    className="rounded-xl cursor-pointer focus:bg-red-50 px-3 py-2.5 text-sm text-red-600 focus:text-red-700"
+                                    className="rounded-lg cursor-pointer focus:bg-red-50 px-3 py-2.5 text-sm text-red-600 focus:text-red-700"
                                 >
                                     <LogOut className="mr-3 h-4 w-4" />
                                     Déconnexion

@@ -34,9 +34,6 @@ export function DemandSelectionModal({ open, onOpenChange, userId }: DemandSelec
             title: 'Vol International',
             description: 'Recherchez et réservez des vols',
             icon: Plane,
-            color: 'text-blue-600',
-            bgColor: 'bg-blue-50',
-            borderColor: 'border-blue-200',
             form: <FlightSearchForm userId={userId} />,
         },
         {
@@ -44,9 +41,6 @@ export function DemandSelectionModal({ open, onOpenChange, userId }: DemandSelec
             title: 'Hôtel',
             description: 'Trouvez votre hébergement',
             icon: Building,
-            color: 'text-indigo-600',
-            bgColor: 'bg-indigo-50',
-            borderColor: 'border-indigo-200',
             form: <HotelSearchForm userId={userId} />,
         },
         {
@@ -54,9 +48,6 @@ export function DemandSelectionModal({ open, onOpenChange, userId }: DemandSelec
             title: 'Location de Voiture',
             description: 'Louez un véhicule',
             icon: Car,
-            color: 'text-sky-600',
-            bgColor: 'bg-sky-50',
-            borderColor: 'border-sky-200',
             form: <CarRentalForm userId={userId} />,
         },
     ];
@@ -72,60 +63,48 @@ export function DemandSelectionModal({ open, onOpenChange, userId }: DemandSelec
     };
 
     const handleCloseMainModal = (open: boolean) => {
-        if (!open) {
-            setSelectedService(null);
-        }
+        if (!open) setSelectedService(null);
         onOpenChange(open);
     };
 
     return (
         <>
-            {/* Main Selection Dialog */}
             <Dialog open={open && !selectedService} onOpenChange={handleCloseMainModal}>
-                <DialogContent className="sm:max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold">Nouvelle Demande</DialogTitle>
-                        <DialogDescription>
-                            Sélectionnez le type de service que vous souhaitez réserver
+                <DialogContent className="sm:max-w-2xl p-0 overflow-hidden">
+                    <DialogHeader className="p-6 pb-4">
+                        <DialogTitle className="text-lg font-semibold">Nouvelle Demande</DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500">
+                            Sélectionnez le type de service
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-6 pb-6">
                         {services.map((service) => {
                             const Icon = service.icon;
                             return (
-                                <Card
+                                <button
                                     key={service.id}
-                                    className={`cursor-pointer transition-all hover:border-blue-400 hover:shadow-md ${service.borderColor}`}
                                     onClick={() => handleServiceSelect(service.id)}
+                                    className="flex flex-col items-center gap-3 p-6 border border-slate-200 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-all text-center group"
                                 >
-                                    <CardContent className="p-6 text-center space-y-4">
-                                        <div className={`w-16 h-16 ${service.bgColor} border ${service.borderColor} mx-auto flex items-center justify-center`}>
-                                            <Icon className={`w-8 h-8 ${service.color}`} />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-gray-900 mb-1">{service.title}</h3>
-                                            <p className="text-sm text-gray-500">{service.description}</p>
-                                        </div>
-                                        <Button variant="outline" className="w-full">
-                                            Sélectionner
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                                    <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                                        <Icon className="w-6 h-6 text-slate-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-slate-900 mb-0.5">{service.title}</h3>
+                                        <p className="text-xs text-slate-500">{service.description}</p>
+                                    </div>
+                                </button>
                             );
                         })}
                     </div>
                 </DialogContent>
             </Dialog>
 
-            {/* Service Form Modal */}
             {selectedServiceData && (
                 <Credenza open={!!selectedService} onOpenChange={(open) => !open && handleCloseServiceModal()}>
                     <CredenzaContent className="max-w-3xl">
                         <CredenzaHeader>
-                            <CredenzaTitle className="flex items-center gap-3 text-2xl">
-                                <div className={`w-12 h-12 ${selectedServiceData.bgColor} border ${selectedServiceData.borderColor} flex items-center justify-center`}>
-                                    <selectedServiceData.icon className={`w-6 h-6 ${selectedServiceData.color}`} />
-                                </div>
+                            <CredenzaTitle className="text-lg font-semibold">
                                 {selectedServiceData.title}
                             </CredenzaTitle>
                             <CredenzaDescription>

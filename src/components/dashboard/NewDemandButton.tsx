@@ -14,7 +14,10 @@ export function NewDemandButton({ userId }: NewDemandButtonProps) {
 
     return (
         <>
-            <Button className="gap-2" onClick={() => setOpen(true)}>
+            <Button
+                className="gap-2 h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-sm font-medium transition-colors"
+                onClick={() => setOpen(true)}
+            >
                 <Plus className="h-4 w-4" />
                 Nouvelle Demande
             </Button>

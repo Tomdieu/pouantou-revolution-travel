@@ -85,21 +85,21 @@ export function ChangePasswordModal() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9">
+                <button className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
                     Changer
-                </Button>
+                </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden border-0 shadow-lg ring-1 ring-stone-200">
-                <DialogHeader className="p-6 pb-4 space-y-3">
-                    <DialogTitle className="text-base font-semibold tracking-tight">
+            <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+                <DialogHeader className="p-6 pb-0">
+                    <DialogTitle className="text-base font-semibold">
                         Changer le mot de passe
                     </DialogTitle>
-                    <DialogDescription className="text-sm leading-relaxed text-stone-500">
-                        Pour votre sécurité, entrez votre mot de passe actuel avant de choisir un nouveau.
+                    <DialogDescription className="text-sm text-slate-500">
+                        Entrez votre mot de passe actuel avant de choisir un nouveau.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="px-6 py-4 bg-stone-50/50 border-y border-stone-100">
+                <div className="px-6 py-5">
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
@@ -107,7 +107,7 @@ export function ChangePasswordModal() {
                                 name="currentPassword"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className="text-sm font-medium text-stone-700">
+                                        <FormLabel className="text-sm font-medium text-slate-700">
                                             Mot de passe actuel
                                         </FormLabel>
                                         <FormControl>
@@ -115,19 +115,15 @@ export function ChangePasswordModal() {
                                                 <Input
                                                     {...field}
                                                     type={showPassword.current ? 'text' : 'password'}
-                                                    className="h-10 pr-10 border-stone-200 focus:border-stone-400 focus:ring-0 bg-white"
+                                                    className="h-10 pr-10 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
                                                     placeholder="••••••••"
                                                 />
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleVisibility('current')}
-                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                                                 >
-                                                    {showPassword.current ? (
-                                                        <EyeOff className="h-4 w-4" />
-                                                    ) : (
-                                                        <Eye className="h-4 w-4" />
-                                                    )}
+                                                    {showPassword.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                                 </button>
                                             </div>
                                         </FormControl>
@@ -136,87 +132,77 @@ export function ChangePasswordModal() {
                                 )}
                             />
 
-                            <div className="space-y-4 pt-2">
-                                <FormField
-                                    control={form.control}
-                                    name="newPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-sm font-medium text-stone-700">
-                                                Nouveau mot de passe
-                                            </FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Input
-                                                        {...field}
-                                                        type={showPassword.new ? 'text' : 'password'}
-                                                        className="h-10 pr-10 border-stone-200 focus:border-stone-400 focus:ring-0 bg-white"
-                                                        placeholder="••••••••"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleVisibility('new')}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-                                                    >
-                                                        {showPassword.new ? (
-                                                            <EyeOff className="h-4 w-4" />
-                                                        ) : (
-                                                            <Eye className="h-4 w-4" />
-                                                        )}
-                                                    </button>
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage className="text-xs" />
-                                        </FormItem>
-                                    )}
-                                />
+                            <FormField
+                                control={form.control}
+                                name="newPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-medium text-slate-700">
+                                            Nouveau mot de passe
+                                        </FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    type={showPassword.new ? 'text' : 'password'}
+                                                    className="h-10 pr-10 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                                                    placeholder="••••••••"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleVisibility('new')}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                >
+                                                    {showPassword.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                </button>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="text-xs" />
+                                    </FormItem>
+                                )}
+                            />
 
-                                <FormField
-                                    control={form.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-sm font-medium text-stone-700">
-                                                Confirmer le nouveau mot de passe
-                                            </FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Input
-                                                        {...field}
-                                                        type={showPassword.confirm ? 'text' : 'password'}
-                                                        className="h-10 pr-10 border-stone-200 focus:border-stone-400 focus:ring-0 bg-white"
-                                                        placeholder="••••••••"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toggleVisibility('confirm')}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
-                                                    >
-                                                        {showPassword.confirm ? (
-                                                            <EyeOff className="h-4 w-4" />
-                                                        ) : (
-                                                            <Eye className="h-4 w-4" />
-                                                        )}
-                                                    </button>
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage className="text-xs" />
-                                        </FormItem>
-                                    )}
-                                />
-                            </div>
+                            <FormField
+                                control={form.control}
+                                name="confirmPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-sm font-medium text-slate-700">
+                                            Confirmer
+                                        </FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    type={showPassword.confirm ? 'text' : 'password'}
+                                                    className="h-10 pr-10 rounded-lg border-slate-200 focus:border-slate-400 focus:ring-slate-400/20"
+                                                    placeholder="••••••••"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleVisibility('confirm')}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                >
+                                                    {showPassword.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                </button>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="text-xs" />
+                                    </FormItem>
+                                )}
+                            />
                         </form>
                     </Form>
                 </div>
 
-                <DialogFooter className="p-4 bg-stone-50 flex flex-row justify-end gap-2">
+                <DialogFooter className="px-6 py-4 border-t border-slate-100 flex flex-row justify-end gap-2">
                     <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => setOpen(false)}
                         disabled={isLoading}
-                        className="h-9 px-4 text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
+                        className="h-9 px-4 text-slate-600"
                     >
                         Annuler
                     </Button>
@@ -225,13 +211,9 @@ export function ChangePasswordModal() {
                         size="sm"
                         disabled={isLoading}
                         onClick={form.handleSubmit(onSubmit)}
-                        className="h-9 px-4 bg-stone-900 hover:bg-stone-800 text-white"
+                        className="h-9 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg"
                     >
-                        {isLoading ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            'Mettre à jour'
-                        )}
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Mettre à jour'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

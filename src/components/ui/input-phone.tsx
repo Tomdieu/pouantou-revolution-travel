@@ -46,7 +46,7 @@ export const InputPhone: React.ForwardRefExoticComponent<InputPhoneProps> =
           <RPNInput.default
             ref={ref}
             className={cn(
-              "flex w-full items-center overflow-hidden transition-all",
+              "flex w-full items-center overflow-hidden rounded-lg border border-slate-200 bg-white transition-colors focus-within:border-slate-400 focus-within:ring-1 focus-within:ring-slate-400/20",
               className
             )}
             flagComponent={FlagComponent}

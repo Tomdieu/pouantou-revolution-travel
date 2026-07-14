@@ -10,7 +10,7 @@ const createBookingSchema = z.object({
     price: z.number().optional(),
     currency: z.string().optional(),
     contactName: z.string().min(2),
-    contactEmail: z.string().email(),
+    contactEmail: z.string().email().optional().or(z.literal('')),
     contactPhone: z.string().optional(),
     notes: z.string().optional(),
 });
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
                 price: validatedData.price,
                 currency: validatedData.currency || 'EUR',
                 contactName: validatedData.contactName,
-                contactEmail: validatedData.contactEmail,
+                contactEmail: validatedData.contactEmail ?? '',
                 contactPhone: validatedData.contactPhone || '',
                 notes: validatedData.notes,
                 status: 'PENDING',

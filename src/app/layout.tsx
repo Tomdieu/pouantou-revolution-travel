@@ -106,6 +106,7 @@ export const metadata: Metadata = {
     canonical: 'https://puantou-revolution-travel.vercel.app',
     languages: {
       'fr-CM': 'https://puantou-revolution-travel.vercel.app',
+      'x-default': 'https://puantou-revolution-travel.vercel.app',
     },
   },
   category: 'Travel Agency',
@@ -127,62 +128,31 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
+        <meta name="msapplication-TileColor" content="#0f172a" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="theme-color" content="#0f172a" />
 
-        {/* Developer & SEO Meta Tags */}
-        <meta name="developer" content="TOMDIEU TCHADIEUKO IVAN GOTTFRIED" />
-        <meta name="author" content="Tomdieu Ivan, Revolution Travel Services" />
-        <meta name="designer" content="Tomdieu Ivan" />
-        <meta name="programmer" content="TOMDIEU TCHADIEUKO IVAN GOTTFRIED" />
-        <meta name="web-developer" content="Ivan Tomdieu" />
-        <meta name="creator" content="Tomdieu Tchadieuko Ivan Gottfried" />
-
-        {/* Accessibility Meta Tags */}
-        <meta name="accessibility" content="WCAG 2.1 AA compliant" />
-        <meta name="color-scheme" content="light dark" />
-
-        {/* Additional SEO */}
+        {/* SEO Meta Tags */}
         <meta name="rating" content="general" />
         <meta name="distribution" content="global" />
         <meta name="revisit-after" content="7 days" />
         <meta name="language" content="French" />
         <meta name="geo.region" content="CM" />
         <meta name="geo.country" content="Cameroon" />
-        <meta name="geo.placename" content="Douala, Yaoundé" />
+        <meta name="geo.placename" content="Yaoundé" />
 
-        {/* Viewport for PWA */}
+        {/* Viewport */}
         <meta
           name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
+          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover"
         />
 
         {/* Apple Touch Icons */}
-        <link rel="apple-touch-icon" href="/logo-image.png" />
-        <link rel="apple-touch-icon" sizes="152x152" href="/logo-image.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo-image.png" />
-        <link rel="apple-touch-icon" sizes="167x167" href="/logo-image.png" />
-
-        {/* Splash Screens */}
-        <link
-          rel="apple-touch-startup-image"
-          href="/logo-image.png"
-          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/logo-image.png"
-          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/logo-image.png"
-          media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
-        />
+        <link rel="apple-touch-icon" href="/logo-image.png" sizes="180x180" />
 
         {/* Manifest */}
         <link rel="manifest" href="/manifest.json" />
+        <link rel="llms-txt" href="/llms.txt" />
       </head>
       <body
         className="antialiased w-full h-full flex flex-col scroll-smooth bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"

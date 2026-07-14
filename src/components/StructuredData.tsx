@@ -67,64 +67,6 @@ export function StructuredData() {
     "priceRange": "$$",
     "currenciesAccepted": "XAF",
     "paymentAccepted": ["Cash", "Bank Transfer"],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Services de Voyage Revolution Travel",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Réservation Billets d'Avion",
-            "description": "Service de réservation de billets d'avion vers toutes destinations"
-          },
-          "priceSpecification": {
-            "@type": "PriceSpecification",
-            "priceCurrency": "XAF",
-            "price": "0",
-            "description": "Devis gratuit"
-          }
-        }
-      ]
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5",
-      "reviewCount": "200",
-      "bestRating": "5",
-      "worstRating": "1"
-    },
-    "review": [
-      {
-        "@type": "Review",
-        "author": {
-          "@type": "Person",
-          "name": "Chantal Ngozi"
-        },
-        "reviewRating": {
-          "@type": "Rating",
-          "ratingValue": "5",
-          "bestRating": "5"
-        },
-        "datePublished": "2024-12-01",
-        "reviewBody": "Service exceptionnel! L'équipe m'a trouvé un excellent tarif pour mon voyage d'affaires à Paris. Processus très professionnel."
-      }
-    ],
-    "developer": {
-      "@type": "Person",
-      "name": "TOMDIEU TCHADIEUKO IVAN GOTTFRIED",
-      "alternateName": ["Tomdieu Ivan", "Ivan Tomdieu", "Tchadieuko Ivan", "Ivan Gottfried"],
-      "url": "https://github.com/Tomdieu",
-      "jobTitle": "Développeur Web Full Stack",
-      "knowsAbout": [
-        "Next.js",
-        "React",
-        "TypeScript", 
-        "Web Development",
-        "Progressive Web Apps"
-      ],
-      "sameAs": "https://github.com/Tomdieu"
-    }
   };
 
   const servicesData = {

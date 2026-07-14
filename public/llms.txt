@@ -1,0 +1,34 @@
+# Revolution Travel & Services
+
+## About
+Revolution Travel & Services is a professional travel agency based in Yaoundé, Cameroon. We specialize in flight bookings, hotel reservations, and car rentals across 500+ airlines worldwide.
+
+## Services
+- **Flight Bookings**: Compare and book flights from 500+ airlines. Free quotes within 1 hour.
+- **Hotel Reservations**: Find and book hotels worldwide with preferential rates.
+- **Car Rentals**: Rent vehicles in 50+ cities with full insurance included.
+
+## Contact
+- Phone: +237 677 916 832
+- Email: p.revolutiontravel@yahoo.com
+- Location: Yaoundé, Cameroon
+- Hours: Monday–Saturday, 8:00–18:00
+
+## Key Pages
+- Home: https://puantou-revolution-travel.vercel.app
+- Services: https://puantou-revolution-travel.vercel.app/services
+- Flights: https://puantou-revolution-travel.vercel.app/services/flights
+- Hotels: https://puantou-revolution-travel.vercel.app/services/hotels
+- Car Rentals: https://puantou-revolution-travel.vercel.app/services/cars
+
+## Pricing
+- Quote search: Free
+- Consultation: Free
+- You only pay for the flight/hotel/car at negotiated rates
+
+## Languages
+- French (primary)
+- English (support available)
+
+## Service Area
+Cameroon, Chad, Central African Republic, Equatorial Guinea, Gabon, and international destinations.

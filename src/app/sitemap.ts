@@ -1,8 +1,25 @@
 import type { MetadataRoute } from 'next'
- 
-export default function sitemap(): MetadataRoute.Sitemap {
+import { prisma } from '@/lib/prisma'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://puantou-revolution-travel.vercel.app'
-  
+
+  // Fetch active destinations from database
+  const destinations = await prisma.destination.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      updatedAt: true,
+    },
+  })
+
+  const destinationUrls = destinations.map((dest) => ({
+    url: `${baseUrl}/#destinations`,
+    lastModified: dest.updatedAt,
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
+
   return [
     {
       url: baseUrl,
@@ -35,5 +52,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    ...destinationUrls,
   ]
 }

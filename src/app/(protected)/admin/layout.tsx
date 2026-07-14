@@ -1,9 +1,14 @@
 import { ReactNode } from 'react';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminHeader } from '@/components/admin/AdminHeader';
+import type { Metadata } from 'next';
 
-// Ensure the page is only accessible to admins (This check logic might be in a middleware or page level wrapper, 
-// strictly layout is for structure. Assuming middleware handles auth redirection)
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     return (

@@ -19,7 +19,7 @@ export function AdminHeader() {
     const { data: session } = useSession();
 
     return (
-        <header className="h-20 sticky top-0 border-b border-slate-200 bg-white px-6 flex items-center justify-between z-30 shadow-sm">
+        <header className="h-16 sticky top-0 border-b border-slate-200 bg-white px-6 flex items-center justify-between z-30">
             {/* Search Bar - Hidden on mobile for now or collapsed */}
             {/* <div className="hidden md:flex items-center max-w-md w-full relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -40,10 +40,10 @@ export function AdminHeader() {
                 {/* User Profile */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-slate-100 p-0">
-                            <Avatar className="h-10 w-10 cursor-pointer">
+                        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                            <Avatar className="h-9 w-9 cursor-pointer">
                                 <AvatarImage src={session?.user?.image || ''} alt={session?.user?.name || 'Admin'} />
-                                <AvatarFallback className="bg-blue-600 text-white font-bold">
+                                <AvatarFallback className="bg-slate-900 text-white text-sm font-medium">
                                     {session?.user?.name?.charAt(0).toUpperCase() || 'A'}
                                 </AvatarFallback>
                             </Avatar>

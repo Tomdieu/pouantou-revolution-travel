@@ -126,7 +126,7 @@ export function AdminSidebar({ className }: SidebarProps) {
                                 className="object-contain"
                             />
                         </div>
-                        <span className="font-bold text-xl tracking-wide text-blue-400">Revolution<span className="text-white">Admin</span></span>
+                        <span className="font-bold text-xl tracking-wide text-white">Revolution<span className="text-slate-400">Admin</span></span>
                     </Link>
                 </div>
 
@@ -139,8 +139,8 @@ export function AdminSidebar({ className }: SidebarProps) {
                             className={cn(
                                 "flex items-center gap-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors group",
                                 route.active
-                                    ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
-                                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                                    ? "bg-white/10 text-white"
+                                    : "text-slate-400 hover:text-white hover:bg-white/5"
                             )}
                         >
                             <route.icon className={cn("h-5 w-5", route.active ? "text-white" : "text-slate-400 group-hover:text-white")} />

@@ -162,7 +162,7 @@ export default async function AdminDashboardPage() {
                         <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.revenue)}</div>
+                        <div className="text-2xl font-bold">{formatCurrency(stats.revenue)}</div>
                     </CardContent>
                 </Card>
                 <Card>

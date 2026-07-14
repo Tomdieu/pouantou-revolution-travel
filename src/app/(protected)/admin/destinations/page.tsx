@@ -31,7 +31,7 @@ export default async function AdminDestinationsPage() {
                     <p className="text-slate-500 mt-2">Gérez les destinations populaires ({destinations.length}).</p>
                 </div>
                 <Link href="/admin/destinations/new">
-                    <Button>
+                    <Button className="bg-slate-900 hover:bg-slate-800 text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         Nouvelle Destination
                     </Button>
@@ -51,7 +51,7 @@ export default async function AdminDestinationsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Populaires</CardTitle>
-                        <MapPin className="h-4 w-4 text-blue-500" />
+                        <MapPin className="h-4 w-4 text-slate-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{destinations.filter((d: Destination) => d.isPopular).length}</div>
@@ -60,7 +60,7 @@ export default async function AdminDestinationsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Actives</CardTitle>
-                        <MapPin className="h-4 w-4 text-green-500" />
+                        <MapPin className="h-4 w-4 text-slate-400" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{destinations.filter((d: Destination) => d.isActive).length}</div>

@@ -27,11 +27,11 @@ export default async function BookingsPage() {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'CONFIRMED': return 'bg-green-500 hover:bg-green-600';
-            case 'PENDING': return 'bg-yellow-500 hover:bg-yellow-600';
-            case 'CANCELLED': return 'bg-red-500 hover:bg-red-600';
-            case 'COMPLETED': return 'bg-blue-500 hover:bg-blue-600';
-            default: return 'bg-gray-500';
+            case 'CONFIRMED': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+            case 'PENDING': return 'bg-amber-50 text-amber-700 border border-amber-200';
+            case 'CANCELLED': return 'bg-red-50 text-red-700 border border-red-200';
+            case 'COMPLETED': return 'bg-slate-100 text-slate-600 border border-slate-200';
+            default: return 'bg-slate-100 text-slate-600 border border-slate-200';
         }
     };
 

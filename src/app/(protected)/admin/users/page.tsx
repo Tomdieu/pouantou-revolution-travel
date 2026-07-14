@@ -37,7 +37,7 @@ export default async function UsersPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Utilisateurs</h1>
                     <p className="text-slate-500 mt-2">Gérez les comptes utilisateurs ({users.length}).</p>
                 </div>
-                <Button>Ajouter un utilisateur</Button>
+                <Button className="bg-slate-900 hover:bg-slate-800 text-white">Ajouter un utilisateur</Button>
             </div>
 
             <div className="rounded-md border bg-white">

@@ -32,19 +32,17 @@ export async function forgotPassword(formData: FormData) {
             where: { email },
         });
 
-        // We don't want to reveal if a user exists or not for security reasons
         if (!user) {
-            return { success: true };
+            console.warn(`[forgot-password] No user found for email: ${email}`);
+            return { success: true, message: 'Si un compte existe avec cet email, un lien de réinitialisation vous a été envoyé.' };
         }
+
+        console.log(`[forgot-password] User found: ${user.email} (id: ${user.id})`);
 
         const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date(Date.now() + 3600 * 1000); // 1 hour
 
-        // Ensure the model exists in the client
-        if (!prisma.passwordResetToken) {
-            throw new Error('Prisma client not initialized with PasswordResetToken. Please restart the dev server.');
-        }
-
+        console.log(`[forgot-password] Saving reset token...`);
         await prisma.passwordResetToken.upsert({
             where: { token },
             update: { token, expires },
@@ -53,6 +51,7 @@ export async function forgotPassword(formData: FormData) {
 
         const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
+        console.log(`[forgot-password] Rendering email...`);
         const emailHtml = await render(
             React.createElement(ResetPasswordEmail, {
                 resetLink,
@@ -60,16 +59,18 @@ export async function forgotPassword(formData: FormData) {
             })
         );
 
+        console.log(`[forgot-password] Sending email to ${email}...`);
         await sendEmail({
             to: email,
             subject: 'Réinitialisation de votre mot de passe',
             html: emailHtml,
         });
 
-        return { success: true };
+        console.log(`[forgot-password] Email sent successfully to ${email}`);
+        return { success: true, message: 'Un email de réinitialisation a été envoyé. Vérifiez votre boîte de réception.' };
     } catch (error) {
-        console.error('Forgot password error:', error);
-        return { error: 'Une erreur est survenue lors de l\'envoi de l\'email' };
+        console.error('[forgot-password] Error:', error);
+        return { error: 'Une erreur est survenue lors de l\'envoi de l\'email. Veuillez réessayer.' };
     }
 }
 
